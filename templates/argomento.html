@@ -136,10 +136,9 @@
         </div>
     </div>
 
-    <script>
-        const socket = io();
+    <script>        const socket = io();
         const argomentoId = {{ argomento.id }};
-        const originalContent = `{{ argomento.contenuto_md or '' }}`;
+        const originalContent = {{ (argomento.contenuto_md or '') | tojson }};
         
         // Inizializzazione della pagina
         document.addEventListener('DOMContentLoaded', function() {
@@ -206,12 +205,136 @@
                     fileModeSection.style.display = 'none';
                 }
             });
+        }        function parseMarkdownSafely(content) {
+            if (!content || !content.trim()) {
+                return '';
+            }
+            
+            console.log('🔍 Inizio parsing del contenuto...');
+            
+            // STEP 1: Rilevamento preventivo di sintassi problematica
+            const hasProblematicSyntax = 
+                content.includes('```math') || 
+                /\$\$[\s\S]*?\$\$/g.test(content) ||
+                content.includes('\\int') ||
+                content.includes('\\sum') ||
+                content.includes('\\frac');
+            
+            if (hasProblematicSyntax) {
+                console.warn('⚠️ RILEVATA SINTASSI PROBLEMATICA - Uso pulizia preventiva');
+                return parseWithForcedCleanup(content);
+            }
+            
+            // STEP 2: Tentativo parsing normale
+            try {
+                const result = marked.parse(content);
+                console.log('✅ Parser normale riuscito');
+                return result;
+            } catch (error) {
+                console.error('❌ Parser normale fallito:', error);
+                return parseWithForcedCleanup(content);
+            }
         }
         
-        function updateMarkdownView() {
-            const content = `{{ argomento.contenuto_md or '' }}`;
-            if (content.trim()) {
-                document.getElementById('rendered-markdown').innerHTML = marked.parse(content);
+        function parseWithForcedCleanup(content) {
+            console.log('🧹 Applico pulizia forzata del contenuto...');
+            
+            try {
+                // Pulizia aggressiva della sintassi problematica
+                let cleanedContent = content
+                    // Sostituisce blocchi math con testo leggibile
+                    .replace(/```math\s*\n([\s\S]*?)\n```/gi, function(match, mathContent) {
+                        console.log('🔄 Sostituisco blocco math:', mathContent.substring(0, 50) + '...');
+                        return '\n**📐 Formula matematica:**\n```\n' + mathContent.replace(/\\/g, '') + '\n```\n';
+                    })
+                    // Sostituisce formule LaTeX display
+                    .replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, function(match, formula) {
+                        console.log('🔄 Sostituisco formula display:', formula.substring(0, 30) + '...');
+                        return '\n**📐 Formula:** `' + formula.replace(/\\/g, '') + '`\n';
+                    })
+                    // Sostituisce formule LaTeX inline
+                    .replace(/\$([^$\n]+)\$/g, function(match, formula) {
+                        return '*[' + formula.replace(/\\/g, '') + ']*';
+                    });
+                
+                console.log('🧹 Contenuto pulito, tentativo parsing...');
+                const result = marked.parse(cleanedContent);
+                console.log('✅ Parsing con contenuto pulito riuscito');
+                return result;
+                
+            } catch (error) {
+                console.error('❌ Anche il parsing pulito è fallito:', error);
+                // Fallback finale con interfaccia di errore
+                return `
+                    <div class="markdown-error">
+                        <div class="markdown-error-title">
+                            ⚠️ Errore di sintassi Markdown
+                        </div>
+                        <p><strong>Il contenuto contiene sintassi non supportata:</strong></p>
+                        <ul>
+                            <li>Blocchi <code>\`\`\`math</code> non sono supportati</li>
+                            <li>Formule LaTeX (<code>$$...$$</code> o <code>$...$</code>) non sono supportate</li>
+                        </ul>
+                        <p>Usa la modalità modifica per correggere la sintassi.</p>
+                        <button class="emergency-edit-btn" onclick="toggleEditMode()" style="background: #e74c3c; color: white; border: none; padding: 0.75em 1.5em; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                            🛠️ MODIFICA CONTENUTO
+                        </button>
+                        <details style="margin-top: 1em;">
+                            <summary style="cursor: pointer; font-weight: bold;">📄 Mostra contenuto grezzo</summary>
+                            <div class="markdown-error-content">${escapeHtml(content)}</div>
+                        </details>
+                    </div>
+                `;
+            }
+        }
+          function basicMarkdownParser(content) {
+            // Parser markdown molto basilare per fallback
+            let html = content
+                // Gestione blocchi di codice prima
+                .replace(/```(\w+)?\s*\n([\s\S]*?)\n```/g, '<pre><code>$2</code></pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold e italic
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Blockquotes
+                .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+                // Line breaks e paragrafi
+                .replace(/\n\n+/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrappa in paragrafi se non è già html strutturato
+            if (!html.includes('<h') && !html.includes('<p>')) {
+                html = '<p>' + html + '</p>';
+            } else if (!html.includes('<p>')) {
+                html = '<p>' + html + '</p>';
+            }
+            
+            return html;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }        function updateMarkdownView() {
+            // Uso JSON per evitare problemi con backtick e caratteri speciali
+            const content = {{ (argomento.contenuto_md or '') | tojson }};
+            console.log('📝 Contenuto caricato:', content.substring(0, 100) + '...');
+            
+            const renderedContent = parseMarkdownSafely(content);
+            
+            if (renderedContent) {
+                document.getElementById('rendered-markdown').innerHTML = renderedContent;
+            } else {
+                document.getElementById('rendered-markdown').innerHTML = `
+                    <div class="empty-content">
+                        <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
+                    </div>
+                `;
             }
         }
         
@@ -228,8 +351,7 @@
                 editorSection.style.display = 'none';
             }
         }
-        
-        function switchTab(tab) {
+          function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
             
@@ -242,7 +364,8 @@
             } else {
                 textarea.style.display = 'none';
                 preview.style.display = 'block';
-                preview.innerHTML = marked.parse(textarea.value || 'Nessun contenuto da visualizzare');
+                const previewContent = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
+                preview.innerHTML = previewContent;
             }
         }
         
@@ -269,8 +392,7 @@
                 }
             });
         }
-        
-        function cancelEdit() {
+          function cancelEdit() {
             document.getElementById('contenuto_md').value = originalContent;
             document.getElementById('file_content').value = '';
             document.getElementById('file-mode-section').style.display = 'none';

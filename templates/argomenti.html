@@ -107,9 +107,49 @@
         </div>
     </div>
 
-    <script>
-        const socket = io();
-        const materiaId = {{ materia.id }};
+    <script>        const socket = io();
+        const materiaId = {{ materia.id }};        // Funzioni per parsing sicuro del markdown
+        function parseMarkdownSafely(content) {
+            if (!content || !content.trim()) {
+                return '';
+            }
+            
+            // Primo controllo: verificare se ci sono problemi noti
+            const hasProblematicSyntax = content.includes('```math') || /\$\$[\s\S]*?\$\$/g.test(content);
+            
+            if (hasProblematicSyntax) {
+                console.warn('⚠️ Rilevata sintassi problematica nel preview, uso parser semplificato');
+                return parseMarkdownWithCleanup(content);
+            }
+            
+            try {
+                return marked.parse(content);
+            } catch (error) {
+                console.warn('Errore parser markdown:', error);
+                return parseMarkdownWithCleanup(content);
+            }
+        }
+        
+        function parseMarkdownWithCleanup(content) {
+            try {
+                const cleanedContent = content
+                    .replace(/```math\s*\n([\s\S]*?)\n```/gi, function(match, mathContent) {
+                        return '**[Formula matematica]**\n```\n' + mathContent.replace(/\\/g, '') + '\n```';
+                    })
+                    .replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, '**[Formula: $1]**')
+                    .replace(/\$([^$\n]+)\$/g, '*[Formula: $1]*');
+                return marked.parse(cleanedContent);
+            } catch (error2) {
+                console.warn('Errore parser semplificato:', error2);
+                return `<div style="background: #fff3cd; padding: 0.5em; border-radius: 4px; margin: 0.5em 0;"><small>⚠️ Errore sintassi markdown</small></div><pre style="font-size: 0.8em; background: #f8f9fa; padding: 0.5em; border-radius: 4px;">${escapeHtml(content.substring(0, 200))}...</pre>`;
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         // Gestione popup argomento
         document.getElementById('openArgomentoPopup').addEventListener('click', function() {
@@ -161,11 +201,10 @@
                 
                 if (tab === 'editor') {
                     textarea.style.display = 'block';
-                    preview.style.display = 'none';
-                } else {
+                    preview.style.display = 'none';                } else {
                     textarea.style.display = 'none';
                     preview.style.display = 'block';
-                    preview.innerHTML = marked.parse(textarea.value || 'Nessun contenuto da visualizzare');
+                    preview.innerHTML = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
                 }
             });
         });
