@@ -2,6 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import sqlite3
 import os
+from docx import Document
+import PyPDF2
+import markdown
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -14,6 +18,62 @@ def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def convert_docx_to_markdown(file_path):
+    """Converte un file .docx in markdown"""
+    try:
+        doc = Document(file_path)
+        markdown_content = []
+        
+        for paragraph in doc.paragraphs:
+            text = paragraph.text.strip()
+            if text:
+                # Gestione dei titoli basata sullo stile
+                if paragraph.style.name.startswith('Heading'):
+                    level = int(paragraph.style.name[-1]) if paragraph.style.name[-1].isdigit() else 1
+                    markdown_content.append('#' * level + ' ' + text)
+                else:
+                    markdown_content.append(text)
+                markdown_content.append('')  # Riga vuota tra i paragrafi
+        
+        return '\n'.join(markdown_content).strip()
+    except Exception as e:
+        return f"Errore nella conversione del file Word: {str(e)}"
+
+def convert_pdf_to_markdown(file_path):
+    """Converte un file .pdf in markdown"""
+    try:
+        markdown_content = []
+        with open(file_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            
+            for page_num, page in enumerate(pdf_reader.pages):
+                text = page.extract_text()
+                if text.strip():
+                    markdown_content.append(f"## Pagina {page_num + 1}")
+                    markdown_content.append(text.strip())
+                    markdown_content.append('')
+        
+        return '\n'.join(markdown_content).strip()
+    except Exception as e:
+        return f"Errore nella conversione del file PDF: {str(e)}"
+
+def convert_file_to_markdown(file_path, filename):
+    """Converte un file in markdown basandosi sulla sua estensione"""
+    ext = filename.lower().split('.')[-1]
+    
+    if ext == 'docx':
+        return convert_docx_to_markdown(file_path)
+    elif ext == 'pdf':
+        return convert_pdf_to_markdown(file_path)
+    elif ext == 'md':
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            return f"Errore nella lettura del file Markdown: {str(e)}"
+    else:
+        return "Formato file non supportato. Usa .docx, .pdf o .md"
 
 # Inizializzazione DB se non esiste
 if not os.path.exists(DB_FILE):
@@ -96,6 +156,33 @@ def add_argomento():
     contenuto_md = request.form.get('contenuto_md', '')
     colore = request.form.get('colore', '#cccccc')
     etichetta_preparazione = request.form.get('etichetta_preparazione', 'scarsa preparazione')
+    
+    # Gestione file caricato
+    if 'file_content' in request.files:
+        file = request.files['file_content']
+        if file.filename != '' and file.filename is not None:
+            # Salva temporaneamente il file
+            filename = secure_filename(file.filename)
+            temp_path = os.path.join(os.path.dirname(__file__), 'temp_' + filename)
+            file.save(temp_path)
+            
+            try:
+                # Converte il file in markdown
+                file_markdown = convert_file_to_markdown(temp_path, filename)
+                
+                # Gestisce la modalità di inserimento
+                file_mode = request.form.get('file_mode', 'replace')
+                if file_mode == 'replace':
+                    contenuto_md = file_markdown
+                elif file_mode == 'prepend':
+                    contenuto_md = file_markdown + '\n\n' + contenuto_md if contenuto_md else file_markdown
+                elif file_mode == 'append':
+                    contenuto_md = contenuto_md + '\n\n' + file_markdown if contenuto_md else file_markdown
+                
+            finally:
+                # Rimuove il file temporaneo
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
     
     conn = get_db_connection()
     conn.execute('INSERT INTO argomenti (id_materia, titolo, contenuto_md, colore, etichetta_preparazione) VALUES (?, ?, ?, ?, ?)', 

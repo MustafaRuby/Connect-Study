@@ -34,13 +34,11 @@
             {% endif %}
         </div>
         {% endfor %}
-    </div>
-
-    <!-- Popup inserimento argomento -->
+    </div>    <!-- Popup inserimento argomento -->
     <div id="argomentoPopup" class="popup-bg" style="display:none;">
         <div class="popup popup-large">
             <h2>Nuovo argomento</h2>
-            <form id="addArgomentoForm">
+            <form id="addArgomentoForm" enctype="multipart/form-data">
                 <input type="hidden" name="id_materia" value="{{ materia.id }}">
                 
                 <div class="form-group">
@@ -61,8 +59,7 @@
                         <option value="buona preparazione">Buona preparazione</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
+                  <div class="form-group">
                     <label for="contenuto_md">Contenuto (Markdown):</label>
                     <div class="markdown-editor">
                         <div class="editor-tabs">
@@ -74,11 +71,38 @@
                     </div>
                 </div>
                 
-                <div class="popup-actions">
-                    <button type="submit" class="add-btn">Aggiungi</button>
-                    <button type="button" id="closeArgomentoPopup" class="cancel-btn">Annulla</button>
+                <div class="form-group">
+                    <label for="file_content">Carica file (opzionale):</label>
+                    <div class="file-upload-section">
+                        <input type="file" name="file_content" id="file_content" accept=".docx,.pdf,.md" class="file-input">
+                        <div class="file-upload-info">
+                            <small>Formati supportati: .docx, .pdf, .md</small>
+                        </div>
+                        <div id="file-mode-section" class="file-mode-section" style="display:none;">
+                            <label>Come inserire il contenuto del file:</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="replace" checked>
+                                    <span>Sostituisci tutto il contenuto</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="prepend">
+                                    <span>Inserisci all'inizio</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="append">
+                                    <span>Inserisci alla fine</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
+            
+            <div class="popup-actions">
+                <button type="submit" form="addArgomentoForm" class="add-btn">Aggiungi</button>
+                <button type="button" id="closeArgomentoPopup" class="cancel-btn">Annulla</button>
+            </div>
         </div>
     </div>
 
@@ -94,9 +118,7 @@
         document.getElementById('closeArgomentoPopup').addEventListener('click', function() {
             document.getElementById('argomentoPopup').style.display = 'none';
             document.getElementById('addArgomentoForm').reset();
-        });
-
-        // Gestione form argomento
+        });        // Gestione form argomento
         document.getElementById('addArgomentoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -108,8 +130,20 @@
                 if (response.ok) {
                     document.getElementById('argomentoPopup').style.display = 'none';
                     this.reset();
+                    // Reset della sezione file
+                    document.getElementById('file-mode-section').style.display = 'none';
                 }
             });
+        });
+
+        // Gestione selezione file
+        document.getElementById('file_content').addEventListener('change', function() {
+            const fileModeSection = document.getElementById('file-mode-section');
+            if (this.files.length > 0) {
+                fileModeSection.style.display = 'block';
+            } else {
+                fileModeSection.style.display = 'none';
+            }
         });
 
         // Gestione tabs markdown
