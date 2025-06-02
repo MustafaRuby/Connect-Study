@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ materia.nome }} - Argomenti</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="breadcrumb">
+            <a href="/" class="breadcrumb-link">Materie</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{{ materia.nome }}</span>
+        </div>
+        <h1 style="color: {{ materia.colore }}">{{ materia.nome }} - Argomenti</h1>
+        <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
+    </div>
+    
+    <div id="argomenti-list" class="argomenti-list">
+        {% for argomento in argomenti %}
+        <div class="argomento-card" data-id="{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}">
+            <div class="argomento-header">
+                <h3>{{ argomento.titolo }}</h3>
+                <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+                    {{ argomento.etichetta_preparazione }}
+                </span>
+            </div>
+            {% if argomento.contenuto_md %}
+            <div class="argomento-preview">
+                {{ argomento.contenuto_md[:200] }}...
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Popup inserimento argomento -->
+    <div id="argomentoPopup" class="popup-bg" style="display:none;">
+        <div class="popup popup-large">
+            <h2>Nuovo argomento</h2>
+            <form id="addArgomentoForm">
+                <input type="hidden" name="id_materia" value="{{ materia.id }}">
+                
+                <div class="form-group">
+                    <label for="titolo">Titolo:</label>
+                    <input type="text" name="titolo" id="titolo" placeholder="Titolo argomento" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="colore">Colore:</label>
+                    <input type="color" name="colore" id="colore" value="#cccccc">
+                </div>
+                
+                <div class="form-group">
+                    <label for="etichetta_preparazione">Livello di preparazione:</label>
+                    <select name="etichetta_preparazione" id="etichetta_preparazione">
+                        <option value="scarsa preparazione">Scarsa preparazione</option>
+                        <option value="media preparazione">Media preparazione</option>
+                        <option value="buona preparazione">Buona preparazione</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contenuto_md">Contenuto (Markdown):</label>
+                    <div class="markdown-editor">
+                        <div class="editor-tabs">
+                            <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
+                            <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
+                        </div>
+                        <textarea name="contenuto_md" id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown..." rows="10"></textarea>
+                        <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
+                    </div>
+                </div>
+                
+                <div class="popup-actions">
+                    <button type="submit" class="add-btn">Aggiungi</button>
+                    <button type="button" id="closeArgomentoPopup" class="cancel-btn">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const materiaId = {{ materia.id }};
+
+        // Gestione popup argomento
+        document.getElementById('openArgomentoPopup').addEventListener('click', function() {
+            document.getElementById('argomentoPopup').style.display = 'flex';
+        });
+
+        document.getElementById('closeArgomentoPopup').addEventListener('click', function() {
+            document.getElementById('argomentoPopup').style.display = 'none';
+            document.getElementById('addArgomentoForm').reset();
+        });
+
+        // Gestione form argomento
+        document.getElementById('addArgomentoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('/add_argomento', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    document.getElementById('argomentoPopup').style.display = 'none';
+                    this.reset();
+                }
+            });
+        });
+
+        // Gestione tabs markdown
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                
+                // Reset tabs
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const textarea = document.getElementById('contenuto_md');
+                const preview = document.getElementById('markdown-preview');
+                
+                if (tab === 'editor') {
+                    textarea.style.display = 'block';
+                    preview.style.display = 'none';
+                } else {
+                    textarea.style.display = 'none';
+                    preview.style.display = 'block';
+                    preview.innerHTML = marked.parse(textarea.value || 'Nessun contenuto da visualizzare');
+                }
+            });
+        });
+
+        // Aggiornamento real-time argomenti
+        socket.on('update_argomenti', function(data) {
+            if (data.id_materia == materiaId) {
+                fetch(`/api/argomenti/${materiaId}`)
+                    .then(response => response.json())
+                    .then(argomenti => {
+                        const container = document.getElementById('argomenti-list');
+                        container.innerHTML = '';
+                        
+                        argomenti.forEach(argomento => {
+                            const card = document.createElement('div');
+                            card.className = 'argomento-card';
+                            card.dataset.id = argomento.id;
+                            card.style.borderLeft = `4px solid ${argomento.colore}`;
+                            
+                            let preview = '';
+                            if (argomento.contenuto_md) {
+                                preview = `<div class="argomento-preview">${argomento.contenuto_md.substring(0, 200)}...</div>`;
+                            }
+                            
+                            card.innerHTML = `
+                                <div class="argomento-header">
+                                    <h3>${argomento.titolo}</h3>
+                                    <span class="etichetta etichetta-${argomento.etichetta_preparazione.replace(/ /g, '-')}">${argomento.etichetta_preparazione}</span>
+                                </div>
+                                ${preview}
+                            `;
+                            
+                            container.appendChild(card);
+                        });
+                    });
+            }
+        });
+
+        // Click su argomento per aprire dettagli (da implementare)
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.argomento-card');
+            if (card) {
+                const argomentoId = card.dataset.id;
+                // TODO: Aprire pagina dettagli argomento
+                console.log('Clicked argomento:', argomentoId);
+            }
+        });
+    </script>
+</body>
+</html>

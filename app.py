@@ -79,5 +79,38 @@ def api_materie():
     conn.close()
     return jsonify([dict(m) for m in materie])
 
+@app.route('/materia/<int:id>')
+def materia_argomenti(id):
+    conn = get_db_connection()
+    materia = conn.execute('SELECT * FROM materie WHERE id = ?', (id,)).fetchone()
+    if not materia:
+        return "Materia non trovata", 404
+    argomenti = conn.execute('SELECT * FROM argomenti WHERE id_materia = ? ORDER BY id ASC', (id,)).fetchall()
+    conn.close()
+    return render_template('argomenti.html', materia=materia, argomenti=argomenti)
+
+@app.route('/add_argomento', methods=['POST'])
+def add_argomento():
+    id_materia = request.form['id_materia']
+    titolo = request.form['titolo']
+    contenuto_md = request.form.get('contenuto_md', '')
+    colore = request.form.get('colore', '#cccccc')
+    etichetta_preparazione = request.form.get('etichetta_preparazione', 'scarsa preparazione')
+    
+    conn = get_db_connection()
+    conn.execute('INSERT INTO argomenti (id_materia, titolo, contenuto_md, colore, etichetta_preparazione) VALUES (?, ?, ?, ?, ?)', 
+                (id_materia, titolo, contenuto_md, colore, etichetta_preparazione))
+    conn.commit()
+    conn.close()
+    socketio.emit('update_argomenti', {'id_materia': id_materia})
+    return ('', 204)
+
+@app.route('/api/argomenti/<int:id_materia>')
+def api_argomenti(id_materia):
+    conn = get_db_connection()
+    argomenti = conn.execute('SELECT * FROM argomenti WHERE id_materia = ? ORDER BY id ASC', (id_materia,)).fetchall()
+    conn.close()
+    return jsonify([dict(a) for a in argomenti])
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

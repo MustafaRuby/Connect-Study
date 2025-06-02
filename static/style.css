@@ -166,3 +166,204 @@ h1 {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: none; }
 }
+
+/* Stili per la pagina argomenti */
+.materia-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+
+.breadcrumb-link {
+    color: #4f8cff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+    color: #2a3a5c;
+}
+
+.breadcrumb-separator {
+    color: #999;
+}
+
+.breadcrumb-current {
+    color: #2a3a5c;
+    font-weight: 600;
+}
+
+.argomenti-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2em;
+    padding: 0 2em 2em 2em;
+}
+
+.argomento-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.argomento-card:hover {
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.argomento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.argomento-header h3 {
+    margin: 0;
+    color: #2a3a5c;
+    font-size: 1.3em;
+}
+
+.etichetta {
+    padding: 0.3em 0.8em;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.etichetta-scarsa-preparazione {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.etichetta-media-preparazione {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.etichetta-buona-preparazione {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.argomento-preview {
+    color: #666;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+/* Popup large per argomenti */
+.popup-large {
+    min-width: 600px;
+    max-width: 800px;
+}
+
+.form-group {
+    margin-bottom: 1.2em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    color: #2a3a5c;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.7em;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    outline: none;
+    transition: border 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border: 1.5px solid #4f8cff;
+}
+
+/* Editor Markdown */
+.markdown-editor {
+    border: 1px solid #cfd8dc;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.editor-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #cfd8dc;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.8em 1.2em;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #fff;
+    color: #4f8cff;
+    font-weight: 600;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #e9ecef;
+}
+
+.markdown-editor textarea {
+    border: none;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+}
+
+.markdown-preview {
+    padding: 1em;
+    background: #fff;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+    color: #2a3a5c;
+}
+
+.markdown-preview code {
+    background: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.markdown-preview pre {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.markdown-preview blockquote {
+    border-left: 4px solid #4f8cff;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #666;
+}

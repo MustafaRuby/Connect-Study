@@ -10,12 +10,13 @@
     <div class="header">
         <h1>Materie</h1>
         <button id="openMateriaPopup" class="add-btn">Aggiungi materia</button>
-    </div>
-    <div id="materie-list" class="materie-list">
+    </div>    <div id="materie-list" class="materie-list">
         {% for materia in materie %}
-        <div class="materia-card" data-id="{{ materia.id }}" style="background: {{ materia.colore }}">
-            <span>{{ materia.nome }}</span>
-        </div>
+        <a href="/materia/{{ materia.id }}" class="materia-link">
+            <div class="materia-card" data-id="{{ materia.id }}" style="background: {{ materia.colore }}">
+                <span>{{ materia.nome }}</span>
+            </div>
+        </a>
         {% endfor %}
     </div>
     <!-- Popup inserimento materia -->
