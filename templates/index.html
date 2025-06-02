@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Materie - ConnectStudy</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Materie</h1>
+        <button id="openMateriaPopup" class="add-btn">Aggiungi materia</button>
+    </div>
+    <div id="materie-list" class="materie-list">
+        {% for materia in materie %}
+        <div class="materia-card" data-id="{{ materia.id }}" style="background: {{ materia.colore }}">
+            <span>{{ materia.nome }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Popup inserimento materia -->
+    <div id="materiaPopup" class="popup-bg" style="display:none;">
+        <div class="popup">
+            <h2>Nuova materia</h2>
+            <form id="addMateriaForm">
+                <input type="text" name="nome" placeholder="Nome materia" required autofocus>
+                <label>Colore: <input type="color" name="colore" value="#cccccc"></label>
+                <div class="popup-actions">
+                    <button type="submit" class="add-btn">Aggiungi</button>
+                    <button type="button" id="closeMateriaPopup" class="cancel-btn">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/static/drag.js"></script>
+</body>
+</html>

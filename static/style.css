@@ -1,0 +1,168 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #f0f4ff 0%, #e6e9f0 100%);
+    margin: 0;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2em 2em 1em 2em;
+}
+
+h1 {
+    color: #2a3a5c;
+    margin: 0;
+    font-size: 2.2em;
+    letter-spacing: 1px;
+}
+
+.add-btn {
+    background: linear-gradient(90deg, #4f8cff 0%, #6edb8f 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7em 1.5em;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #4f8cff22;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.add-btn:hover {
+    background: linear-gradient(90deg, #6edb8f 0%, #4f8cff 100%);
+    box-shadow: 0 4px 16px #4f8cff33;
+}
+
+.cancel-btn {
+    background: #fff;
+    color: #4f8cff;
+    border: 1px solid #4f8cff;
+    border-radius: 6px;
+    padding: 0.7em 1.5em;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 1em;
+    transition: background 0.2s, color 0.2s;
+}
+.cancel-btn:hover {
+    background: #f0f4ff;
+    color: #2a3a5c;
+}
+
+.materie-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5em;
+    padding: 0 2em 2em 2em;
+}
+
+.materia-card {
+    padding: 1.5em 2.5em;
+    border-radius: 14px;
+    color: #222;
+    font-weight: bold;
+    font-size: 1.2em;
+    cursor: grab;
+    min-width: 140px;
+    min-height: 60px;
+    box-shadow: 0 2px 12px #4f8cff22;
+    user-select: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+}
+.materia-card.dragging {
+    opacity: 0.5;
+    box-shadow: 0 4px 24px #4f8cff33;
+    transform: scale(1.05);
+}
+
+/* Popup */
+.popup-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44, 62, 80, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.popup {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px #4f8cff33;
+    padding: 2em 2.5em 1.5em 2.5em;
+    min-width: 320px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.popup h2 {
+    margin-top: 0;
+    color: #2a3a5c;
+    font-size: 1.5em;
+    margin-bottom: 1em;
+}
+.popup input[type="text"] {
+    padding: 0.7em;
+    font-size: 1.1em;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    margin-bottom: 1em;
+    outline: none;
+    transition: border 0.2s;
+}
+.popup input[type="text"]:focus {
+    border: 1.5px solid #4f8cff;
+}
+.popup input[type="color"] {
+    margin-left: 0.5em;
+    vertical-align: middle;
+}
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1em;
+}
+
+/* Menu contestuale per le materie */
+.materia-menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px #4f8cff33;
+    padding: 0.5em 0.7em;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    gap: 0.3em;
+    border: 1px solid #e0e7ef;
+    animation: fadeIn 0.15s;
+}
+.materia-menu button {
+    background: none;
+    border: none;
+    color: #2a3a5c;
+    font-size: 1em;
+    padding: 0.5em 0.7em;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.materia-menu button:hover {
+    background: #f0f4ff;
+    color: #4f8cff;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
