@@ -14,7 +14,7 @@
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{ materia.nome }}</span>
         </div>
-        <h1 style="color: {{ materia.colore }}">{{ materia.nome }} - Argomenti</h1>
+        <h1 id="materia-title">{{ materia.nome }} - Argomenti</h1>
         <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
     </div>
     
@@ -167,9 +167,7 @@
                         });
                     });
             }
-        });
-
-        // Click su argomento per aprire dettagli (da implementare)
+        });        // Click su argomento per aprire dettagli (da implementare)
         document.addEventListener('click', function(e) {
             const card = e.target.closest('.argomento-card');
             if (card) {
@@ -177,7 +175,51 @@
                 // TODO: Aprire pagina dettagli argomento
                 console.log('Clicked argomento:', argomentoId);
             }
-        });
+        });        // Funzione per gestire il contrasto del titolo della materia
+        function setTitleContrast() {
+            const materiaColor = '{{ materia.colore }}';
+            const title = document.getElementById('materia-title');
+            
+            // Funzione per calcolare la luminosità
+            function getLuminance(hexColor) {
+                const hex = hexColor.replace('#', '');
+                const r = parseInt(hex.substr(0, 2), 16);
+                const g = parseInt(hex.substr(2, 2), 16);
+                const b = parseInt(hex.substr(4, 2), 16);
+                return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            }
+            
+            // Funzione per scurire un colore
+            function darkenColor(hexColor, factor = 0.6) {
+                const hex = hexColor.replace('#', '');
+                const r = Math.floor(parseInt(hex.substr(0, 2), 16) * factor);
+                const g = Math.floor(parseInt(hex.substr(2, 2), 16) * factor);
+                const b = Math.floor(parseInt(hex.substr(4, 2), 16) * factor);
+                return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+            }
+            
+            const luminance = getLuminance(materiaColor);
+            
+            // Lo sfondo della pagina è sempre chiaro, quindi gestiamo solo per quello
+            if (luminance > 0.6) {
+                // Colore troppo chiaro per uno sfondo chiaro, usa una versione molto più scura
+                const darkerColor = darkenColor(materiaColor, 0.3);
+                title.style.color = darkerColor;
+                title.classList.add('materia-title-colored');
+            } else if (luminance > 0.4) {
+                // Colore medio-chiaro, scurire leggermente
+                const darkerColor = darkenColor(materiaColor, 0.6);
+                title.style.color = darkerColor;
+                title.classList.add('materia-title-colored');
+            } else {
+                // Colore già abbastanza scuro per buon contrasto su sfondo chiaro
+                title.style.color = materiaColor;
+                title.classList.add('materia-title-colored');
+            }
+        }
+        
+        // Applica il contrasto al caricamento della pagina
+        setTitleContrast();
     </script>
 </body>
 </html>
