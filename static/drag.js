@@ -1,6 +1,24 @@
 // drag.js: drag & drop materie + SocketIO update + popup gestione
 const socket = io();
 
+// Funzione per calcolare la luminosità di un colore e determinare il contrasto
+function getContrastClass(hexColor) {
+    // Rimuovi il # se presente
+    const hex = hexColor.replace('#', '');
+    
+    // Converti hex in RGB
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    // Calcola la luminosità usando la formula standard
+    // https://www.w3.org/TR/WCAG20/#relativeluminancedef
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Se la luminosità è > 0.5, è un colore chiaro, altrimenti scuro
+    return luminance > 0.5 ? 'light-bg' : 'dark-bg';
+}
+
 function fetchMaterie() {
     fetch('/api/materie')
         .then(r => r.json())
@@ -30,6 +48,9 @@ function renderMaterie(materie) {
         const span = document.createElement('span');
         span.textContent = m.nome;
         card.appendChild(span);
+        
+        // Imposta classe per contrasto testo
+        card.classList.add(getContrastClass(m.colore));
         
         // Right-click context menu su tutto il blocco
         card.oncontextmenu = function(e) {

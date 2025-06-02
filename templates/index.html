@@ -31,8 +31,19 @@
                     <button type="button" id="closeMateriaPopup" class="cancel-btn">Annulla</button>
                 </div>
             </form>
-        </div>
-    </div>
+        </div>    </div>
     <script src="/static/drag.js"></script>
+    <script>
+        // Applica il contrasto alle materie già renderizzate dal server
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.materia-card').forEach(card => {
+                const bgColor = card.style.background;
+                if (bgColor) {
+                    const contrastClass = getContrastClass(bgColor);
+                    card.classList.add(contrastClass);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
