@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import sqlite3
 import os
+import uuid
+from datetime import datetime
 from docx import Document
 import PyPDF2
 import markdown
@@ -263,21 +265,20 @@ def add_allegato(id_argomento):
         # Crea la directory se non esiste
         upload_dir = os.path.join(app.static_folder, 'argomenti')
         os.makedirs(upload_dir, exist_ok=True)
+          # Genera un nome file sicuro e univoco
+        original_filename = secure_filename(file.filename)
+        base_name, ext = os.path.splitext(original_filename)
         
-        # Genera un nome file sicuro e univoco
-        filename = secure_filename(file.filename)
-        base_name, ext = os.path.splitext(filename)
-        counter = 1
-        while os.path.exists(os.path.join(upload_dir, filename)):
-            filename = f"{base_name}_{counter}{ext}"
-            counter += 1
+        # Usa timestamp e UUID per garantire unicità
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"{base_name}_{timestamp}_{unique_id}{ext}"
         
         file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
-        
-        # Salva nel database
+          # Salva nel database
         conn = get_db_connection()
-        conn.execute('INSERT INTO allegati (id_argomento, nome_file, percorso_file) VALUES (?, ?, ?)', 
+        conn.execute('INSERT INTO allegati (id_argomento, nome_file, percorso) VALUES (?, ?, ?)', 
                     (id_argomento, filename, f'static/argomenti/{filename}'))
         conn.commit()
         conn.close()
@@ -292,7 +293,7 @@ def delete_allegato(id):
     allegato = conn.execute('SELECT * FROM allegati WHERE id = ?', (id,)).fetchone()
     if allegato:
         # Rimuovi il file fisico
-        file_path = os.path.join(os.path.dirname(__file__), allegato['percorso_file'])
+        file_path = os.path.join(os.path.dirname(__file__), allegato['percorso'])
         if os.path.exists(file_path):
             os.remove(file_path)
         
@@ -300,10 +301,13 @@ def delete_allegato(id):
         conn.execute('DELETE FROM allegati WHERE id = ?', (id,))
         conn.commit()
         id_argomento = allegato['id_argomento']
+        conn.close()
+        
         socketio.emit('update_allegati', {'id_argomento': id_argomento})
+        return ('', 204)
     
     conn.close()
-    return ('', 204)
+    return ('File non trovato', 404)
 
 # API per ottenere allegati di un argomento
 @app.route('/api/allegati/<int:id_argomento>')
