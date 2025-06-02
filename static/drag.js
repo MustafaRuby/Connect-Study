@@ -14,23 +14,41 @@ function renderMaterie(materie) {
     const list = document.getElementById('materie-list');
     list.innerHTML = '';
     materie.forEach(m => {
+        // Crea il link wrapper
+        const link = document.createElement('a');
+        link.href = `/materia/${m.id}`;
+        link.className = 'materia-link';
+        
+        // Crea la card
         const card = document.createElement('div');
         card.className = 'materia-card';
         card.setAttribute('data-id', m.id);
         card.style.background = m.colore;
         card.tabIndex = 0; // make focusable for events
-        // Rendi il titolo un elemento separato ma il testo non deve bloccare il drag
+        
+        // Aggiungi il testo
         const span = document.createElement('span');
         span.textContent = m.nome;
         card.appendChild(span);
+        
         // Right-click context menu su tutto il blocco
         card.oncontextmenu = function(e) {
             e.preventDefault();
+            e.stopPropagation(); // Previeni la navigazione
             showMateriaMenu(e, m);
         };
-        // Drag events
+        
+        // Drag events - aggiungi solo alla card, non al link
         card.draggable = true;
-        list.appendChild(card);
+        
+        // Previeni la navigazione durante il drag
+        card.ondragstart = function(e) {
+            e.stopPropagation();
+        };
+        
+        // Assembla la struttura
+        link.appendChild(card);
+        list.appendChild(link);
     });
     enableDrag();
 }
@@ -108,69 +126,101 @@ function enableDrag() {
     let dragSrc = null;
     let placeholder = null;
     let isDragging = false;
+    
     function removePlaceholder() {
         if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
     }
+    
     // Rimuovi eventuali listener precedenti
-    list.querySelectorAll('.materia-card').forEach(card => {
-        card.ondragstart = null;
-        card.ondragend = null;
-        card.ondragover = null;
-        card.ondrop = null;
+    list.querySelectorAll('.materia-link').forEach(link => {
+        const card = link.querySelector('.materia-card');
+        if (card) {
+            card.ondragstart = null;
+            card.ondragend = null;
+            card.ondragover = null;
+            card.ondrop = null;
+        }
     });
     list.ondragover = null;
     list.ondrop = null;
-    const cards = document.querySelectorAll('.materia-card');
-    cards.forEach((card) => {
+    
+    const links = document.querySelectorAll('.materia-link');
+    links.forEach((link) => {
+        const card = link.querySelector('.materia-card');
+        if (!card) return;
+        
         card.draggable = true;
+        
         card.ondragstart = function(e) {
-            dragSrc = card;
+            dragSrc = link; // Trasciniamo il link, non la card
             isDragging = true;
             card.classList.add('dragging');
-            placeholder = document.createElement('div');
-            placeholder.className = 'materia-card placeholder';
-            placeholder.style.height = card.offsetHeight + 'px';
-            placeholder.style.width = card.offsetWidth + 'px';
+            
+            // Crea placeholder
+            placeholder = document.createElement('a');
+            placeholder.className = 'materia-link placeholder';
+            const placeholderCard = document.createElement('div');
+            placeholderCard.className = 'materia-card';
+            placeholderCard.style.height = card.offsetHeight + 'px';
+            placeholderCard.style.width = card.offsetWidth + 'px';
+            placeholderCard.style.opacity = '0.3';
+            placeholderCard.style.background = '#ddd';
+            placeholder.appendChild(placeholderCard);
+            
+            // Previeni la navigazione durante il drag
+            e.stopPropagation();
+            link.style.pointerEvents = 'none';
+            
             // workaround per bug Chrome/Edge: serve un dataTransfer
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', '');
-            card.style.visibility = 'hidden';
+            link.style.visibility = 'hidden';
         };
+        
         card.ondragend = function(e) {
             card.classList.remove('dragging');
-            card.style.visibility = '';
+            link.style.visibility = '';
+            link.style.pointerEvents = '';
             isDragging = false;
             removePlaceholder();
         };
+        
         card.ondragover = function(e) {
             e.preventDefault();
-            if (!isDragging || card === dragSrc) return;
-            const bounding = card.getBoundingClientRect();
+            e.stopPropagation();
+            if (!isDragging || link === dragSrc) return;
+            
+            const bounding = link.getBoundingClientRect();
             const offset = e.clientY - bounding.top;
             const insertBefore = offset < bounding.height / 2;
+            
             if (insertBefore) {
-                if (card.previousSibling !== placeholder) {
+                if (link.previousSibling !== placeholder) {
                     removePlaceholder();
-                    list.insertBefore(placeholder, card);
+                    list.insertBefore(placeholder, link);
                 }
             } else {
-                if (card.nextSibling !== placeholder) {
+                if (link.nextSibling !== placeholder) {
                     removePlaceholder();
-                    list.insertBefore(placeholder, card.nextSibling);
+                    list.insertBefore(placeholder, link.nextSibling);
                 }
             }
         };
+        
         card.ondrop = function(e) {
             e.preventDefault();
-            if (!isDragging || card === dragSrc) return;
+            e.stopPropagation();
+            if (!isDragging || link === dragSrc) return;
             if (placeholder && placeholder.parentNode) {
                 list.insertBefore(dragSrc, placeholder);
                 removePlaceholder();
             }
             dragSrc.style.visibility = '';
+            dragSrc.style.pointerEvents = '';
             updateOrder();
         };
     });
+    
     list.ondragover = function(e) {
         e.preventDefault();
         if (!isDragging) return;
@@ -180,19 +230,21 @@ function enableDrag() {
             list.appendChild(placeholder);
         }
     };
+    
     list.ondrop = function(e) {
         e.preventDefault();
         if (isDragging && placeholder && placeholder.parentNode) {
             list.insertBefore(dragSrc, placeholder);
             removePlaceholder();
             dragSrc.style.visibility = '';
+            dragSrc.style.pointerEvents = '';
             updateOrder();
         }
     };
 }
 
 function updateOrder() {
-    const order = Array.from(document.querySelectorAll('.materia-card')).map(c => c.getAttribute('data-id'));
+    const order = Array.from(document.querySelectorAll('.materia-link .materia-card')).map(c => c.getAttribute('data-id'));
     socket.emit('reorder_materie', { order });
 }
 
@@ -240,4 +292,8 @@ form.onsubmit = function(e) {
 // SocketIO update
 socket.on('update_materie', fetchMaterie);
 
-document.addEventListener('DOMContentLoaded', enableDrag);
+document.addEventListener('DOMContentLoaded', function() {
+    enableDrag();
+    // Carica le materie al primo accesso per applicare gli event listener
+    fetchMaterie();
+});
