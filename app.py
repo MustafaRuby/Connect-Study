@@ -199,5 +199,119 @@ def api_argomenti(id_materia):
     conn.close()
     return jsonify([dict(a) for a in argomenti])
 
+# Route per il singolo argomento
+@app.route('/argomento/<int:id>')
+def argomento_dettaglio(id):
+    conn = get_db_connection()
+    argomento = conn.execute('SELECT * FROM argomenti WHERE id = ?', (id,)).fetchone()
+    if not argomento:
+        return "Argomento non trovato", 404
+    
+    materia = conn.execute('SELECT * FROM materie WHERE id = ?', (argomento['id_materia'],)).fetchone()
+    allegati = conn.execute('SELECT * FROM allegati WHERE id_argomento = ? ORDER BY nome_file ASC', (id,)).fetchall()
+    conn.close()
+    
+    return render_template('argomento.html', argomento=argomento, materia=materia, allegati=allegati)
+
+# Route per aggiornare il contenuto dell'argomento
+@app.route('/update_argomento/<int:id>', methods=['POST'])
+def update_argomento(id):
+    contenuto_md = request.form.get('contenuto_md', '')
+    
+    # Gestione file caricato per aggiornamento
+    if 'file_content' in request.files:
+        file = request.files['file_content']
+        if file.filename != '' and file.filename is not None:
+            filename = secure_filename(file.filename)
+            temp_path = os.path.join(os.path.dirname(__file__), 'temp_' + filename)
+            file.save(temp_path)
+            
+            try:
+                file_markdown = convert_file_to_markdown(temp_path, filename)
+                
+                file_mode = request.form.get('file_mode', 'replace')
+                if file_mode == 'replace':
+                    contenuto_md = file_markdown
+                elif file_mode == 'prepend':
+                    contenuto_md = file_markdown + '\n\n' + contenuto_md if contenuto_md else file_markdown
+                elif file_mode == 'append':
+                    contenuto_md = contenuto_md + '\n\n' + file_markdown if contenuto_md else file_markdown
+                
+            finally:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+    
+    conn = get_db_connection()
+    conn.execute('UPDATE argomenti SET contenuto_md = ? WHERE id = ?', (contenuto_md, id))
+    conn.commit()
+    conn.close()
+    
+    socketio.emit('update_argomento', {'id': id})
+    return ('', 204)
+
+# Route per caricare allegati
+@app.route('/add_allegato/<int:id_argomento>', methods=['POST'])
+def add_allegato(id_argomento):
+    if 'file' not in request.files:
+        return 'Nessun file caricato', 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return 'Nessun file selezionato', 400
+    
+    if file:
+        # Crea la directory se non esiste
+        upload_dir = os.path.join(app.static_folder, 'argomenti')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Genera un nome file sicuro e univoco
+        filename = secure_filename(file.filename)
+        base_name, ext = os.path.splitext(filename)
+        counter = 1
+        while os.path.exists(os.path.join(upload_dir, filename)):
+            filename = f"{base_name}_{counter}{ext}"
+            counter += 1
+        
+        file_path = os.path.join(upload_dir, filename)
+        file.save(file_path)
+        
+        # Salva nel database
+        conn = get_db_connection()
+        conn.execute('INSERT INTO allegati (id_argomento, nome_file, percorso_file) VALUES (?, ?, ?)', 
+                    (id_argomento, filename, f'static/argomenti/{filename}'))
+        conn.commit()
+        conn.close()
+        
+        socketio.emit('update_allegati', {'id_argomento': id_argomento})
+        return ('', 204)
+
+# Route per eliminare allegati
+@app.route('/delete_allegato/<int:id>', methods=['DELETE'])
+def delete_allegato(id):
+    conn = get_db_connection()
+    allegato = conn.execute('SELECT * FROM allegati WHERE id = ?', (id,)).fetchone()
+    if allegato:
+        # Rimuovi il file fisico
+        file_path = os.path.join(os.path.dirname(__file__), allegato['percorso_file'])
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        # Rimuovi dal database
+        conn.execute('DELETE FROM allegati WHERE id = ?', (id,))
+        conn.commit()
+        id_argomento = allegato['id_argomento']
+        socketio.emit('update_allegati', {'id_argomento': id_argomento})
+    
+    conn.close()
+    return ('', 204)
+
+# API per ottenere allegati di un argomento
+@app.route('/api/allegati/<int:id_argomento>')
+def api_allegati(id_argomento):
+    conn = get_db_connection()
+    allegati = conn.execute('SELECT * FROM allegati WHERE id_argomento = ? ORDER BY nome_file ASC', (id_argomento,)).fetchall()
+    conn.close()
+    return jsonify([dict(a) for a in allegati])
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

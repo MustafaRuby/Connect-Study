@@ -17,24 +17,25 @@
         <h1 id="materia-title">{{ materia.nome }} - Argomenti</h1>
         <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
     </div>
-    
-    <div id="argomenti-list" class="argomenti-list">
+      <div id="argomenti-list" class="argomenti-list">
         {% for argomento in argomenti %}
-        <div class="argomento-card" data-id="{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}">
-            <div class="argomento-header">
-                <h3>{{ argomento.titolo }}</h3>
-                <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
-                    {{ argomento.etichetta_preparazione }}
-                </span>
+        <a href="/argomento/{{ argomento.id }}" class="argomento-link">
+            <div class="argomento-card" data-id="{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}">
+                <div class="argomento-header">
+                    <h3>{{ argomento.titolo }}</h3>
+                    <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+                        {{ argomento.etichetta_preparazione }}
+                    </span>
+                </div>
+                {% if argomento.contenuto_md %}
+                <div class="argomento-preview">
+                    {{ argomento.contenuto_md[:200] }}...
+                </div>
+                {% endif %}
             </div>
-            {% if argomento.contenuto_md %}
-            <div class="argomento-preview">
-                {{ argomento.contenuto_md[:200] }}...
-            </div>
-            {% endif %}
-        </div>
+        </a>
         {% endfor %}
-    </div>    <!-- Popup inserimento argomento -->
+    </div><!-- Popup inserimento argomento -->
     <div id="argomentoPopup" class="popup-bg" style="display:none;">
         <div class="popup popup-large">
             <h2>Nuovo argomento</h2>
@@ -177,8 +178,11 @@
                     .then(argomenti => {
                         const container = document.getElementById('argomenti-list');
                         container.innerHTML = '';
-                        
-                        argomenti.forEach(argomento => {
+                          argomenti.forEach(argomento => {
+                            const link = document.createElement('a');
+                            link.href = `/argomento/${argomento.id}`;
+                            link.className = 'argomento-link';
+                            
                             const card = document.createElement('div');
                             card.className = 'argomento-card';
                             card.dataset.id = argomento.id;
@@ -197,19 +201,19 @@
                                 ${preview}
                             `;
                             
-                            container.appendChild(card);
+                            link.appendChild(card);
+                            container.appendChild(link);
                         });
                     });
             }
-        });        // Click su argomento per aprire dettagli (da implementare)
-        document.addEventListener('click', function(e) {
-            const card = e.target.closest('.argomento-card');
-            if (card) {
-                const argomentoId = card.dataset.id;
-                // TODO: Aprire pagina dettagli argomento
-                console.log('Clicked argomento:', argomentoId);
-            }
-        });        // Funzione per gestire il contrasto del titolo della materia
+        });        // Click su argomento per aprire dettagli (non più necessario, ora sono link)
+        // document.addEventListener('click', function(e) {
+        //     const card = e.target.closest('.argomento-card');
+        //     if (card) {
+        //         const argomentoId = card.dataset.id;
+        //         window.location.href = `/argomento/${argomentoId}`;
+        //     }
+        // });// Funzione per gestire il contrasto del titolo della materia
         function setTitleContrast() {
             const materiaColor = '{{ materia.colore }}';
             const title = document.getElementById('materia-title');

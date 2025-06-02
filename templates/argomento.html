@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ argomento.titolo }} - {{ materia.nome }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="breadcrumb">
+            <a href="/" class="breadcrumb-link">Materie</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/materia/{{ materia.id }}" class="breadcrumb-link">{{ materia.nome }}</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{{ argomento.titolo }}</span>
+        </div>
+        <div class="argomento-header-section">
+            <div class="argomento-title-container">
+                <h1 id="argomento-title" style="color: {{ argomento.colore }}">{{ argomento.titolo }}</h1>
+                <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+                    {{ argomento.etichetta_preparazione }}
+                </span>
+            </div>
+            <div class="argomento-actions">
+                <button id="editBtn" class="add-btn">Modifica</button>
+                <button id="addAllegatoBtn" class="add-btn">Aggiungi allegato</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenuto principale -->
+    <div class="argomento-content">
+        <!-- Visualizzazione markdown -->
+        <div id="markdown-view" class="markdown-content">
+            {% if argomento.contenuto_md %}
+            <div id="rendered-markdown"></div>
+            {% else %}
+            <div class="empty-content">
+                <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Editor markdown (nascosto di default) -->
+        <div id="markdown-editor-section" class="markdown-editor-section" style="display:none;">
+            <div class="editor-container">
+                <div class="markdown-editor">
+                    <div class="editor-tabs">
+                        <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
+                        <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
+                    </div>
+                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown..." rows="20">{{ argomento.contenuto_md or '' }}</textarea>
+                    <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
+                </div>
+                
+                <!-- Sezione caricamento file -->
+                <div class="file-upload-section">
+                    <input type="file" id="file_content" accept=".docx,.pdf,.md" class="file-input">
+                    <div class="file-upload-info">
+                        <small>Formati supportati: .docx, .pdf, .md</small>
+                    </div>
+                    <div id="file-mode-section" class="file-mode-section" style="display:none;">
+                        <label>Come inserire il contenuto del file:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="file_mode" value="replace" checked>
+                                <span>Sostituisci tutto il contenuto</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="file_mode" value="prepend">
+                                <span>Inserisci all'inizio</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="file_mode" value="append">
+                                <span>Inserisci alla fine</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Azioni editor -->
+                <div class="editor-actions">
+                    <button id="saveBtn" class="add-btn">Salva</button>
+                    <button id="cancelBtn" class="cancel-btn">Annulla</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Allegati -->
+        <div class="allegati-section">
+            <h3>Allegati</h3>
+            <div id="allegati-list" class="allegati-list">
+                {% for allegato in allegati %}
+                <div class="allegato-card" data-id="{{ allegato.id }}">
+                    <div class="allegato-info">
+                        <span class="allegato-nome">{{ allegato.nome_file }}</span>
+                        <div class="allegato-actions">
+                            <button class="view-allegato-btn" data-path="{{ allegato.percorso_file }}">Visualizza</button>
+                            <button class="delete-allegato-btn" data-id="{{ allegato.id }}">Elimina</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup caricamento allegato -->
+    <div id="allegatoPopup" class="popup-bg" style="display:none;">
+        <div class="popup">
+            <h2>Aggiungi allegato</h2>
+            <form id="addAllegatoForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="allegato_file">Seleziona file:</label>
+                    <input type="file" name="file" id="allegato_file" required class="file-input">
+                </div>
+                <div class="popup-actions">
+                    <button type="submit" class="add-btn">Carica</button>
+                    <button type="button" id="closeAllegatoPopup" class="cancel-btn">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup visualizzazione allegato -->
+    <div id="viewAllegatoPopup" class="popup-bg" style="display:none;">
+        <div class="popup popup-large">
+            <h2>Visualizzazione allegato</h2>
+            <div id="allegato-content" class="allegato-content">
+                <!-- Contenuto dell'allegato verrà caricato qui -->
+            </div>
+            <div class="popup-actions">
+                <button type="button" id="closeViewAllegatoPopup" class="cancel-btn">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const argomentoId = {{ argomento.id }};
+        const originalContent = `{{ argomento.contenuto_md or '' }}`;
+        
+        // Inizializzazione della pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMarkdownView();
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Gestione modifica argomento
+            document.getElementById('editBtn').addEventListener('click', toggleEditMode);
+            document.getElementById('add-content-link')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleEditMode();
+            });
+            
+            // Gestione salvataggio
+            document.getElementById('saveBtn').addEventListener('click', saveArgomento);
+            document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+            
+            // Gestione allegati
+            document.getElementById('addAllegatoBtn').addEventListener('click', function() {
+                document.getElementById('allegatoPopup').style.display = 'flex';
+            });
+            
+            document.getElementById('closeAllegatoPopup').addEventListener('click', function() {
+                document.getElementById('allegatoPopup').style.display = 'none';
+            });
+            
+            document.getElementById('addAllegatoForm').addEventListener('submit', uploadAllegato);
+            
+            // Gestione visualizzazione allegati
+            document.querySelectorAll('.view-allegato-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    viewAllegato(this.dataset.path);
+                });
+            });
+            
+            // Gestione eliminazione allegati
+            document.querySelectorAll('.delete-allegato-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Sei sicuro di voler eliminare questo allegato?')) {
+                        deleteAllegato(this.dataset.id);
+                    }
+                });
+            });
+            
+            document.getElementById('closeViewAllegatoPopup').addEventListener('click', function() {
+                document.getElementById('viewAllegatoPopup').style.display = 'none';
+            });
+            
+            // Gestione tabs markdown
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+            
+            // Gestione selezione file
+            document.getElementById('file_content').addEventListener('change', function() {
+                const fileModeSection = document.getElementById('file-mode-section');
+                if (this.files.length > 0) {
+                    fileModeSection.style.display = 'block';
+                } else {
+                    fileModeSection.style.display = 'none';
+                }
+            });
+        }
+        
+        function updateMarkdownView() {
+            const content = `{{ argomento.contenuto_md or '' }}`;
+            if (content.trim()) {
+                document.getElementById('rendered-markdown').innerHTML = marked.parse(content);
+            }
+        }
+        
+        function toggleEditMode() {
+            const viewSection = document.getElementById('markdown-view');
+            const editorSection = document.getElementById('markdown-editor-section');
+            
+            if (editorSection.style.display === 'none') {
+                viewSection.style.display = 'none';
+                editorSection.style.display = 'block';
+                document.getElementById('contenuto_md').focus();
+            } else {
+                viewSection.style.display = 'block';
+                editorSection.style.display = 'none';
+            }
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            const textarea = document.getElementById('contenuto_md');
+            const preview = document.getElementById('markdown-preview');
+            
+            if (tab === 'editor') {
+                textarea.style.display = 'block';
+                preview.style.display = 'none';
+            } else {
+                textarea.style.display = 'none';
+                preview.style.display = 'block';
+                preview.innerHTML = marked.parse(textarea.value || 'Nessun contenuto da visualizzare');
+            }
+        }
+        
+        function saveArgomento() {
+            const formData = new FormData();
+            formData.append('contenuto_md', document.getElementById('contenuto_md').value);
+            
+            // Gestione file caricato
+            const fileInput = document.getElementById('file_content');
+            if (fileInput.files.length > 0) {
+                formData.append('file_content', fileInput.files[0]);
+                const selectedMode = document.querySelector('input[name="file_mode"]:checked').value;
+                formData.append('file_mode', selectedMode);
+            }
+            
+            fetch(`/update_argomento/${argomentoId}`, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    location.reload(); // Ricarica la pagina per mostrare le modifiche
+                } else {
+                    alert('Errore nel salvataggio');
+                }
+            });
+        }
+        
+        function cancelEdit() {
+            document.getElementById('contenuto_md').value = originalContent;
+            document.getElementById('file_content').value = '';
+            document.getElementById('file-mode-section').style.display = 'none';
+            toggleEditMode();
+        }
+        
+        function uploadAllegato(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(`/add_allegato/${argomentoId}`, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    document.getElementById('allegatoPopup').style.display = 'none';
+                    this.reset();
+                } else {
+                    alert('Errore nel caricamento del file');
+                }
+            });
+        }
+        
+        function deleteAllegato(id) {
+            fetch(`/delete_allegato/${id}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    document.querySelector(`[data-id="${id}"]`).remove();
+                } else {
+                    alert('Errore nell\'eliminazione del file');
+                }
+            });
+        }
+        
+        function viewAllegato(path) {
+            const content = document.getElementById('allegato-content');
+            const extension = path.split('.').pop().toLowerCase();
+            
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension)) {
+                content.innerHTML = `<img src="/${path}" style="max-width: 100%; height: auto;">`;
+            } else if (['pdf'].includes(extension)) {
+                content.innerHTML = `<iframe src="/${path}" style="width: 100%; height: 600px; border: none;"></iframe>`;
+            } else if (['txt', 'md'].includes(extension)) {
+                fetch(`/${path}`)
+                    .then(response => response.text())
+                    .then(text => {
+                        content.innerHTML = `<pre style="white-space: pre-wrap; padding: 1em; background: #f8f9fa; border-radius: 6px;">${text}</pre>`;
+                    });
+            } else {
+                content.innerHTML = `<p>Tipo di file non supportato per la visualizzazione. <a href="/${path}" download>Scarica file</a></p>`;
+            }
+            
+            document.getElementById('viewAllegatoPopup').style.display = 'flex';
+        }
+        
+        // Aggiornamenti real-time
+        socket.on('update_argomento', function(data) {
+            if (data.id == argomentoId) {
+                location.reload();
+            }
+        });
+        
+        socket.on('update_allegati', function(data) {
+            if (data.id_argomento == argomentoId) {
+                fetch(`/api/allegati/${argomentoId}`)
+                    .then(response => response.json())
+                    .then(allegati => {
+                        const container = document.getElementById('allegati-list');
+                        container.innerHTML = '';
+                        
+                        allegati.forEach(allegato => {
+                            const card = document.createElement('div');
+                            card.className = 'allegato-card';
+                            card.dataset.id = allegato.id;
+                            
+                            card.innerHTML = `
+                                <div class="allegato-info">
+                                    <span class="allegato-nome">${allegato.nome_file}</span>
+                                    <div class="allegato-actions">
+                                        <button class="view-allegato-btn" data-path="${allegato.percorso_file}">Visualizza</button>
+                                        <button class="delete-allegato-btn" data-id="${allegato.id}">Elimina</button>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            container.appendChild(card);
+                        });
+                        
+                        // Riassegna event listeners
+                        setupAllegatoListeners();
+                    });
+            }
+        });
+        
+        function setupAllegatoListeners() {
+            document.querySelectorAll('.view-allegato-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    viewAllegato(this.dataset.path);
+                });
+            });
+            
+            document.querySelectorAll('.delete-allegato-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Sei sicuro di voler eliminare questo allegato?')) {
+                        deleteAllegato(this.dataset.id);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
