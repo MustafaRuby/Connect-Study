@@ -436,6 +436,10 @@ h1 {
     overflow: hidden;
     background: #fff;
     transition: border-color 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .markdown-editor:focus-within {
@@ -447,6 +451,7 @@ h1 {
     display: flex;
     background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
     border-bottom: 1px solid #e8f2ff;
+    flex-shrink: 0;
 }
 
 .tab-btn {
@@ -484,26 +489,71 @@ h1 {
 
 .markdown-editor textarea {
     border: none;
-    resize: vertical;
+    resize: none;
     font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
     margin: 0;
     padding: 1.2em;
     font-size: 0.95em;
     line-height: 1.6;
     background: #fff;
+    flex: 1;
+    min-height: calc(98vh - 450px);
+    width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    overflow-y: auto;
 }
 
 .markdown-editor textarea:focus {
     outline: none;
 }
 
+/* Scrollbar personalizzata per il textarea dell'editor */
+.markdown-editor textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
 .markdown-preview {
     padding: 1.5em;
     background: #fff;
-    min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto;
     line-height: 1.6;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: calc(98vh - 450px);
+}
+
+/* Scrollbar personalizzata per il preview dell'editor */
+.markdown-preview::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
 }
 
 .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
@@ -540,6 +590,8 @@ h1 {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
 .file-upload-section::before {
@@ -770,7 +822,28 @@ h1 {
     padding: 2em;
     box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
     margin-bottom: 2em;
-    min-height: 200px;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Scrollbar personalizzata per il contenuto markdown */
+.markdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
 }
 
 .empty-content {
@@ -796,12 +869,30 @@ h1 {
     padding: 2em;
     box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
     margin-bottom: 2em;
+    height: calc(98vh - 100px);
+    max-height: calc(98vh - 100px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .editor-container {
     display: flex;
     flex-direction: column;
     gap: 1.5em;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.markdown-editor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border: 1px solid #e8f2ff;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .editor-actions {
@@ -810,6 +901,8 @@ h1 {
     gap: 1em;
     padding-top: 1em;
     border-top: 1px solid #e8f2ff;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
 /* Sezione allegati */

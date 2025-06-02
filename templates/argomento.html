@@ -45,13 +45,12 @@
         
         <!-- Editor markdown (nascosto di default) -->
         <div id="markdown-editor-section" class="markdown-editor-section" style="display:none;">
-            <div class="editor-container">
-                <div class="markdown-editor">
+            <div class="editor-container">                <div class="markdown-editor">
                     <div class="editor-tabs">
                         <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
                         <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
                     </div>
-                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown..." rows="20">{{ argomento.contenuto_md or '' }}</textarea>
+                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
                     <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
                 </div>
                 
