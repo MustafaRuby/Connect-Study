@@ -1,11 +1,42 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ materia.nome }} - Argomenti</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">    <title>{{ materia.nome }} - Argomenti</title>
+    <link rel="stylesheet" href="/static/style.css">    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <!-- Highlight.js CSS - VS Code Dark theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
+    
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- KaTeX JavaScript -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+    <!-- KaTeX auto-render extension -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    
+    <!-- Highlight.js Core + Popular Languages -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/php.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/csharp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/rust.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/kotlin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/swift.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/ruby.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/perl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/r.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/matlab.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/shell.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/powershell.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/dockerfile.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/xml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/json.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -17,23 +48,46 @@
         <h1 id="materia-title">{{ materia.nome }} - Argomenti</h1>
         <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
     </div>
-      <div id="argomenti-list" class="argomenti-list">
-        {% for argomento in argomenti %}
-        <a href="/argomento/{{ argomento.id }}" class="argomento-link">
-            <div class="argomento-card" data-id="{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}">
-                <div class="argomento-header">
-                    <h3>{{ argomento.titolo }}</h3>
-                    <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
-                        {{ argomento.etichetta_preparazione }}
-                    </span>
-                </div>
-                {% if argomento.contenuto_md %}
-                <div class="argomento-preview">
-                    {{ argomento.contenuto_md[:200] }}...
-                </div>
-                {% endif %}
+
+    <!-- Sezione ricerca e filtri -->
+    <div class="search-filters-section">
+        <div class="search-container">
+            <div class="search-group">
+                <label for="search-title">Cerca nel titolo:</label>
+                <input type="text" id="search-title" placeholder="Cerca argomenti per titolo..." class="search-input">
             </div>
-        </a>
+            <div class="search-group">
+                <label for="search-content">Cerca nel contenuto:</label>
+                <input type="text" id="search-content" placeholder="Cerca nel contenuto degli argomenti..." class="search-input">
+            </div>
+            <div class="search-group">
+                <label for="filter-etichetta">Filtra per preparazione:</label>
+                <select id="filter-etichetta" class="filter-select">
+                    <option value="">Tutte le preparazioni</option>
+                    <option value="scarsa-preparazione">Scarsa preparazione</option>
+                    <option value="media-preparazione">Media preparazione</option>
+                    <option value="buona-preparazione">Buona preparazione</option>
+                </select>
+            </div>
+            <button id="clear-filters" class="clear-btn">Pulisci filtri</button>
+        </div>
+    </div>
+
+    <div id="argomenti-list" class="argomenti-list">
+        {% for argomento in argomenti %}        <div class="argomento-card" data-id="{{ argomento.id }}" data-href="/argomento/{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}" data-title="{{ argomento.titolo|e }}" data-content="{{ argomento.contenuto_md|e }}" data-etichetta="{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+            <div class="argomento-header">
+                <h3 class="argomento-title">{{ argomento.titolo }}</h3>
+                <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+                    {{ argomento.etichetta_preparazione }}
+                </span>
+            </div>
+            <div class="search-result" style="display: none;"></div>
+            {% if argomento.contenuto_md %}
+            <div class="argomento-preview">
+                {{ argomento.contenuto_md[:200] }}...
+            </div>
+            {% endif %}
+        </div>
         {% endfor %}
     </div><!-- Popup inserimento argomento -->
     <div id="argomentoPopup" class="popup-bg" style="display:none;">
@@ -105,44 +159,148 @@
                 <button type="button" id="closeArgomentoPopup" class="cancel-btn">Annulla</button>
             </div>
         </div>
-    </div>
+    </div>    <script>
+        const socket = io();
+        const materiaId = {{ materia.id }};
+        
+        // Function to clean preview text from markdown artifacts
+        function cleanPreviewText(text) {
+            if (!text) return '';
+            
+            return text
+                // Remove markdown syntax
+                .replace(/```[\w]*\n[\s\S]*?\n```/g, '[Code Block]')  // Code blocks
+                .replace(/`([^`]+)`/g, '$1')  // Inline code
+                .replace(/\*\*(.*?)\*\*/g, '$1')  // Bold
+                .replace(/\*(.*?)\*/g, '$1')  // Italic
+                .replace(/#{1,6}\s/g, '')  // Headers
+                .replace(/!\[([^\]]*)\]\([^\)]*\)/g, '[Image: $1]')  // Images
+                .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')  // Links
+                .replace(/^\s*[-*+]\s/gm, '• ')  // List items
+                .replace(/^\s*\d+\.\s/gm, '• ')  // Numbered lists
+                .replace(/>\s/g, '')  // Blockquotes
+                .replace(/\$\$[\s\S]*?\$\$/g, '[Math Formula]')  // Math blocks
+                .replace(/\$([^$\n]+)\$/g, '[Math: $1]')  // Inline math
+                .replace(/\n+/g, ' ')  // Multiple newlines to single space
+                .replace(/\s+/g, ' ')  // Multiple spaces to single space
+                .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF.,!?;:()\[\]{}'"«»""''–—]/g, '')  // Remove special chars but keep accented letters and basic punctuation
+                .trim();
+        }
 
-    <script>        const socket = io();
-        const materiaId = {{ materia.id }};        // Funzioni per parsing sicuro del markdown
+        // Funzioni per parsing sicuro del markdown con KaTeX e Highlight.js
         function parseMarkdownSafely(content) {
             if (!content || !content.trim()) {
                 return '';
             }
             
-            // Primo controllo: verificare se ci sono problemi noti
-            const hasProblematicSyntax = content.includes('```math') || /\$\$[\s\S]*?\$\$/g.test(content);
-            
-            if (hasProblematicSyntax) {
-                console.warn('⚠️ Rilevata sintassi problematica nel preview, uso parser semplificato');
-                return parseMarkdownWithCleanup(content);
-            }
+            console.log('🔍 Inizio parsing del contenuto con KaTeX e Highlight.js...');
             
             try {
-                return marked.parse(content);
+                // Step 1: Parse markdown content
+                const htmlContent = marked.parse(content);
+                
+                // Step 2: Create temporary container for KaTeX rendering
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlContent;
+                
+                // Step 3: Apply syntax highlighting with highlight.js
+                console.log('🎨 Applicando syntax highlighting...');
+                tempDiv.querySelectorAll('pre code').forEach((block) => {
+                    // Rimuovi eventuali classi esistenti di highlight.js
+                    block.className = block.className.replace(/hljs\S*/g, '');
+                    
+                    // Applica la syntax highlighting
+                    hljs.highlightElement(block);
+                    
+                    // Aggiungi una classe per lo styling personalizzato
+                    block.classList.add('hljs-enhanced');
+                });
+                
+                // Step 4: Render math with KaTeX
+                console.log('🧮 Rendering formule matematiche...');
+                renderMathInElement(tempDiv, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\[", right: "\\]", display: true},
+                        {left: "$", right: "$", display: false},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false,
+                    errorColor: '#cc0000',
+                    strict: false,
+                    trust: false
+                });
+                
+                console.log('✅ Parser con KaTeX e Highlight.js riuscito');
+                return tempDiv.innerHTML;
+                
             } catch (error) {
-                console.warn('Errore parser markdown:', error);
-                return parseMarkdownWithCleanup(content);
+                console.error('❌ Errore nel parsing avanzato:', error);
+                // Fallback to basic markdown without math but with highlighting
+                try {
+                    const basicHtml = marked.parse(content);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = basicHtml;
+                    
+                    // Apply only syntax highlighting in fallback
+                    tempDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                        block.classList.add('hljs-enhanced');
+                    });
+                    
+                    return tempDiv.innerHTML;
+                } catch (fallbackError) {
+                    console.error('❌ Anche il fallback è fallito:', fallbackError);
+                    return parseWithBasicFallback(content);
+                }
             }
         }
-        
-        function parseMarkdownWithCleanup(content) {
-            try {
-                const cleanedContent = content
-                    .replace(/```math\s*\n([\s\S]*?)\n```/gi, function(match, mathContent) {
-                        return '**[Formula matematica]**\n```\n' + mathContent.replace(/\\/g, '') + '\n```';
-                    })
-                    .replace(/\$\$\s*([\s\S]*?)\s*\$\$/g, '**[Formula: $1]**')
-                    .replace(/\$([^$\n]+)\$/g, '*[Formula: $1]*');
-                return marked.parse(cleanedContent);
-            } catch (error2) {
-                console.warn('Errore parser semplificato:', error2);
-                return `<div style="background: #fff3cd; padding: 0.5em; border-radius: 4px; margin: 0.5em 0;"><small>⚠️ Errore sintassi markdown</small></div><pre style="font-size: 0.8em; background: #f8f9fa; padding: 0.5em; border-radius: 4px;">${escapeHtml(content.substring(0, 200))}...</pre>`;
+          function parseWithBasicFallback(content) {
+            console.log('🔧 Usando fallback básico con syntax highlighting...');
+            
+            // Very basic markdown parsing without math
+            let html = content
+                // Code blocks - preserve language hints for highlighting
+                .replace(/```(\w+)?\s*\n([\s\S]*?)\n```/g, function(match, lang, code) {
+                    const langClass = lang ? ` class="language-${lang}"` : '';
+                    return `<pre><code${langClass}>${code}</code></pre>`;
+                })
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold and italic
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Remove math expressions that can't be rendered
+                .replace(/\$\$[\s\S]*?\$\$/g, '<span style="background:#ffe6e6;padding:2px 4px;border-radius:3px;">[Formula matematica]</span>')
+                .replace(/\$([^$\n]+)\$/g, '<span style="background:#ffe6e6;padding:2px 4px;border-radius:3px;">[Math: $1]</span>')
+                // Line breaks
+                .replace(/\n\n+/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrap in paragraphs
+            if (!html.includes('<h') && !html.includes('<p>')) {
+                html = '<p>' + html + '</p>';
             }
+            
+            // Apply syntax highlighting to code blocks
+            try {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                
+                tempDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                    block.classList.add('hljs-enhanced');
+                });
+                
+                html = tempDiv.innerHTML;
+                console.log('✅ Syntax highlighting applicato al fallback');
+            } catch (highlightError) {
+                console.warn('⚠️ Errore nell\'applicazione del syntax highlighting:', highlightError);
+            }
+              return html;
         }
         
         function escapeHtml(text) {
@@ -207,9 +365,7 @@
                     preview.innerHTML = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
                 }
             });
-        });
-
-        // Aggiornamento real-time argomenti
+        });        // Aggiornamento real-time argomenti
         socket.on('update_argomenti', function(data) {
             if (data.id_materia == materiaId) {
                 fetch(`/api/argomenti/${materiaId}`)
@@ -217,42 +373,63 @@
                     .then(argomenti => {
                         const container = document.getElementById('argomenti-list');
                         container.innerHTML = '';
-                          argomenti.forEach(argomento => {
-                            const link = document.createElement('a');
-                            link.href = `/argomento/${argomento.id}`;
-                            link.className = 'argomento-link';
-                            
+                        
+                        // Reset allArgomenti array
+                        allArgomenti = [];
+                          
+                        argomenti.forEach(argomento => {
                             const card = document.createElement('div');
                             card.className = 'argomento-card';
                             card.dataset.id = argomento.id;
-                            card.style.borderLeft = `4px solid ${argomento.colore}`;
-                            
+                            card.dataset.href = `/argomento/${argomento.id}`;
+                            card.dataset.title = argomento.titolo;
+                            card.dataset.content = argomento.contenuto_md || '';
+                            card.dataset.etichetta = argomento.etichetta_preparazione.replace(/ /g, '-');
+                            card.style.borderLeft = `4px solid ${argomento.colore}`;                              
                             let preview = '';
                             if (argomento.contenuto_md) {
-                                preview = `<div class="argomento-preview">${argomento.contenuto_md.substring(0, 200)}...</div>`;
+                                // Clean the preview text to remove markdown artifacts and special characters
+                                const cleanText = cleanPreviewText(argomento.contenuto_md.substring(0, 200));
+                                preview = `<div class="argomento-preview">${escapeHtml(cleanText)}...</div>`;
                             }
                             
                             card.innerHTML = `
                                 <div class="argomento-header">
-                                    <h3>${argomento.titolo}</h3>
+                                    <h3 class="argomento-title">${argomento.titolo}</h3>
                                     <span class="etichetta etichetta-${argomento.etichetta_preparazione.replace(/ /g, '-')}">${argomento.etichetta_preparazione}</span>
                                 </div>
+                                <div class="search-result" style="display: none;"></div>
                                 ${preview}
-                            `;
+                            `;                            
+                            container.appendChild(card);
                             
-                            link.appendChild(card);
-                            container.appendChild(link);
+                            // Add to allArgomenti array for search functionality
+                            allArgomenti.push({
+                                element: card,
+                                id: argomento.id,
+                                title: argomento.titolo || '',
+                                content: argomento.contenuto_md || '',
+                                etichetta: argomento.etichetta_preparazione.replace(/ /g, '-'),
+                                originalTitle: argomento.titolo,
+                                originalPreview: preview
+                            });
                         });
+                        
+                        // Re-apply current search/filters after update
+                        if (document.getElementById('search-title').value || 
+                            document.getElementById('search-content').value || 
+                            document.getElementById('filter-etichetta').value) {
+                            performSearch();
+                        }
                     });
             }
-        });        // Click su argomento per aprire dettagli (non più necessario, ora sono link)
-        // document.addEventListener('click', function(e) {
-        //     const card = e.target.closest('.argomento-card');
-        //     if (card) {
-        //         const argomentoId = card.dataset.id;
-        //         window.location.href = `/argomento/${argomentoId}`;
-        //     }
-        // });// Funzione per gestire il contrasto del titolo della materia
+        });// Click su argomento per aprire dettagli
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.argomento-card');
+            if (card && card.dataset.href) {
+                window.location.href = card.dataset.href;
+            }
+        });// Funzione per gestire il contrasto del titolo della materia
         function setTitleContrast() {
             const materiaColor = '{{ materia.colore }}';
             const title = document.getElementById('materia-title');
@@ -294,9 +471,215 @@
                 title.classList.add('materia-title-colored');
             }
         }
+          // Applica il contrasto al caricamento della pagina
+        setTitleContrast();        // Search and filter functionality
+        let searchTimeout;
+        let allArgomenti = [];
         
-        // Applica il contrasto al caricamento della pagina
-        setTitleContrast();
+        // Store original data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store all argomenti data for filtering
+            document.querySelectorAll('.argomento-card').forEach(function(card) {
+                allArgomenti.push({
+                    element: card,
+                    id: card.dataset.id,
+                    title: card.dataset.title || '',
+                    content: card.dataset.content || '',
+                    etichetta: card.dataset.etichetta || '',
+                    originalTitle: card.querySelector('.argomento-title').innerHTML,
+                    originalPreview: card.querySelector('.argomento-preview') ? 
+                        card.querySelector('.argomento-preview').innerHTML : ''
+                });
+            });
+            
+            // Handle existing preview texts that are already loaded in the template
+            document.querySelectorAll('.argomento-preview').forEach(function(element) {
+                const originalText = element.textContent.replace('...', '');
+                if (originalText) {
+                    const cleanedText = cleanPreviewText(originalText);
+                    const truncatedText = cleanedText.length > 200 ? cleanedText.substring(0, 200) + '...' : cleanedText + '...';
+                    element.textContent = truncatedText; // Use textContent to prevent HTML interpretation
+                }
+            });
+            
+            // Setup search event listeners
+            setupSearchListeners();
+        });
+        
+        function setupSearchListeners() {
+            const searchTitle = document.getElementById('search-title');
+            const searchContent = document.getElementById('search-content');
+            const filterEtichetta = document.getElementById('filter-etichetta');
+            const clearFilters = document.getElementById('clear-filters');
+            
+            // Search with debounce
+            function debounceSearch() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 300);
+            }
+            
+            searchTitle.addEventListener('input', debounceSearch);
+            searchContent.addEventListener('input', debounceSearch);
+            filterEtichetta.addEventListener('change', performSearch);
+            
+            clearFilters.addEventListener('click', function() {
+                searchTitle.value = '';
+                searchContent.value = '';
+                filterEtichetta.value = '';
+                performSearch();
+            });
+        }
+        
+        function performSearch() {
+            const titleQuery = document.getElementById('search-title').value.toLowerCase().trim();
+            const contentQuery = document.getElementById('search-content').value.toLowerCase().trim();
+            const etichettaFilter = document.getElementById('filter-etichetta').value;
+            
+            let visibleCount = 0;
+            
+            allArgomenti.forEach(function(argomento) {
+                let isVisible = true;
+                
+                // Title search
+                if (titleQuery && !argomento.title.toLowerCase().includes(titleQuery)) {
+                    isVisible = false;
+                }
+                
+                // Content search
+                if (contentQuery) {
+                    const cleanContent = cleanPreviewText(argomento.content).toLowerCase();
+                    if (!cleanContent.includes(contentQuery)) {
+                        isVisible = false;
+                    }
+                }
+                
+                // Etichetta filter
+                if (etichettaFilter && argomento.etichetta !== etichettaFilter) {
+                    isVisible = false;
+                }
+                
+                // Show/hide element
+                if (isVisible) {
+                    argomento.element.style.display = 'block';
+                    visibleCount++;
+                    
+                    // Highlight matches
+                    highlightMatches(argomento, titleQuery, contentQuery);
+                    
+                    // Show search result snippet if content search
+                    if (contentQuery) {
+                        showSearchSnippet(argomento, contentQuery);
+                    } else {
+                        hideSearchSnippet(argomento);
+                    }
+                } else {
+                    argomento.element.style.display = 'none';
+                }
+            });
+            
+            // Update results info
+            updateSearchResults(visibleCount, allArgomenti.length);
+        }
+        
+        function highlightMatches(argomento, titleQuery, contentQuery) {
+            const titleElement = argomento.element.querySelector('.argomento-title');
+            const previewElement = argomento.element.querySelector('.argomento-preview');
+            
+            // Reset to original content
+            titleElement.innerHTML = argomento.originalTitle;
+            if (previewElement) {
+                previewElement.innerHTML = argomento.originalPreview;
+            }
+            
+            // Highlight title matches
+            if (titleQuery) {
+                const highlightedTitle = highlightText(argomento.originalTitle, titleQuery);
+                titleElement.innerHTML = highlightedTitle;
+            }
+            
+            // Highlight content matches in preview
+            if (contentQuery && previewElement) {
+                const originalText = previewElement.textContent || '';
+                const highlightedText = highlightText(originalText, contentQuery);
+                previewElement.innerHTML = highlightedText;
+            }
+        }
+        
+        function highlightText(text, query) {
+            if (!query || !text) return text;
+            
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        function showSearchSnippet(argomento, query) {
+            const searchResultElement = argomento.element.querySelector('.search-result');
+            const cleanContent = cleanPreviewText(argomento.content);
+            
+            if (!cleanContent) {
+                hideSearchSnippet(argomento);
+                return;
+            }
+            
+            // Find the position of the query in the content
+            const lowerContent = cleanContent.toLowerCase();
+            const queryPos = lowerContent.indexOf(query.toLowerCase());
+            
+            if (queryPos === -1) {
+                hideSearchSnippet(argomento);
+                return;
+            }
+            
+            // Extract snippet around the found text
+            const snippetStart = Math.max(0, queryPos - 50);
+            const snippetEnd = Math.min(cleanContent.length, queryPos + query.length + 50);
+            let snippet = cleanContent.substring(snippetStart, snippetEnd);
+            
+            // Add ellipsis if needed
+            if (snippetStart > 0) snippet = '...' + snippet;
+            if (snippetEnd < cleanContent.length) snippet = snippet + '...';
+            
+            // Highlight the query in the snippet
+            const highlightedSnippet = highlightText(snippet, query);
+            
+            searchResultElement.innerHTML = `
+                <div class="search-snippet">
+                    <strong>Trovato in:</strong> ${highlightedSnippet}
+                </div>
+            `;
+            searchResultElement.style.display = 'block';
+        }
+        
+        function hideSearchSnippet(argomento) {
+            const searchResultElement = argomento.element.querySelector('.search-result');
+            searchResultElement.style.display = 'none';
+        }
+        
+        function updateSearchResults(visibleCount, totalCount) {
+            // Remove existing results info
+            const existingInfo = document.querySelector('.search-results-info');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+            
+            // Add new results info
+            if (visibleCount !== totalCount) {
+                const resultsInfo = document.createElement('div');
+                resultsInfo.className = 'search-results-info';
+                resultsInfo.innerHTML = `
+                    <span class="results-count">
+                        Mostrati ${visibleCount} di ${totalCount} argomenti
+                    </span>
+                `;
+                
+                const argomentiList = document.getElementById('argomenti-list');
+                argomentiList.parentNode.insertBefore(resultsInfo, argomentiList);
+            }
+        }
     </script>
 </body>
 </html>

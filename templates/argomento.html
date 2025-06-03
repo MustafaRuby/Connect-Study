@@ -1,11 +1,42 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ argomento.titolo }} - {{ materia.nome }}</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">    <title>{{ argomento.titolo }} - {{ materia.nome }}</title>
+    <link rel="stylesheet" href="/static/style.css">    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <!-- Highlight.js CSS - VS Code Dark theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
+    
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- KaTeX JavaScript -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+    <!-- KaTeX auto-render extension -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    
+    <!-- Highlight.js Core + Popular Languages -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/php.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/csharp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/rust.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/kotlin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/swift.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/ruby.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/perl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/r.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/matlab.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/shell.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/powershell.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/dockerfile.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/xml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/json.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -210,29 +241,68 @@
                 return '';
             }
             
-            console.log('🔍 Inizio parsing del contenuto...');
+            console.log('🔍 Inizio parsing del contenuto con KaTeX e Highlight.js...');
             
-            // STEP 1: Rilevamento preventivo di sintassi problematica
-            const hasProblematicSyntax = 
-                content.includes('```math') || 
-                /\$\$[\s\S]*?\$\$/g.test(content) ||
-                content.includes('\\int') ||
-                content.includes('\\sum') ||
-                content.includes('\\frac');
-            
-            if (hasProblematicSyntax) {
-                console.warn('⚠️ RILEVATA SINTASSI PROBLEMATICA - Uso pulizia preventiva');
-                return parseWithForcedCleanup(content);
-            }
-            
-            // STEP 2: Tentativo parsing normale
             try {
-                const result = marked.parse(content);
-                console.log('✅ Parser normale riuscito');
-                return result;
+                // Step 1: Parse markdown content
+                const htmlContent = marked.parse(content);
+                
+                // Step 2: Create temporary container for KaTeX rendering
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlContent;
+                
+                // Step 3: Apply syntax highlighting with highlight.js
+                console.log('🎨 Applicando syntax highlighting...');
+                tempDiv.querySelectorAll('pre code').forEach((block) => {
+                    // Rimuovi eventuali classi esistenti di highlight.js
+                    block.className = block.className.replace(/hljs\S*/g, '');
+                    
+                    // Applica la syntax highlighting
+                    hljs.highlightElement(block);
+                    
+                    // Aggiungi una classe per lo styling personalizzato
+                    block.classList.add('hljs-enhanced');
+                });
+                
+                // Step 4: Render math with KaTeX
+                console.log('🧮 Rendering formule matematiche...');
+                renderMathInElement(tempDiv, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\[", right: "\\]", display: true},
+                        {left: "$", right: "$", display: false},
+                        {left: "\\(", right: "\\)", display: false}
+                    ],
+                    throwOnError: false,
+                    errorColor: '#cc0000',
+                    strict: false,
+                    trust: false,
+                    macros: {
+                        "\\f": "#1f(#2)"
+                    }
+                });
+                
+                console.log('✅ Parser con KaTeX e Highlight.js riuscito');
+                return tempDiv.innerHTML;
+                
             } catch (error) {
-                console.error('❌ Parser normale fallito:', error);
-                return parseWithForcedCleanup(content);
+                console.error('❌ Errore nel parsing avanzato:', error);
+                // Fallback to basic markdown without math but with highlighting
+                try {
+                    const basicHtml = marked.parse(content);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = basicHtml;
+                      // Apply only syntax highlighting in fallback
+                    tempDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                        block.classList.add('hljs-enhanced');
+                    });
+                    
+                    return tempDiv.innerHTML;
+                } catch (fallbackError) {
+                    console.error('❌ Anche il fallback è fallito:', fallbackError);
+                    return parseWithBasicFallback(content);
+                }
             }
         }
         
@@ -502,6 +572,54 @@
                     }
                 });
             });
+        }
+          function parseWithBasicFallback(content) {
+            console.log('🔧 Usando fallback básico con syntax highlighting...');
+            
+            // Very basic markdown parsing without math
+            let html = content
+                // Code blocks - preserve language hints for highlighting
+                .replace(/```(\w+)?\s*\n([\s\S]*?)\n```/g, function(match, lang, code) {
+                    const langClass = lang ? ` class="language-${lang}"` : '';
+                    return `<pre><code${langClass}>${code}</code></pre>`;
+                })
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold and italic
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Remove math expressions that can't be rendered
+                .replace(/\$\$[\s\S]*?\$\$/g, '<span style="background:#ffe6e6;padding:2px 4px;border-radius:3px;">[Formula matematica]</span>')
+                .replace(/\$([^$\n]+)\$/g, '<span style="background:#ffe6e6;padding:2px 4px;border-radius:3px;">[Math: $1]</span>')
+                // Line breaks
+                .replace(/\n\n+/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrap in paragraphs
+            if (!html.includes('<h') && !html.includes('<p>')) {
+                html = '<p>' + html + '</p>';
+            }
+            
+            // Apply syntax highlighting to code blocks
+            try {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                
+                tempDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                    block.classList.add('hljs-enhanced');
+                });
+                
+                html = tempDiv.innerHTML;
+                console.log('✅ Syntax highlighting applicato al fallback');
+            } catch (highlightError) {
+                console.warn('⚠️ Errore nell\'applicazione del syntax highlighting:', highlightError);
+            }
+            
+            return html;
         }
     </script>
 </body>
