@@ -1,0 +1,46 @@
+/**
+* Button components - All button styles and variants
+* ConnectStudy Application
+*/
+
+.add-btn, .cancel-btn {
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.8em 1.8em;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #4f8cff 0%, #6edb8f 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(79, 140, 255, 0.3);
+}
+
+.add-btn:hover {
+    background: linear-gradient(135deg, #6edb8f 0%, #4f8cff 100%);
+    box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.add-btn:active {
+    transform: translateY(0);
+}
+
+.cancel-btn {
+    background: #fff;
+    color: #4f8cff;
+    border: 2px solid #4f8cff;
+    margin-left: 1em;
+}
+
+.cancel-btn:hover {
+    background: #4f8cff;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(79, 140, 255, 0.2);
+}

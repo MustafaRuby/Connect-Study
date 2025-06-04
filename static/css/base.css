@@ -1,0 +1,118 @@
+/**
+* Base styles - Typography, layout and global styles
+* ConnectStudy Application
+*/
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(120deg, #f0f4ff 0%, #e6e9f0 100%);
+    margin: 0;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2em 2em 1em 2em;
+}
+
+h1 {
+    color: #2a3a5c;
+    margin: 0;
+    font-size: 2.2em;
+    letter-spacing: 1px;
+}
+
+/* Menu contestuale per le materie */
+.materia-menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px #4f8cff33;
+    padding: 0.5em 0.7em;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    gap: 0.3em;
+    border: 1px solid #e0e7ef;
+    animation: fadeIn 0.15s;
+}
+
+.materia-menu button {
+    background: none;
+    border: none;
+    color: #2a3a5c;
+    font-size: 1em;
+    padding: 0.5em 0.7em;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.materia-menu button:hover {
+    background: #f0f4ff;
+    color: #4f8cff;
+}
+
+/* Breadcrumb navigation */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+
+.breadcrumb-link {
+    color: #4f8cff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+    color: #2a3a5c;
+}
+
+.breadcrumb-separator {
+    color: #999;
+}
+
+.breadcrumb-current {
+    color: #2a3a5c;
+    font-weight: 600;
+}
+
+/* Links */
+.materia-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Placeholder for drag & drop */
+.placeholder {
+    background: #f8f9fa !important;
+    border: 2px dashed #cfd8dc;
+    color: transparent;
+    box-shadow: none;
+}
+
+.placeholder::before {
+    display: none;
+}
+
+/* Global utility classes */
+.hidden {
+    display: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.15s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}

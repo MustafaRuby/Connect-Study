@@ -1,0 +1,182 @@
+/**
+* Animations and transitions - Keyframes, transitions and motion effects
+* ConnectStudy Application
+*/
+
+/* Global animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: none; 
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.15s;
+}
+
+.popup-bg {
+    animation: fadeIn 0.3s ease;
+}
+
+.popup-large {
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Card hover animations */
+.materia-card {
+    transition: all 0.2s ease;
+}
+
+.materia-card:hover {
+    transform: translateY(-3px);
+}
+
+.materia-card.dragging {
+    transform: scale(1.05) rotate(2deg);
+}
+
+.argomento-card {
+    transition: all 0.2s;
+}
+
+.argomento-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Button animations */
+.add-btn, .cancel-btn {
+    transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+}
+
+.cancel-btn:hover {
+    transform: translateY(-1px);
+}
+
+.action-btn {
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* Form element animations */
+.form-group input, .form-group select, .form-group textarea {
+    transition: all 0.3s ease;
+}
+
+.search-input, .filter-select {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input:focus, .filter-select:focus {
+    transform: translateY(-1px);
+}
+
+/* File upload animations */
+.file-upload-section {
+    transition: all 0.3s ease;
+}
+
+.file-upload-section:hover {
+    transform: translateY(-2px);
+}
+
+.file-upload-section::before {
+    transition: left 0.5s ease;
+}
+
+.file-input-display {
+    transition: all 0.3s ease;
+}
+
+.file-input-wrapper:hover .file-input-display {
+    transform: translateY(-1px);
+}
+
+/* Menu and modal animations */
+.materia-menu {
+    animation: fadeIn 0.15s;
+}
+
+.tab-btn {
+    transition: all 0.3s ease;
+}
+
+/* Search highlighting animations */
+.highlight-match {
+    transition: all 0.2s ease;
+}
+
+.highlight-match.current-match {
+    transform: scale(1.05);
+}
+
+/* Radio option animations */
+.radio-option {
+    transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+    transform: translateX(4px);
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    transform: translateX(8px);
+}
+
+.radio-option::before {
+    transition: left 0.4s ease;
+}
+
+/* Clear button animations */
+.clear-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clear-btn:hover {
+    transform: translateY(-2px);
+}
+
+.clear-btn:active {
+    transform: translateY(-1px);
+}
+
+.clear-btn::after {
+    transition: left 0.5s;
+}
+
+/* Navigation button animations */
+.nav-btn {
+    transition: all 0.2s ease;
+}
+
+/* Markdown editor animations */
+.markdown-editor {
+    transition: border-color 0.3s ease;
+}

@@ -1,0 +1,249 @@
+/**
+* Popup and Modal components - Dialogs, overlays, and context menus
+* ConnectStudy Application
+*/
+
+/* Popup */
+.popup-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44, 62, 80, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.popup {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px #4f8cff33;
+    padding: 2em 2.5em 1.5em 2.5em;
+    min-width: 320px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.popup h2 {
+    margin-top: 0;
+    color: #2a3a5c;
+    font-size: 1.5em;
+    margin-bottom: 1em;
+}
+
+.popup input[type="text"] {
+    padding: 0.7em;
+    font-size: 1.1em;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    margin-bottom: 1em;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.popup input[type="text"]:focus {
+    border: 1.5px solid #4f8cff;
+}
+
+.popup input[type="color"] {
+    margin-left: 0.5em;
+    vertical-align: middle;
+}
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1em;
+}
+
+/* Large Popup for Complex Forms */
+.popup-large {
+    min-width: 600px;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Header del popup */
+.popup-large h2 {
+    margin: 0;
+    padding: 1.5em 2em 1em 2em;
+    color: #2a3a5c;
+    font-size: 1.5em;
+    border-bottom: 1px solid #e8f2ff;
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+}
+
+/* Contenuto scrollabile del popup */
+.popup-large form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    padding: 1em 2em 1.5em 2em;
+    flex: 1;
+}
+
+/* Actions del popup (fisse in basso) */
+.popup-large .popup-actions {
+    margin: 0;
+    padding: 1em 2em 1.5em 2em;
+    border-top: 1px solid #e8f2ff;
+    background: #fff;
+}
+
+/* Scrollbar styling for the popup */
+.popup-large form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.popup-large form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.popup-large form::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.popup-large form::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+/* Modal delete confirmation styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.3em;
+}
+
+.modal-content p {
+    margin: 0 0 25px 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+}
+
+/* Menu contestuale per le materie */
+.materia-menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px #4f8cff33;
+    padding: 0.5em 0.7em;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    gap: 0.3em;
+    border: 1px solid #e0e7ef;
+    animation: fadeIn 0.15s;
+}
+
+.materia-menu button {
+    background: none;
+    border: none;
+    color: #2a3a5c;
+    font-size: 1em;
+    padding: 0.5em 0.7em;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.materia-menu button:hover {
+    background: #f0f4ff;
+    color: #4f8cff;
+}
+
+/* Placeholder for drag and drop */
+.placeholder {
+    background: #f8f9fa !important;
+    border: 2px dashed #cfd8dc;
+    color: transparent;
+    box-shadow: none;
+}
+
+.placeholder::before {
+    display: none;
+}
+
+/* Animation for modal appearance */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

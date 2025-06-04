@@ -97,6 +97,21 @@ def update_argomento_content(id, contenuto_md):
     conn.commit()
     conn.close()
 
+def update_argomento_content_and_label(id, contenuto_md, etichetta_preparazione):
+    """Aggiorna il contenuto markdown e l'etichetta di preparazione di un argomento"""
+    conn = get_db_connection()
+    conn.execute('UPDATE argomenti SET contenuto_md = ?, etichetta_preparazione = ? WHERE id = ?', 
+                (contenuto_md, etichetta_preparazione, id))
+    conn.commit()
+    conn.close()
+
+def delete_argomento(id):
+    """Elimina un argomento"""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM argomenti WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+
 # === ALLEGATI OPERATIONS ===
 
 def get_allegati_by_argomento(id_argomento):

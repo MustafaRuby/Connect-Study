@@ -1,0 +1,277 @@
+/**
+* Card components - Materia cards, argomento cards and related styling
+* ConnectStudy Application
+*/
+
+.materie-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.8em;
+    padding: 0 2em 2em 2em;
+}
+
+.materia-card {
+    padding: 1.8em 2.5em;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.2em;
+    cursor: grab;
+    min-width: 160px;
+    min-height: 80px;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.15);
+    user-select: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.materia-card.light-bg {
+    color: #2a3a5c;
+}
+
+.materia-card.dark-bg {
+    color: #ffffff;
+}
+
+.materia-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.materia-card:hover {
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.25);
+    transform: translateY(-3px);
+}
+
+.materia-card.dragging {
+    opacity: 0.6;
+    box-shadow: 0 8px 32px rgba(79, 140, 255, 0.4);
+    transform: scale(1.05) rotate(2deg);
+}
+
+.materia-card span {
+    position: relative;
+    z-index: 1;
+}
+
+.materia-card.light-bg span {
+    text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.materia-card.dark-bg span {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.materia-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Titolo materia con contrasto automatico */
+.materia-title-light {
+    color: #2a3a5c !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.materia-title-dark {
+    color: #2a3a5c !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.materia-title-colored {
+    /* Il colore verrà impostato dinamicamente */
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+/* Placeholder for drag and drop */
+.placeholder {
+    background: #f8f9fa !important;
+    border: 2px dashed #cfd8dc;
+    color: transparent;
+    box-shadow: none;
+}
+
+.placeholder::before {
+    display: none;
+}
+
+/* Argomento cards */
+.argomento-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.argomento-card:hover {
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.argomento-card[data-href] {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.argomento-card[data-href]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.argomento-card[data-href]:active {
+    transform: translateY(0);
+}
+
+.argomento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.argomento-header h3 {
+    margin: 0;
+    color: #2a3a5c;
+    font-size: 1.3em;
+}
+
+.etichetta {
+    padding: 0.3em 0.8em;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: capitalize;
+    margin: 0.1em;
+}
+
+.etichetta-scarsa-preparazione {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.etichetta-media-preparazione {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.etichetta-buona-preparazione {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.argomento-preview {
+    color: #666;
+    font-size: 0.95em;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-height: 3.6em; /* Limita a circa 3 righe */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    /* Remove any potential markdown artifacts */
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Fix per rimuovere decorazioni hypertext nelle preview */
+.argomento-preview,
+.argomento-preview *,
+.preview-text,
+.preview-text * {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+    text-decoration-color: transparent !important;
+    text-underline-offset: 0 !important;
+    text-decoration-thickness: 0 !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+    background: transparent !important;
+}
+
+/* Regole aggiuntive per elementi specifici che potrebbero causare linee */
+.argomento-preview code,
+.argomento-preview pre,
+.argomento-preview span,
+.argomento-preview div,
+.argomento-preview p,
+.argomento-preview strong,
+.argomento-preview em,
+.argomento-preview b,
+.argomento-preview i,
+.preview-text code,
+.preview-text pre,
+.preview-text span,
+.preview-text div,
+.preview-text p,
+.preview-text strong,
+.preview-text em,
+.preview-text b,
+.preview-text i {
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+/* Rimuovi pseudo-elementi che potrebbero creare linee */
+.argomento-preview::before,
+.argomento-preview::after,
+.preview-text::before,
+.preview-text::after,
+.argomento-preview *::before,
+.argomento-preview *::after,
+.preview-text *::before,
+.preview-text *::after {
+    content: none !important;
+    display: none !important;
+    border: none !important;
+    background: none !important;
+}
+
+/* Enhanced argomento card for search context */
+.argomento-card {
+    transition: all 0.3s ease, box-shadow 0.2s ease;
+}
+
+/* Search state indicators */
+.argomento-card[data-search-match="true"] {
+    background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+    border: 1px solid #e3f2fd;
+    box-shadow: 0 4px 15px rgba(79, 140, 255, 0.15);
+}
+
+.argomento-card[data-search-match="true"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f8cff 0%, #6edb8f 100%);
+    border-radius: 10px 10px 0 0;
+}

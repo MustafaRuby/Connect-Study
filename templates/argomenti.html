@@ -1,14 +1,34 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">    <title>{{ materia.nome }} - Argomenti</title>
-    <link rel="stylesheet" href="/static/style.css">    <!-- KaTeX CSS -->
+    <meta charset="UTF-8">    <title>{{ materia.nome }} - Argomenti</title>    <!-- Modular CSS imports -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <link rel="stylesheet" href="/static/css/buttons.css">
+    <link rel="stylesheet" href="/static/css/cards.css">
+    <link rel="stylesheet" href="/static/css/modals.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="stylesheet" href="/static/css/search.css">
+    <link rel="stylesheet" href="/static/css/markdown.css">
+    <link rel="stylesheet" href="/static/css/allegati.css">
+    <link rel="stylesheet" href="/static/css/context-menu.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/argomenti-page.css"><!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
     <!-- Highlight.js CSS - VS Code Dark theme -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
-    
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>    <!-- CodeMirror for Markdown syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gfm/gfm.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
     
     <!-- KaTeX JavaScript -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
@@ -39,6 +59,27 @@
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/json.min.js"></script>
 </head>
 <body>
+    <!-- Context Menu per le card degli argomenti -->
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item" data-action="edit">
+            <span><img src="/static/icons/modify-icon.svg" width="16" height="16" style="vertical-align: middle;"> Modifica</span>
+        </div>
+        <div class="context-menu-item" data-action="delete">
+            <span><img src="/static/icons/delete-icon.svg" width="16" height="16" style="vertical-align: middle;"> Elimina</span>
+        </div>
+    </div>
+
+    <!-- Modal di conferma eliminazione -->    <div id="confirm-delete-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Elimina argomento</h3>
+            <p>Per eliminare <b id="delete-argomento-title"></b>, scrivi il titolo esatto qui sotto e conferma:</p>
+            <input type="text" id="delete-argomento-input" placeholder="Titolo argomento">
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn" class="btn btn-danger">Elimina</button>
+                <button id="cancel-delete-btn" class="btn btn-secondary">Annulla</button>
+            </div>
+        </div>
+    </div>
     <div class="header">
         <div class="breadcrumb">
             <a href="/" class="breadcrumb-link">Materie</a>
@@ -71,10 +112,9 @@
             </div>
             <button id="clear-filters" class="clear-btn">Pulisci filtri</button>
         </div>
-    </div>
-
-    <div id="argomenti-list" class="argomenti-list">
-        {% for argomento in argomenti %}        <div class="argomento-card" data-id="{{ argomento.id }}" data-href="/argomento/{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}" data-title="{{ argomento.titolo|e }}" data-content="{{ argomento.contenuto_md|e }}" data-etichetta="{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
+    </div>    <div id="argomenti-list" class="argomenti-list">
+        {% for argomento in argomenti %}
+        <div class="argomento-card" data-id="{{ argomento.id }}" data-href="/argomento/{{ argomento.id }}" style="border-left: 4px solid {{ argomento.colore }}" data-title="{{ argomento.titolo|e }}" data-content="{{ argomento.contenuto_md|e }}" data-etichetta="{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
             <div class="argomento-header">
                 <h3 class="argomento-title">{{ argomento.titolo }}</h3>
                 <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
@@ -113,23 +153,28 @@
                         <option value="media preparazione">Media preparazione</option>
                         <option value="buona preparazione">Buona preparazione</option>
                     </select>
-                </div>
-                  <div class="form-group">
+                </div>                  <div class="form-group">
                     <label for="contenuto_md">Contenuto (Markdown):</label>
                     <div class="markdown-editor">
                         <div class="editor-tabs">
                             <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
                             <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
                         </div>
-                        <textarea name="contenuto_md" id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown..." rows="10"></textarea>
+                        <textarea name="contenuto_md" id="contenuto_md_add" placeholder="Inserisci il contenuto in formato Markdown..." rows="10"></textarea>
                         <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
                     </div>
                 </div>
-                
-                <div class="form-group">
+                  <div class="form-group">
                     <label for="file_content">Carica file (opzionale):</label>
                     <div class="file-upload-section">
-                        <input type="file" name="file_content" id="file_content" accept=".docx,.pdf,.md" class="file-input">
+                        <div class="file-input-wrapper">
+                            <input type="file" name="file_content" id="file_content" accept=".docx,.pdf,.md" class="file-input-hidden">
+                            <div class="file-input-display" id="file_display">
+                                <span class="file-icon">📎</span>
+                                <span class="file-text">Scegli file o trascina qui</span>
+                                <span class="file-subtext">Clicca per selezionare un file dal tuo computer</span>
+                            </div>
+                        </div>
                         <div class="file-upload-info">
                             <small>Formati supportati: .docx, .pdf, .md</small>
                         </div>
@@ -159,11 +204,12 @@
                 <button type="button" id="closeArgomentoPopup" class="cancel-btn">Annulla</button>
             </div>
         </div>
-    </div>    <script>
+    </div>
+    
+    <script>
         const socket = io();
         const materiaId = {{ materia.id }};
-        
-        // Function to clean preview text from markdown artifacts
+          // Function to clean preview text from markdown artifacts
         function cleanPreviewText(text) {
             if (!text) return '';
             
@@ -185,6 +231,33 @@
                 .replace(/\s+/g, ' ')  // Multiple spaces to single space
                 .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF.,!?;:()\[\]{}'"«»""''–—]/g, '')  // Remove special chars but keep accented letters and basic punctuation
                 .trim();
+        }
+
+        // Enhanced function to create clean text preview
+        function createCleanPreview(content, maxLength = 200) {
+            if (!content) return '';
+            
+            const cleanText = cleanPreviewText(content);
+            if (cleanText.length <= maxLength) {
+                return cleanText;
+            }
+            
+            // Find a good breaking point near the max length
+            let breakPoint = maxLength;
+            const lastSpace = cleanText.lastIndexOf(' ', maxLength);
+            const lastPunctuation = Math.max(
+                cleanText.lastIndexOf('.', maxLength),
+                cleanText.lastIndexOf('!', maxLength),
+                cleanText.lastIndexOf('?', maxLength)
+            );
+            
+            if (lastPunctuation > maxLength - 50) {
+                breakPoint = lastPunctuation + 1;
+            } else if (lastSpace > maxLength - 30) {
+                breakPoint = lastSpace;
+            }
+            
+            return cleanText.substring(0, breakPoint).trim() + '...';
         }
 
         // Funzioni per parsing sicuro del markdown con KaTeX e Highlight.js
@@ -343,9 +416,7 @@
             } else {
                 fileModeSection.style.display = 'none';
             }
-        });
-
-        // Gestione tabs markdown
+        });        // Gestione tabs markdown
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const tab = this.dataset.tab;
@@ -354,18 +425,41 @@
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
-                const textarea = document.getElementById('contenuto_md');
+                const textarea = document.getElementById('contenuto_md_add');
                 const preview = document.getElementById('markdown-preview');
                 
+                if (!textarea || !preview) return;
+                
+                // Find CodeMirror wrapper
+                const codeMirrorWrapper = textarea.nextElementSibling;
+                
                 if (tab === 'editor') {
-                    textarea.style.display = 'block';
-                    preview.style.display = 'none';                } else {
-                    textarea.style.display = 'none';
+                    if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                        codeMirrorWrapper.style.display = 'block';
+                        // Refresh CodeMirror when shown
+                        const cm = codeMirrorWrapper.CodeMirror;
+                        if (cm) {
+                            setTimeout(() => cm.refresh(), 10);
+                        }
+                    } else {
+                        textarea.style.display = 'block';
+                    }
+                    preview.style.display = 'none';
+                } else {
+                    if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                        codeMirrorWrapper.style.display = 'none';
+                        // Get content from CodeMirror
+                        const cm = codeMirrorWrapper.CodeMirror;
+                        const content = cm ? cm.getValue() : textarea.value;
+                        preview.innerHTML = parseMarkdownSafely(content) || '<p>Nessun contenuto da visualizzare</p>';
+                    } else {
+                        textarea.style.display = 'none';
+                        preview.innerHTML = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
+                    }
                     preview.style.display = 'block';
-                    preview.innerHTML = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
                 }
             });
-        });        // Aggiornamento real-time argomenti
+        });// Aggiornamento real-time argomenti
         socket.on('update_argomenti', function(data) {
             if (data.id_materia == materiaId) {
                 fetch(`/api/argomenti/${materiaId}`)
@@ -385,12 +479,12 @@
                             card.dataset.title = argomento.titolo;
                             card.dataset.content = argomento.contenuto_md || '';
                             card.dataset.etichetta = argomento.etichetta_preparazione.replace(/ /g, '-');
-                            card.style.borderLeft = `4px solid ${argomento.colore}`;                              
-                            let preview = '';
+                            card.style.borderLeft = `4px solid ${argomento.colore}`;                                let preview = '';
+                            let cleanPreviewText = '';
                             if (argomento.contenuto_md) {
-                                // Clean the preview text to remove markdown artifacts and special characters
-                                const cleanText = cleanPreviewText(argomento.contenuto_md.substring(0, 200));
-                                preview = `<div class="argomento-preview">${escapeHtml(cleanText)}...</div>`;
+                                // Create clean preview text
+                                cleanPreviewText = createCleanPreview(argomento.contenuto_md);
+                                preview = `<div class="argomento-preview">${escapeHtml(cleanPreviewText)}</div>`;
                             }
                             
                             card.innerHTML = `
@@ -411,7 +505,7 @@
                                 content: argomento.contenuto_md || '',
                                 etichetta: argomento.etichetta_preparazione.replace(/ /g, '-'),
                                 originalTitle: argomento.titolo,
-                                originalPreview: preview
+                                originalPreview: cleanPreviewText
                             });
                         });
                         
@@ -474,37 +568,264 @@
           // Applica il contrasto al caricamento della pagina
         setTitleContrast();        // Search and filter functionality
         let searchTimeout;
-        let allArgomenti = [];
-        
-        // Store original data on page load
+        let allArgomenti = [];        // Store original data on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Store all argomenti data for filtering
+            // Initialize CodeMirror for markdown editing
+            let addArgomentoEditor;
+              function initCodeMirror() {
+                // Check if CodeMirror is available
+                if (typeof CodeMirror === 'undefined') {
+                    console.log('CodeMirror not yet loaded, retrying...');
+                    setTimeout(initCodeMirror, 100);
+                    return;
+                }
+                
+                const textareaAdd = document.getElementById('contenuto_md_add');
+                if (textareaAdd && !addArgomentoEditor) {                    addArgomentoEditor = CodeMirror.fromTextArea(textareaAdd, {
+                        mode: 'gfm',
+                        theme: 'monokai',
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        autoCloseBrackets: true,
+                        matchBrackets: true,
+                        styleActiveLine: true,
+                        placeholder: 'Inserisci il contenuto in formato Markdown...',
+                        extraKeys: {
+                            "Ctrl-Space": "autocomplete",
+                            "F11": function(cm) {
+                                cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                            },
+                            "Esc": function(cm) {
+                                if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                            }
+                        }
+                    });
+                      // Update textarea when CodeMirror changes
+                    addArgomentoEditor.on('change', function(cm) {
+                        textareaAdd.value = cm.getValue();
+                        // Trigger preview update if needed
+                        updateMarkdownPreview();
+                    });
+                }
+            }
+            
+            // Function to update markdown preview (can be extended if preview tabs are added)
+            function updateMarkdownPreview() {
+                // This function can be extended to show real-time preview
+                // For now, it ensures the textarea value is synced with CodeMirror
+                const textareaAdd = document.getElementById('contenuto_md_add');
+                if (textareaAdd && addArgomentoEditor) {
+                    textareaAdd.value = addArgomentoEditor.getValue();
+                }
+            }
+              // Initialize CodeMirror when popup is shown
+            const argomentoPopup = document.getElementById('argomentoPopup');
+            if (argomentoPopup) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            const isVisible = argomentoPopup.style.display !== 'none';
+                            if (isVisible) {
+                                setTimeout(initCodeMirror, 100); // Small delay to ensure DOM is ready
+                            }
+                        }
+                    });
+                });
+                observer.observe(argomentoPopup, { attributes: true });
+            }
+            
+            // Tab switching functionality for markdown editor
+            setupTabSwitching();
+        });
+        
+        function setupTabSwitching() {
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tab-btn')) {
+                    const clickedTab = e.target;
+                    const tabContainer = clickedTab.closest('.markdown-editor');
+                    const tabType = clickedTab.dataset.tab;
+                    
+                    if (!tabContainer) return;
+                    
+                    // Remove active class from all tabs in this container
+                    tabContainer.querySelectorAll('.tab-btn').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    clickedTab.classList.add('active');
+                    
+                    // Get editor elements
+                    const textarea = tabContainer.querySelector('textarea');
+                    const previewDiv = tabContainer.querySelector('.markdown-preview');
+                    
+                    // Find CodeMirror wrapper
+                    const codeMirrorWrapper = textarea.nextElementSibling;
+                    
+                    if (tabType === 'editor') {
+                        // Show editor, hide preview
+                        textarea.style.display = 'block';
+                        if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                            codeMirrorWrapper.style.display = 'block';
+                            // Refresh CodeMirror when shown
+                            const cm = codeMirrorWrapper.CodeMirror;
+                            if (cm) {
+                                setTimeout(() => cm.refresh(), 10);
+                            }
+                        }
+                        if (previewDiv) {
+                            previewDiv.style.display = 'none';
+                        }
+                    } else if (tabType === 'preview') {
+                        // Hide editor, show preview
+                        textarea.style.display = 'none';
+                        if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                            codeMirrorWrapper.style.display = 'none';
+                        }
+                        if (previewDiv) {
+                            previewDiv.style.display = 'block';
+                            // Update preview content
+                            const content = textarea.value;
+                            if (content.trim()) {
+                                // Simple markdown to HTML conversion for preview
+                                const htmlContent = convertMarkdownToHtml(content);
+                                previewDiv.innerHTML = htmlContent;
+                            } else {
+                                previewDiv.innerHTML = '<p class="text-muted">Nessun contenuto da visualizzare in anteprima</p>';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function convertMarkdownToHtml(markdown) {
+            // Simple markdown to HTML conversion
+            let html = markdown
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/__(.*?)__/gim, '<strong>$1</strong>')
+                // Italic
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                .replace(/_(.*?)_/gim, '<em>$1</em>')
+                // Code blocks
+                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                // Inline code
+                .replace(/`(.*?)`/gim, '<code>$1</code>')
+                // Lists
+                .replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>')
+                .replace(/^\- (.*$)/gim, '<ul><li>$1</li></ul>')
+                .replace(/^\d+\. (.*$)/gim, '<ol><li>$1</li></ol>')
+                // Line breaks
+                .replace(/\n/gim, '<br>');
+            
+            // Clean up nested lists
+            html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+              return html;
+        }
+        
+        // Store all argomenti data for filtering
             document.querySelectorAll('.argomento-card').forEach(function(card) {
+                const titleElement = card.querySelector('.argomento-title');
+                const previewElement = card.querySelector('.argomento-preview');
+                
+                // Create clean preview text for search
+                const rawContent = card.dataset.content || '';
+                const cleanPreview = createCleanPreview(rawContent);
+                
+                // Update preview element with clean text
+                if (previewElement && rawContent) {
+                    previewElement.textContent = cleanPreview;
+                }
+                
                 allArgomenti.push({
                     element: card,
                     id: card.dataset.id,
                     title: card.dataset.title || '',
-                    content: card.dataset.content || '',
+                    content: rawContent,
                     etichetta: card.dataset.etichetta || '',
-                    originalTitle: card.querySelector('.argomento-title').innerHTML,
-                    originalPreview: card.querySelector('.argomento-preview') ? 
-                        card.querySelector('.argomento-preview').innerHTML : ''
+                    originalTitle: titleElement ? titleElement.textContent : '',
+                    originalPreview: cleanPreview
                 });
             });
-            
-            // Handle existing preview texts that are already loaded in the template
+              // Handle existing preview texts that are already loaded in the template
             document.querySelectorAll('.argomento-preview').forEach(function(element) {
-                const originalText = element.textContent.replace('...', '');
-                if (originalText) {
-                    const cleanedText = cleanPreviewText(originalText);
-                    const truncatedText = cleanedText.length > 200 ? cleanedText.substring(0, 200) + '...' : cleanedText + '...';
-                    element.textContent = truncatedText; // Use textContent to prevent HTML interpretation
+                const card = element.closest('.argomento-card');
+                const rawContent = card ? card.dataset.content : '';
+                
+                if (rawContent) {
+                    const cleanPreview = createCleanPreview(rawContent);
+                    element.textContent = cleanPreview;
+                    
+                    // Update the stored preview in allArgomenti
+                    const argomento = allArgomenti.find(arg => arg.element === card);
+                    if (argomento) {
+                        argomento.originalPreview = cleanPreview;
+                    }
                 }
             });
-            
-            // Setup search event listeners
+              // Setup search event listeners
             setupSearchListeners();
-        });
+            
+            // Enhanced file input handling
+            const fileInput = document.getElementById('file_content');
+            const fileDisplay = document.getElementById('file_display');
+            
+            if (fileInput && fileDisplay) {
+                // Make the display area clickable
+                fileDisplay.addEventListener('click', function() {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    const wrapper = fileInput.closest('.file-input-wrapper');
+                    
+                    if (file) {
+                        wrapper.classList.add('has-file');
+                        fileDisplay.querySelector('.file-icon').textContent = '✅';
+                        fileDisplay.querySelector('.file-text').textContent = `File selezionato: ${file.name}`;
+                        fileDisplay.querySelector('.file-subtext').textContent = 'Clicca per cambiare file';
+                        fileInput.title = `File selezionato: ${file.name}`;
+                    } else {
+                        wrapper.classList.remove('has-file');
+                        fileDisplay.querySelector('.file-icon').textContent = '📎';
+                        fileDisplay.querySelector('.file-text').textContent = 'Scegli file o trascina qui';
+                        fileDisplay.querySelector('.file-subtext').textContent = 'Clicca per selezionare un file dal tuo computer';
+                        fileInput.title = '';
+                    }
+                });
+
+                // Drag and drop support
+                fileDisplay.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    fileDisplay.style.borderColor = '#4f8cff';
+                    fileDisplay.style.backgroundColor = '#f0f4ff';
+                });
+
+                fileDisplay.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    fileDisplay.style.borderColor = '';
+                    fileDisplay.style.backgroundColor = '';
+                });
+
+                fileDisplay.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    fileDisplay.style.borderColor = '';
+                    fileDisplay.style.backgroundColor = '';
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        
         
         function setupSearchListeners() {
             const searchTitle = document.getElementById('search-title');
@@ -579,28 +900,27 @@
             
             // Update results info
             updateSearchResults(visibleCount, allArgomenti.length);
-        }
-        
-        function highlightMatches(argomento, titleQuery, contentQuery) {
+        }          function highlightMatches(argomento, titleQuery, contentQuery) {
             const titleElement = argomento.element.querySelector('.argomento-title');
             const previewElement = argomento.element.querySelector('.argomento-preview');
             
             // Reset to original content
-            titleElement.innerHTML = argomento.originalTitle;
+            if (titleElement) {
+                titleElement.textContent = argomento.originalTitle || '';
+            }
             if (previewElement) {
-                previewElement.innerHTML = argomento.originalPreview;
+                previewElement.textContent = argomento.originalPreview || '';
             }
             
             // Highlight title matches
-            if (titleQuery) {
+            if (titleQuery && titleElement && argomento.originalTitle) {
                 const highlightedTitle = highlightText(argomento.originalTitle, titleQuery);
                 titleElement.innerHTML = highlightedTitle;
             }
             
             // Highlight content matches in preview
-            if (contentQuery && previewElement) {
-                const originalText = previewElement.textContent || '';
-                const highlightedText = highlightText(originalText, contentQuery);
+            if (contentQuery && previewElement && argomento.originalPreview) {
+                const highlightedText = highlightText(argomento.originalPreview, contentQuery);
                 previewElement.innerHTML = highlightedText;
             }
         }
@@ -615,9 +935,13 @@
         function escapeRegex(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
-        
-        function showSearchSnippet(argomento, query) {
+          function showSearchSnippet(argomento, query) {
             const searchResultElement = argomento.element.querySelector('.search-result');
+            
+            if (!searchResultElement) {
+                return;
+            }
+            
             const cleanContent = cleanPreviewText(argomento.content);
             
             if (!cleanContent) {
@@ -653,10 +977,11 @@
             `;
             searchResultElement.style.display = 'block';
         }
-        
-        function hideSearchSnippet(argomento) {
+          function hideSearchSnippet(argomento) {
             const searchResultElement = argomento.element.querySelector('.search-result');
-            searchResultElement.style.display = 'none';
+            if (searchResultElement) {
+                searchResultElement.style.display = 'none';
+            }
         }
         
         function updateSearchResults(visibleCount, totalCount) {
@@ -675,11 +1000,121 @@
                         Mostrati ${visibleCount} di ${totalCount} argomenti
                     </span>
                 `;
-                
-                const argomentiList = document.getElementById('argomenti-list');
+                  const argomentiList = document.getElementById('argomenti-list');
                 argomentiList.parentNode.insertBefore(resultsInfo, argomentiList);
             }
         }
+
+        // Context Menu Management
+        let currentContextCard = null;
+        const contextMenu = document.getElementById('context-menu');
+        const confirmModal = document.getElementById('confirm-delete-modal');
+
+        // Right-click on argomento cards
+        document.addEventListener('contextmenu', function(e) {
+            const card = e.target.closest('.argomento-card');
+            if (card) {
+                e.preventDefault();
+                currentContextCard = card;
+                showContextMenu(e.clientX, e.clientY);
+            }
+        });
+
+        // Hide context menu on click elsewhere
+        document.addEventListener('click', function(e) {
+            if (!contextMenu.contains(e.target)) {
+                hideContextMenu();
+            }
+        });        // Context menu actions
+        document.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const action = this.dataset.action;
+                if (currentContextCard) {
+                    if (action === 'edit') {
+                        const argomentoId = currentContextCard.dataset.id;
+                        window.location.href = `/argomento/${argomentoId}?edit=true`;
+                    } else if (action === 'delete') {
+                        showDeleteConfirmation();
+                    }
+                }
+                hideContextMenu();
+            });
+        });        // Delete confirmation modal
+        document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+            if (currentContextCard) {
+                const argomentoTitle = currentContextCard.querySelector('h3').textContent;
+                const inputValue = document.getElementById('delete-argomento-input').value.trim();
+                
+                if (inputValue !== argomentoTitle) {
+                    alert('Il titolo inserito non corrisponde.');
+                    return;
+                }
+                  const argomentoId = currentContextCard.dataset.id;
+                deleteArgomento(argomentoId)
+                    .then(() => {
+                        hideDeleteConfirmation();
+                    })
+                    .catch(() => {
+                        hideDeleteConfirmation();
+                    });
+            }
+        });
+
+        document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+            hideDeleteConfirmation();
+        });
+
+        function showContextMenu(x, y) {
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+            
+            // Ensure menu stays within viewport
+            const rect = contextMenu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                contextMenu.style.left = (x - rect.width) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                contextMenu.style.top = (y - rect.height) + 'px';
+            }
+        }        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+        }function showDeleteConfirmation() {
+            const argomentoTitle = currentContextCard.querySelector('h3').textContent;
+            document.getElementById('delete-argomento-title').textContent = argomentoTitle;
+            document.getElementById('delete-argomento-input').placeholder = argomentoTitle;
+            document.getElementById('delete-argomento-input').value = '';
+            confirmModal.style.display = 'flex';
+        }        function hideDeleteConfirmation() {
+            confirmModal.style.display = 'none';
+            document.getElementById('delete-argomento-input').value = '';
+            currentContextCard = null;
+        }function deleteArgomento(id) {
+            return fetch(`/delete_argomento/${id}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    // Remove card from DOM
+                    currentContextCard.remove();
+                    
+                    // Update allArgomenti array to remove deleted item
+                    const cardIndex = allArgomenti.findIndex(arg => arg.element === currentContextCard);
+                    if (cardIndex !== -1) {
+                        allArgomenti.splice(cardIndex, 1);
+                    }
+                    
+                    // Update search results
+                    const allCards = document.querySelectorAll('.argomento-card');
+                    updateSearchResults(allCards.length, allCards.length);
+                    return Promise.resolve();
+                } else {
+                    alert('Errore durante l\'eliminazione dell\'argomento');
+                    return Promise.reject(new Error('Delete failed'));
+                }
+            }).catch(error => {
+                console.error('Errore:', error);
+                alert('Errore durante l\'eliminazione dell\'argomento');                return Promise.reject(error);
+            });        }        // Enhanced file input handling - moved to main DOMContentLoaded block
     </script>
 </body>
 </html>

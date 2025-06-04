@@ -1,0 +1,494 @@
+/**
+* Form components - Input fields, selects, file upload, and markdown editor
+* ConnectStudy Application
+*/
+
+.form-group {
+    margin-bottom: 1.8em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.7em;
+    font-weight: 600;
+    color: #2a3a5c;
+    font-size: 1.05em;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.9em 1em;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 2px solid #e8f2ff;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #fff;
+    font-family: inherit;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+    background: #fafbff;
+}
+
+.form-group input:hover:not(:focus), .form-group select:hover:not(:focus), .form-group textarea:hover:not(:focus) {
+    border-color: #4f8cff;
+    background: #fafbff;
+}
+
+/* Stili specifici per input color */
+.form-group input[type="color"] {
+    height: 50px;
+    padding: 0.3em;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+/* Stili per select */
+.form-group select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1em top 50%;
+    background-repeat: no-repeat;
+    background-size: 1.2em auto;
+    appearance: none;
+    padding-right: 3em;
+}
+
+/* Editor Markdown */
+.markdown-editor {
+    border: 2px solid #e8f2ff;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    transition: border-color 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.markdown-editor:focus-within {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+}
+
+.editor-tabs {
+    display: flex;
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+    border-bottom: 1px solid #e8f2ff;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 1em 1.5em;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 0.95em;
+}
+
+.tab-btn.active {
+    background: #fff;
+    color: #4f8cff;
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #4f8cff;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(79, 140, 255, 0.08);
+    color: #4f8cff;
+}
+
+.markdown-editor textarea {
+    border: none;
+    resize: none;
+    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+    margin: 0;
+    padding: 1.2em;
+    font-size: 0.95em;
+    line-height: 1.6;
+    background: #fff;
+    flex: 1;
+    min-height: 400px;
+    width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    overflow-y: auto;
+}
+
+.markdown-editor textarea:focus {
+    outline: none;
+}
+
+/* Scrollbar personalizzata per il textarea dell'editor */
+.markdown-editor textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.markdown-preview {
+    padding: 1.5em;
+    background: #fff;
+    line-height: 1.6;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 400px;
+}
+
+/* Scrollbar personalizzata per il preview dell'editor */
+.markdown-preview::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+    color: #2a3a5c;
+}
+
+.markdown-preview code {
+    background: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.markdown-preview pre {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.markdown-preview blockquote {
+    border-left: 4px solid #4f8cff;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #666;
+}
+
+/* File Upload Styles */
+.file-upload-section {
+    border: 2px dashed #4f8cff;
+    border-radius: 12px;
+    padding: 2em;
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.file-upload-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(79, 140, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.file-upload-section:hover {
+    border-color: #6edb8f;
+    background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+}
+
+.file-upload-section:hover::before {
+    left: 100%;
+}
+
+/* Modern custom file input styling */
+.file-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.file-input-hidden {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-input-display {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.5em 2em;
+    border: 2px dashed #c7d2fe;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #6366f1;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+.file-icon {
+    font-size: 1.5em;
+    margin-bottom: 0.2em;
+}
+
+.file-text {
+    font-weight: 600;
+    color: #6366f1;
+    font-size: 1em;
+}
+
+.file-subtext {
+    font-size: 0.8em;
+    color: #8b5cf6;
+    opacity: 0.8;
+}
+
+.file-input-wrapper:hover .file-input-display {
+    border-color: #4f8cff;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e6e9f0 100%);
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.file-input-wrapper:focus-within .file-input-display {
+    border-color: #4f8cff;
+    border-style: solid;
+    box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+}
+
+.file-input-wrapper.has-file .file-input-display {
+    border-color: #10b981;
+    border-style: solid;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    color: #059669;
+}
+
+.file-input-wrapper.has-file .file-icon {
+    color: #059669;
+}
+
+.file-input-wrapper.has-file .file-text {
+    color: #059669;
+}
+
+.file-input-wrapper.has-file .file-subtext {
+    color: #10b981;
+}
+
+/* Legacy file input fallback */
+.file-input {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.2em 1.5em;
+    border: 2px dashed #c7d2fe;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    text-align: center;
+    color: #6366f1;
+    font-weight: 500;
+    box-sizing: border-box;
+}
+
+.file-input:hover {
+    border-color: #4f8cff;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e6e9f0 100%);
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.file-input:focus {
+    outline: none;
+    border-color: #4f8cff;
+    border-style: solid;
+    box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+}
+
+.file-upload-info {
+    margin-top: 1.2em;
+    padding: 1em 1.5em;
+    background: linear-gradient(135deg, rgba(79, 140, 255, 0.08) 0%, rgba(110, 219, 143, 0.08) 100%);
+    border-radius: 10px;
+    color: #4f8cff;
+    font-size: 0.85em;
+    font-weight: 500;
+    border: 1px solid rgba(79, 140, 255, 0.2);
+    position: relative;
+}
+
+.file-upload-info::before {
+    content: "ℹ️";
+    margin-right: 0.5em;
+}
+
+.file-mode-section {
+    margin-top: 1.5em;
+    padding: 1.8em;
+    background: linear-gradient(135deg, #fafbff 0%, #f8faff 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(79, 140, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(79, 140, 255, 0.05);
+}
+
+.file-mode-section label {
+    font-weight: 600;
+    color: #2a3a5c;
+    margin-bottom: 1em;
+    display: block;
+    font-size: 1.05em;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    font-weight: normal !important;
+    margin-bottom: 0 !important;
+    cursor: pointer;
+    padding: 1em 1.2em;
+    border-radius: 8px;
+    background: #fff;
+    border: 2px solid #f0f4ff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(79, 140, 255, 0.05), transparent);
+    transition: left 0.4s ease;
+}
+
+.radio-option:hover {
+    border-color: #4f8cff;
+    background: #f8fbff;
+    transform: translateX(4px);
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+}
+
+.radio-option:hover::before {
+    left: 100%;
+}
+
+.radio-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #4f8cff;
+    position: relative;
+    z-index: 1;
+}
+
+.radio-option span {
+    color: #2a3a5c;
+    font-weight: 500;
+    font-size: 1em;
+    position: relative;
+    z-index: 1;
+}
+
+.radio-option input[type="radio"]:checked + span {
+    color: #4f8cff;
+    font-weight: 600;
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    border-color: #4f8cff;
+    background: linear-gradient(135deg, #f0f6ff 0%, #e8f2ff 100%);
+    box-shadow: 0 4px 16px rgba(79, 140, 255, 0.2);
+    transform: translateX(8px);
+}
+
+/* Scrollbar styling for popup forms */
+.popup-large form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.popup-large form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.popup-large form::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.popup-large form::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}

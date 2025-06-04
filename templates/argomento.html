@@ -1,14 +1,34 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">    <title>{{ argomento.titolo }} - {{ materia.nome }}</title>
-    <link rel="stylesheet" href="/static/style.css">    <!-- KaTeX CSS -->
+    <meta charset="UTF-8">    <title>{{ argomento.titolo }} - {{ materia.nome }}</title>    <!-- Modular CSS imports -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <link rel="stylesheet" href="/static/css/buttons.css">
+    <link rel="stylesheet" href="/static/css/cards.css">
+    <link rel="stylesheet" href="/static/css/modals.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="stylesheet" href="/static/css/search.css">
+    <link rel="stylesheet" href="/static/css/markdown.css">
+    <link rel="stylesheet" href="/static/css/allegati.css">
+    <link rel="stylesheet" href="/static/css/context-menu.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/argomento-page.css"><!-- KaTeX CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
     <!-- Highlight.js CSS - VS Code Dark theme -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
-    
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>    <!-- CodeMirror for Markdown syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gfm/gfm.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
     
     <!-- KaTeX JavaScript -->
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
@@ -46,18 +66,68 @@
             <a href="/materia/{{ materia.id }}" class="breadcrumb-link">{{ materia.nome }}</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{ argomento.titolo }}</span>
-        </div>
-        <div class="argomento-header-section">
+        </div>        <div class="argomento-header-section">
             <div class="argomento-title-container">
                 <h1 id="argomento-title" style="color: {{ argomento.colore }}">{{ argomento.titolo }}</h1>
+            </div>
+            <div class="argomento-label-container">
                 <span class="etichetta etichetta-{{ argomento.etichetta_preparazione.replace(' ', '-') }}">
                     {{ argomento.etichetta_preparazione }}
                 </span>
             </div>
+        </div>
+        
+        <!-- Action buttons section -->
+        <div class="argomento-actions-section">
             <div class="argomento-actions">
-                <button id="editBtn" class="add-btn">Modifica</button>
-                <button id="addAllegatoBtn" class="add-btn">Aggiungi allegato</button>
+                <button id="editBtn" class="action-btn primary-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 20h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Modifica
+                </button>
+                <button id="addAllegatoBtn" class="action-btn secondary-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Aggiungi allegato
+                </button>
+                <button id="deleteBtn" class="action-btn danger-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="10" y1="11" x2="10" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Elimina argomento
+                </button>
             </div>
+        </div>
+    </div>
+      <!-- Search in content section -->
+    <div class="search-in-content">
+        <div class="search-input-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="#999" stroke-width="2"/>
+                <path d="M21 21l-4.35-4.35" stroke="#999" stroke-width="2"/>
+            </svg>
+            <input type="text" id="search-in-content" placeholder="Cerca nel contenuto di questo argomento...">
+            <div class="search-navigation" id="search-navigation" style="display: none;">
+                <span class="search-counter" id="search-counter">0/0</span>
+                <button type="button" class="nav-btn nav-prev" id="search-prev" title="Risultato precedente">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+                <button type="button" class="nav-btn nav-next" id="search-next" title="Risultato successivo">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="search-results-summary" class="search-results-summary"></div>
         </div>
     </div>
     
@@ -80,14 +150,29 @@
                     <div class="editor-tabs">
                         <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
                         <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
-                    </div>
-                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
+                    </div>                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
                     <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
                 </div>
                 
-                <!-- Sezione caricamento file -->
+                <!-- Sezione modifica etichetta -->
+                <div class="etichetta-edit-section">
+                    <label for="etichetta_preparazione">Livello di preparazione:</label>
+                    <select id="etichetta_preparazione" class="filter-select">
+                        <option value="scarsa preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'scarsa preparazione' else '' }}>Scarsa preparazione</option>
+                        <option value="media preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'media preparazione' else '' }}>Media preparazione</option>
+                        <option value="buona preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'buona preparazione' else '' }}>Buona preparazione</option>
+                    </select>
+                </div>
+                  <!-- Sezione caricamento file -->
                 <div class="file-upload-section">
-                    <input type="file" id="file_content" accept=".docx,.pdf,.md" class="file-input">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file_content" accept=".docx,.pdf,.md" class="file-input-hidden">
+                        <div class="file-input-display" id="file_display_editor">
+                            <span class="file-icon">📎</span>
+                            <span class="file-text">Scegli file o trascina qui</span>
+                            <span class="file-subtext">Clicca per selezionare un file dal tuo computer</span>
+                        </div>
+                    </div>
                     <div class="file-upload-info">
                         <small>Formati supportati: .docx, .pdf, .md</small>
                     </div>
@@ -141,10 +226,16 @@
     <div id="allegatoPopup" class="popup-bg" style="display:none;">
         <div class="popup">
             <h2>Aggiungi allegato</h2>
-            <form id="addAllegatoForm" enctype="multipart/form-data">
-                <div class="form-group">
+            <form id="addAllegatoForm" enctype="multipart/form-data">                <div class="form-group">
                     <label for="allegato_file">Seleziona file:</label>
-                    <input type="file" name="file" id="allegato_file" required class="file-input">
+                    <div class="file-input-wrapper">
+                        <input type="file" name="file" id="allegato_file" required class="file-input-hidden">
+                        <div class="file-input-display" id="file_display_allegato">
+                            <span class="file-icon">📎</span>
+                            <span class="file-text">Scegli file o trascina qui</span>
+                            <span class="file-subtext">Clicca per selezionare un file dal tuo computer</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="popup-actions">
                     <button type="submit" class="add-btn">Carica</button>
@@ -163,26 +254,194 @@
             </div>
             <div class="popup-actions">
                 <button type="button" id="closeViewAllegatoPopup" class="cancel-btn">Chiudi</button>
-            </div>
-        </div>
+            </div>        </div>
     </div>
 
-    <script>        const socket = io();
+    <!-- Modal di conferma eliminazione argomento -->
+    <div id="confirm-delete-argomento-modal" class="modal" style="display: none;">
+        <div class="modal-content">            <h3>Elimina argomento</h3>
+            <p>Per eliminare <b>{{ argomento.titolo }}</b>, scrivi il titolo esatto qui sotto e conferma:</p>
+            <p><small>Questa azione eliminerà anche tutti gli allegati associati e non può essere annullata.</small></p>
+            <input type="text" id="delete-single-argomento-input" placeholder="{{ argomento.titolo }}">
+            <div class="modal-buttons">
+                <button id="confirm-delete-argomento-btn" class="btn btn-danger">Elimina</button>
+                <button id="cancel-delete-argomento-btn" class="btn btn-secondary">Annulla</button>
+            </div>
+        </div>    </div>
+
+    <script>
+        const socket = io();
         const argomentoId = {{ argomento.id }};
         const originalContent = {{ (argomento.contenuto_md or '') | tojson }};
         
         // Inizializzazione della pagina
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize CodeMirror for markdown editing
+            let mainEditor;
+            let initializationAttempts = 0;
+            const maxAttempts = 10;
+              function initCodeMirror() {
+                const textarea = document.getElementById('contenuto_md');
+                
+                // Check if CodeMirror is available
+                if (typeof CodeMirror === 'undefined') {
+                    initializationAttempts++;
+                    if (initializationAttempts < maxAttempts) {
+                        console.log(`⏳ CodeMirror non ancora caricato, tentativo ${initializationAttempts}/${maxAttempts}...`);
+                        setTimeout(initCodeMirror, 200); // Increased delay
+                        return null;
+                    } else {
+                        console.error('❌ CodeMirror non disponibile dopo', maxAttempts, 'tentativi');
+                        console.log('🔄 Tentativo di caricamento manuale di CodeMirror...');
+                        
+                        // Try to load CodeMirror manually
+                        const script = document.createElement('script');
+                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js';
+                        script.onload = function() {
+                            console.log('✅ CodeMirror caricato manualmente');
+                            setTimeout(() => {
+                                initializationAttempts = 0; // Reset counter
+                                initCodeMirror();
+                            }, 100);
+                        };
+                        script.onerror = function() {
+                            console.error('❌ Impossibile caricare CodeMirror manualmente');
+                            // Fallback to regular textarea
+                            if (textarea) {
+                                textarea.style.display = 'block';
+                                textarea.style.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", monospace';
+                                textarea.style.fontSize = '14px';
+                                console.log('💡 Fallback: usando textarea normale');
+                            }
+                        };
+                        document.head.appendChild(script);
+                        return null;
+                    }
+                }
+                  if (textarea && !mainEditor) {
+                    try {
+                        console.log('🚀 Inizializzazione CodeMirror per argomento.html...');
+                        
+                        // Check if required modes are available
+                        const hasGFM = typeof CodeMirror.modes.gfm !== 'undefined';
+                        const hasMarkdown = typeof CodeMirror.modes.markdown !== 'undefined';
+                        const hasOverlay = typeof CodeMirror.overlayMode !== 'undefined';
+                        
+                        console.log('📋 Modalità disponibili:', { hasGFM, hasMarkdown, hasOverlay });
+                        
+                        // Choose the best available mode
+                        let mode = 'text/plain'; // Fallback
+                        if (hasGFM && hasOverlay) {
+                            mode = 'gfm';
+                        } else if (hasMarkdown) {
+                            mode = 'markdown';
+                        }
+                        
+                        console.log('🎯 Modalità selezionata:', mode);
+                          mainEditor = CodeMirror.fromTextArea(textarea, {
+                            mode: mode,
+                            theme: 'monokai',
+                            lineNumbers: true,
+                            lineWrapping: true,
+                            autoCloseBrackets: true,
+                            matchBrackets: true,
+                            styleActiveLine: true,
+                            placeholder: 'Inserisci il contenuto in formato Markdown...',
+                            extraKeys: {
+                                "Ctrl-Space": "autocomplete",
+                                "F11": function(cm) {
+                                    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                                },
+                                "Esc": function(cm) {
+                                    if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                                }
+                            }
+                        });
+                        
+                        // Update textarea when CodeMirror changes
+                        mainEditor.on('change', function(cm) {
+                            textarea.value = cm.getValue();
+                            // Update preview if in preview mode
+                            updateMarkdownPreview();
+                        });
+                        
+                        // Refresh CodeMirror when shown (important for display)
+                        setTimeout(() => {
+                            if (mainEditor) {
+                                mainEditor.refresh();
+                                console.log('✅ CodeMirror inizializzato con successo per argomento.html');
+                            }
+                        }, 100);
+                        
+                    } catch (error) {
+                        console.error('❌ Errore durante l\'inizializzazione di CodeMirror:', error);
+                        // Fallback to regular textarea
+                        textarea.style.display = 'block';
+                        textarea.style.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", monospace';
+                        textarea.style.fontSize = '14px';
+                        console.log('💡 Fallback: usando textarea normale');
+                    }
+                }
+                return mainEditor;
+            }
+            
+            // Initialize CodeMirror with retry mechanism
+            initCodeMirror();
+            
             updateMarkdownView();
             setupEventListeners();
+            
+            // Check if edit mode should be activated from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('edit') === 'true') {
+                toggleEditMode();
+                // Remove edit parameter from URL without page reload
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
         });
-        
-        function setupEventListeners() {
+          function setupEventListeners() {
             // Gestione modifica argomento
             document.getElementById('editBtn').addEventListener('click', toggleEditMode);
             document.getElementById('add-content-link')?.addEventListener('click', function(e) {
                 e.preventDefault();
                 toggleEditMode();
+            });
+            
+            // Gestione eliminazione argomento
+            document.getElementById('deleteBtn').addEventListener('click', function() {
+                document.getElementById('confirm-delete-argomento-modal').style.display = 'flex';
+            });
+              document.getElementById('confirm-delete-argomento-btn').addEventListener('click', function() {
+                const argomentoTitle = '{{ argomento.titolo }}';
+                const inputValue = document.getElementById('delete-single-argomento-input').value.trim();
+                
+                if (inputValue !== argomentoTitle) {
+                    alert('Il titolo inserito non corrisponde.');
+                    return;
+                }
+                
+                deleteCurrentArgomento();
+            });
+              document.getElementById('cancel-delete-argomento-btn').addEventListener('click', function() {
+                document.getElementById('confirm-delete-argomento-modal').style.display = 'none';
+                document.getElementById('delete-single-argomento-input').value = '';
+            });
+              // Gestione ricerca nel contenuto
+            document.getElementById('search-in-content').addEventListener('input', searchInContent);
+            
+            // Gestione navigazione ricerca
+            document.getElementById('search-prev').addEventListener('click', navigateToPrevious);
+            document.getElementById('search-next').addEventListener('click', navigateToNext);
+            
+            // Gestione tasto Enter per navigazione
+            document.getElementById('search-in-content').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentSearchMatches.length > 0) {
+                        navigateToNext();
+                    }
+                }
             });
             
             // Gestione salvataggio
@@ -236,7 +495,32 @@
                     fileModeSection.style.display = 'none';
                 }
             });
-        }        function parseMarkdownSafely(content) {
+        }
+        
+        function updateMarkdownPreview() {
+            const preview = document.getElementById('markdown-preview');
+            if (!preview) return;
+            
+            // Check if preview is currently visible
+            if (preview.style.display !== 'block') return;
+            
+            // Get content from CodeMirror or textarea
+            const textarea = document.getElementById('contenuto_md');
+            const codeMirrorWrapper = textarea ? textarea.nextElementSibling : null;
+            let content = '';
+            
+            if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                const cm = codeMirrorWrapper.CodeMirror;
+                content = cm ? cm.getValue() : textarea.value;
+            } else if (textarea) {
+                content = textarea.value;
+            }
+            
+            const previewContent = parseMarkdownSafely(content) || '<p>Nessun contenuto da visualizzare</p>';
+            preview.innerHTML = previewContent;
+        }
+        
+        function parseMarkdownSafely(content) {
             if (!content || !content.trim()) {
                 return '';
             }
@@ -396,19 +680,24 @@
             console.log('📝 Contenuto caricato:', content.substring(0, 100) + '...');
             
             const renderedContent = parseMarkdownSafely(content);
+            const markdownElement = document.getElementById('rendered-markdown');
+            
+            if (!markdownElement) {
+                console.error('Elemento rendered-markdown non trovato nel DOM');
+                return;
+            }
             
             if (renderedContent) {
-                document.getElementById('rendered-markdown').innerHTML = renderedContent;
+                markdownElement.innerHTML = renderedContent;
             } else {
-                document.getElementById('rendered-markdown').innerHTML = `
+                markdownElement.innerHTML = `
                     <div class="empty-content">
                         <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
                     </div>
                 `;
             }
         }
-        
-        function toggleEditMode() {
+          function toggleEditMode() {
             const viewSection = document.getElementById('markdown-view');
             const editorSection = document.getElementById('markdown-editor-section');
             
@@ -421,34 +710,75 @@
                 editorSection.style.display = 'none';
             }
         }
-          function switchTab(tab) {
+        
+        function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
             
+            const tabButton = document.querySelector(`[data-tab="${tab}"]`);
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
+            
+            // Get CodeMirror instance
             const textarea = document.getElementById('contenuto_md');
             const preview = document.getElementById('markdown-preview');
             
+            if (!textarea || !preview) {
+                console.error('Elementi textarea o preview non trovati nel DOM');
+                return;
+            }
+            
+            // Find CodeMirror wrapper
+            const codeMirrorWrapper = textarea.nextElementSibling;
+            
             if (tab === 'editor') {
-                textarea.style.display = 'block';
+                if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                    codeMirrorWrapper.style.display = 'block';
+                    // Refresh CodeMirror when shown
+                    const cm = codeMirrorWrapper.CodeMirror;
+                    if (cm) {
+                        setTimeout(() => cm.refresh(), 10);
+                    }
+                } else {
+                    textarea.style.display = 'block';
+                }
                 preview.style.display = 'none';
             } else {
-                textarea.style.display = 'none';
+                if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                    codeMirrorWrapper.style.display = 'none';
+                    // Get content from CodeMirror
+                    const cm = codeMirrorWrapper.CodeMirror;
+                    const content = cm ? cm.getValue() : textarea.value;
+                    const previewContent = parseMarkdownSafely(content) || '<p>Nessun contenuto da visualizzare</p>';
+                    preview.innerHTML = previewContent;
+                } else {
+                    textarea.style.display = 'none';
+                    const previewContent = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
+                    preview.innerHTML = previewContent;
+                }
                 preview.style.display = 'block';
-                const previewContent = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
-                preview.innerHTML = previewContent;
             }
-        }
-        
-        function saveArgomento() {
+        }function saveArgomento() {
+            const contenutoElement = document.getElementById('contenuto_md');
+            const etichettaElement = document.getElementById('etichetta_preparazione');
+            
+            if (!contenutoElement || !etichettaElement) {
+                console.error('Elementi contenuto_md o etichetta_preparazione non trovati nel DOM');
+                return;
+            }
+            
             const formData = new FormData();
-            formData.append('contenuto_md', document.getElementById('contenuto_md').value);
+            formData.append('contenuto_md', contenutoElement.value);
+            formData.append('etichetta_preparazione', etichettaElement.value);
             
             // Gestione file caricato
             const fileInput = document.getElementById('file_content');
-            if (fileInput.files.length > 0) {
+            if (fileInput && fileInput.files.length > 0) {
                 formData.append('file_content', fileInput.files[0]);
-                const selectedMode = document.querySelector('input[name="file_mode"]:checked').value;
-                formData.append('file_mode', selectedMode);
+                const selectedModeElement = document.querySelector('input[name="file_mode"]:checked');
+                if (selectedModeElement) {
+                    formData.append('file_mode', selectedModeElement.value);
+                }
             }
             
             fetch(`/update_argomento/${argomentoId}`, {
@@ -614,12 +944,272 @@
                 });
                 
                 html = tempDiv.innerHTML;
-                console.log('✅ Syntax highlighting applicato al fallback');
-            } catch (highlightError) {
+                console.log('✅ Syntax highlighting applicato al fallback');            } catch (highlightError) {
                 console.warn('⚠️ Errore nell\'applicazione del syntax highlighting:', highlightError);
             }
             
             return html;
+        }
+        
+        // Funzione per eliminare l'argomento corrente
+        function deleteCurrentArgomento() {
+            fetch(`/delete_argomento/${argomentoId}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    // Redirect alla pagina della materia
+                    window.location.href = `/materia/{{ materia.id }}`;
+                } else {
+                    alert('Errore durante l\'eliminazione dell\'argomento');
+                }
+            }).catch(error => {
+                console.error('Errore:', error);
+                alert('Errore durante l\'eliminazione dell\'argomento');
+            }).finally(() => {
+                document.getElementById('confirm-delete-argomento-modal').style.display = 'none';
+            });
+        }
+          // Variables for search navigation
+        let currentSearchMatches = [];
+        let currentMatchIndex = -1;
+        
+        // Funzione per cercare nel contenuto
+        function searchInContent() {
+            const query = document.getElementById('search-in-content').value.toLowerCase().trim();
+            const contentElement = document.getElementById('rendered-markdown');
+            const summaryElement = document.getElementById('search-results-summary');
+            const navigationElement = document.getElementById('search-navigation');
+            const counterElement = document.getElementById('search-counter');
+            
+            if (!contentElement) return;
+            
+            if (!query) {
+                // Reset highlights and navigation
+                resetHighlights();
+                summaryElement.style.display = 'none';
+                navigationElement.style.display = 'none';
+                currentSearchMatches = [];
+                currentMatchIndex = -1;
+                return;
+            }
+            
+            // Remove existing highlights
+            resetHighlights();
+            
+            // Find and highlight matches
+            const matches = highlightTextInElement(contentElement, query);
+            
+            // Update matches array
+            currentSearchMatches = Array.from(contentElement.querySelectorAll('.highlight-match'));
+            currentMatchIndex = currentSearchMatches.length > 0 ? 0 : -1;
+            
+            // Show summary and navigation
+            if (matches > 0) {
+                summaryElement.innerHTML = `Trovati ${matches} risultati per "${query}"`;
+                summaryElement.style.display = 'block';
+                
+                // Show navigation controls
+                navigationElement.style.display = 'flex';
+                updateNavigationState();
+                
+                // Highlight first match and scroll to it
+                highlightCurrentMatch();
+                scrollToCurrentMatch();
+            } else {
+                summaryElement.innerHTML = `Nessun risultato trovato per "${query}"`;
+                summaryElement.style.display = 'block';
+                navigationElement.style.display = 'none';
+                currentSearchMatches = [];
+                currentMatchIndex = -1;
+            }
+        }
+        
+        // Update navigation counter and button states
+        function updateNavigationState() {
+            const counterElement = document.getElementById('search-counter');
+            const prevBtn = document.getElementById('search-prev');
+            const nextBtn = document.getElementById('search-next');
+            
+            if (currentSearchMatches.length === 0) {
+                counterElement.textContent = '0/0';
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                return;
+            }
+            
+            counterElement.textContent = `${currentMatchIndex + 1}/${currentSearchMatches.length}`;
+            prevBtn.disabled = currentMatchIndex <= 0;
+            nextBtn.disabled = currentMatchIndex >= currentSearchMatches.length - 1;
+        }
+        
+        // Highlight current match with special style
+        function highlightCurrentMatch() {
+            // Remove previous current highlight
+            currentSearchMatches.forEach(match => match.classList.remove('current-match'));
+            
+            // Add current highlight
+            if (currentMatchIndex >= 0 && currentMatchIndex < currentSearchMatches.length) {
+                currentSearchMatches[currentMatchIndex].classList.add('current-match');
+            }
+        }
+        
+        // Scroll to current match
+        function scrollToCurrentMatch() {
+            if (currentMatchIndex >= 0 && currentMatchIndex < currentSearchMatches.length) {
+                const currentMatch = currentSearchMatches[currentMatchIndex];
+                currentMatch.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'nearest'
+                });
+            }
+        }
+        
+        // Navigate to previous match
+        function navigateToPrevious() {
+            if (currentMatchIndex > 0) {
+                currentMatchIndex--;
+                updateNavigationState();
+                highlightCurrentMatch();
+                scrollToCurrentMatch();
+            }
+        }
+        
+        // Navigate to next match
+        function navigateToNext() {
+            if (currentMatchIndex < currentSearchMatches.length - 1) {
+                currentMatchIndex++;
+                updateNavigationState();
+                highlightCurrentMatch();
+                scrollToCurrentMatch();
+            }
+        }
+        
+        // Funzione per rimuovere gli highlight
+        function resetHighlights() {
+            const contentElement = document.getElementById('rendered-markdown');
+            if (!contentElement) return;
+            
+            const highlights = contentElement.querySelectorAll('.highlight-match');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+        }
+        
+        // Funzione per evidenziare il testo
+        function highlightTextInElement(element, query) {
+            let matchCount = 0;
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+            
+            textNodes.forEach(textNode => {
+                const text = textNode.textContent;
+                const lowerText = text.toLowerCase();
+                const queryIndex = lowerText.indexOf(query);
+                
+                if (queryIndex !== -1) {
+                    const beforeText = text.substring(0, queryIndex);
+                    const matchText = text.substring(queryIndex, queryIndex + query.length);
+                    const afterText = text.substring(queryIndex + query.length);
+                    
+                    const fragment = document.createDocumentFragment();
+                    
+                    if (beforeText) {
+                        fragment.appendChild(document.createTextNode(beforeText));
+                    }
+                    
+                    const highlight = document.createElement('span');
+                    highlight.className = 'highlight-match';
+                    highlight.textContent = matchText;
+                    fragment.appendChild(highlight);
+                    matchCount++;
+                    
+                    if (afterText) {
+                        fragment.appendChild(document.createTextNode(afterText));
+                    }
+                    
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+            });
+              return matchCount;
+        }        // Enhanced file input handling for both file inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle editor file input
+            const editorFileInput = document.getElementById('file_content');
+            const editorFileDisplay = document.getElementById('file_display_editor');
+            if (editorFileInput && editorFileDisplay) {
+                setupFileInput(editorFileInput, editorFileDisplay);
+            }
+
+            // Handle allegato file input
+            const allegatoFileInput = document.getElementById('allegato_file');
+            const allegatoFileDisplay = document.getElementById('file_display_allegato');
+            if (allegatoFileInput && allegatoFileDisplay) {
+                setupFileInput(allegatoFileInput, allegatoFileDisplay);
+            }
+        });
+
+        function setupFileInput(fileInput, fileDisplay) {
+            // Make the display area clickable
+            fileDisplay.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const wrapper = fileInput.closest('.file-input-wrapper');
+                
+                if (file) {
+                    wrapper.classList.add('has-file');
+                    fileDisplay.querySelector('.file-icon').textContent = '✅';
+                    fileDisplay.querySelector('.file-text').textContent = `File selezionato: ${file.name}`;
+                    fileDisplay.querySelector('.file-subtext').textContent = 'Clicca per cambiare file';
+                    fileInput.title = `File selezionato: ${file.name}`;
+                } else {
+                    wrapper.classList.remove('has-file');
+                    fileDisplay.querySelector('.file-icon').textContent = '📎';
+                    fileDisplay.querySelector('.file-text').textContent = 'Scegli file o trascina qui';
+                    fileDisplay.querySelector('.file-subtext').textContent = 'Clicca per selezionare un file dal tuo computer';
+                    fileInput.title = '';
+                }
+            });
+
+            // Drag and drop support
+            fileDisplay.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileDisplay.style.borderColor = '#4f8cff';
+                fileDisplay.style.backgroundColor = '#f0f4ff';
+            });
+
+            fileDisplay.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileDisplay.style.borderColor = '';
+                fileDisplay.style.backgroundColor = '';
+            });
+
+            fileDisplay.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileDisplay.style.borderColor = '';
+                fileDisplay.style.backgroundColor = '';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
         }
     </script>
 </body>

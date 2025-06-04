@@ -1,0 +1,189 @@
+/**
+* Argomenti Page - Main listing page styles (argomenti.html)
+* ConnectStudy Application
+*/
+
+/* Breadcrumb navigation */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+
+.breadcrumb-link {
+    color: #4f8cff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+    color: #2a3a5c;
+}
+
+.breadcrumb-separator {
+    color: #999;
+}
+
+.breadcrumb-current {
+    color: #2a3a5c;
+    font-weight: 600;
+}
+
+/* Argomenti list layout */
+.argomenti-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2em;
+    padding: 0 2em 2em 2em;
+}
+
+.argomento-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.argomento-card:hover {
+    box-shadow: 0 4px 20px rgba(79, 140, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.argomento-card[data-href] {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.argomento-card[data-href]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.argomento-card[data-href]:active {
+    transform: translateY(0);
+}
+
+.argomento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.argomento-header h3 {
+    margin: 0;
+    color: #2a3a5c;
+    font-size: 1.3em;
+}
+
+/* Etichette (labels) */
+.etichetta {
+    padding: 0.3em 0.8em;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: capitalize;
+    margin: 0.1em;
+}
+
+.etichetta-scarsa-preparazione {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.etichetta-media-preparazione {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.etichetta-buona-preparazione {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+/* Argomento preview text */
+.argomento-preview {
+    color: #666;
+    font-size: 0.95em;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    max-height: 3.6em; /* Limita a circa 3 righe */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    /* Remove any potential markdown artifacts */
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Fix per rimuovere decorazioni hypertext nelle preview */
+.argomento-preview,
+.argomento-preview *,
+.preview-text,
+.preview-text * {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    text-decoration-style: none !important;
+    text-decoration-color: transparent !important;
+    text-underline-offset: 0 !important;
+    text-decoration-thickness: 0 !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+    background: transparent !important;
+}
+
+/* Regole aggiuntive per elementi specifici che potrebbero causare linee */
+.argomento-preview code,
+.argomento-preview pre,
+.argomento-preview span,
+.argomento-preview div,
+.argomento-preview p,
+.argomento-preview strong,
+.argomento-preview em,
+.argomento-preview b,
+.argomento-preview i,
+.preview-text code,
+.preview-text pre,
+.preview-text span,
+.preview-text div,
+.preview-text p,
+.preview-text strong,
+.preview-text em,
+.preview-text b,
+.preview-text i {
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+/* Rimuovi pseudo-elementi che potrebbero creare linee */
+.argomento-preview::before,
+.argomento-preview::after,
+.preview-text::before,
+.preview-text::after,
+.argomento-preview *::before,
+.argomento-preview *::after,
+.preview-text *::before,
+.preview-text *::after {
+    content: none !important;
+    display: none !important;
+    border: none !important;
+    background: none !important;
+}

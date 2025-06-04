@@ -1,0 +1,95 @@
+/**
+* Allegati (Attachments) styles
+* ConnectStudy Application
+*/
+
+/* Allegati section */
+.allegati-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+}
+
+.allegati-section h3 {
+    color: #2a3a5c;
+    margin-top: 0;
+    margin-bottom: 1.5em;
+    font-size: 1.3em;
+}
+
+.allegati-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.allegato-card {
+    border: 2px solid #e8f2ff;
+    border-radius: 8px;
+    padding: 1.2em;
+    background: #fafbff;
+    transition: all 0.3s ease;
+}
+
+.allegato-card:hover {
+    border-color: #4f8cff;
+    background: #f0f6ff;
+    transform: translateX(4px);
+}
+
+.allegato-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.allegato-nome {
+    font-weight: 600;
+    color: #2a3a5c;
+    font-size: 1.05em;
+}
+
+.allegato-actions {
+    display: flex;
+    gap: 0.8em;
+}
+
+.allegato-actions button {
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.view-allegato-btn {
+    background: #4f8cff;
+    color: #fff;
+}
+
+.view-allegato-btn:hover {
+    background: #3d7bff;
+    transform: translateY(-1px);
+}
+
+.delete-allegato-btn {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.delete-allegato-btn:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+}
+
+/* Contenuto allegato nel popup */
+.allegato-content {
+    max-height: 600px;
+    overflow: auto;
+    padding: 1em;
+    background: #f8f9fa;
+    border-radius: 8px;
+}

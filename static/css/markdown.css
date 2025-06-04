@@ -1,0 +1,440 @@
+/**
+* Markdown Editor and Content styles
+* ConnectStudy Application
+*/
+
+/* Editor Markdown */
+.markdown-editor {
+    border: 2px solid #e8f2ff;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    transition: border-color 0.3s ease;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.markdown-editor:focus-within {
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.12);
+}
+
+.editor-tabs {
+    display: flex;
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+    border-bottom: 1px solid #e8f2ff;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 1em 1.5em;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 0.95em;
+}
+
+.tab-btn.active {
+    background: #fff;
+    color: #4f8cff;
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #4f8cff;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(79, 140, 255, 0.08);
+    color: #4f8cff;
+}
+
+.markdown-editor textarea {
+    border: none;
+    resize: none;
+    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+    margin: 0;
+    padding: 1.2em;
+    font-size: 0.95em;
+    line-height: 1.6;
+    background: #fff;
+    flex: 1;
+    min-height: 400px;
+    width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    overflow-y: auto;
+}
+
+.markdown-editor textarea:focus {
+    outline: none;
+}
+
+/* Scrollbar personalizzata per il textarea dell'editor */
+.markdown-editor textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-editor textarea::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.markdown-preview {
+    padding: 1.5em;
+    background: #fff;
+    line-height: 1.6;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 400px;
+}
+
+/* Scrollbar personalizzata per il preview dell'editor */
+.markdown-preview::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-preview::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-preview::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+    color: #2a3a5c;
+}
+
+.markdown-preview code {
+    background: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.markdown-preview pre {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.markdown-preview blockquote {
+    border-left: 4px solid #4f8cff;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #666;
+}
+
+/* Page content containers */
+.argomento-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2em;
+}
+
+.markdown-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+    margin-bottom: 2em;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Scrollbar personalizzata per il contenuto markdown */
+.markdown-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.empty-content {
+    text-align: center;
+    color: #666;
+    font-size: 1.1em;
+    padding: 3em;
+}
+
+.empty-content a {
+    color: #4f8cff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.empty-content a:hover {
+    text-decoration: underline;
+}
+
+.markdown-editor-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2em;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.1);
+    margin-bottom: 2em;
+    height: calc(98vh - 100px);
+    max-height: calc(98vh - 100px);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Scrollbar personalizzata per la sezione editor */
+.markdown-editor-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.markdown-editor-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.markdown-editor-section::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.markdown-editor-section::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Scrollbar personalizzata per il contenitore dell'editor */
+.editor-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.editor-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.editor-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+.editor-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+/* Rendered markdown styling */
+#rendered-markdown {
+    line-height: 1.7;
+    color: #2a3a5c;
+}
+
+#rendered-markdown h1, #rendered-markdown h2, #rendered-markdown h3,
+#rendered-markdown h4, #rendered-markdown h5, #rendered-markdown h6 {
+    color: #2a3a5c;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+#rendered-markdown h1:first-child, #rendered-markdown h2:first-child,
+#rendered-markdown h3:first-child {
+    margin-top: 0;
+}
+
+#rendered-markdown p {
+    margin-bottom: 1em;
+}
+
+#rendered-markdown code {
+    background: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+#rendered-markdown pre {
+    background: #f8f9fa;
+    padding: 1.2em;
+    border-radius: 8px;
+    overflow-x: auto;
+    border-left: 4px solid #4f8cff;
+}
+
+#rendered-markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+/* Enhanced Syntax Highlighting Styles */
+.hljs-enhanced {
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    position: relative !important;
+    overflow-x: auto !important;
+    line-height: 1.5 !important;
+    font-family: 'Fira Code', 'Monaco', 'Consolas', 'Ubuntu Mono', monospace !important;
+    font-size: 14px !important;
+    margin: 1em 0 !important;
+}
+
+.hljs-enhanced:before {
+    content: attr(data-language);
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* Language-specific enhancements */
+.hljs-enhanced.language-sql:before { content: "SQL"; background: rgba(52, 152, 219, 0.2); }
+.hljs-enhanced.language-php:before { content: "PHP"; background: rgba(108, 117, 177, 0.2); }
+.hljs-enhanced.language-python:before { content: "Python"; background: rgba(61, 133, 198, 0.2); }
+.hljs-enhanced.language-javascript:before { content: "JavaScript"; background: rgba(240, 219, 79, 0.2); }
+.hljs-enhanced.language-java:before { content: "Java"; background: rgba(237, 117, 36, 0.2); }
+.hljs-enhanced.language-cpp:before { content: "C++"; background: rgba(0, 89, 156, 0.2); }
+.hljs-enhanced.language-csharp:before { content: "C#"; background: rgba(149, 117, 205, 0.2); }
+.hljs-enhanced.language-go:before { content: "Go"; background: rgba(0, 173, 216, 0.2); }
+.hljs-enhanced.language-rust:before { content: "Rust"; background: rgba(206, 61, 36, 0.2); }
+.hljs-enhanced.language-typescript:before { content: "TypeScript"; background: rgba(49, 120, 198, 0.2); }
+.hljs-enhanced.language-html:before { content: "HTML"; background: rgba(227, 79, 38, 0.2); }
+.hljs-enhanced.language-css:before { content: "CSS"; background: rgba(21, 114, 182, 0.2); }
+.hljs-enhanced.language-json:before { content: "JSON"; background: rgba(41, 128, 185, 0.2); }
+.hljs-enhanced.language-xml:before { content: "XML"; background: rgba(155, 89, 182, 0.2); }
+.hljs-enhanced.language-yaml:before { content: "YAML"; background: rgba(231, 76, 60, 0.2); }
+.hljs-enhanced.language-dockerfile:before { content: "Docker"; background: rgba(46, 134, 193, 0.2); }
+.hljs-enhanced.language-bash:before { content: "Bash"; background: rgba(52, 73, 94, 0.2); }
+.hljs-enhanced.language-powershell:before { content: "PowerShell"; background: rgba(52, 152, 219, 0.2); }
+
+/* Enhanced code block container */
+pre code.hljs-enhanced {
+    display: block;
+    padding: 1.2em 1.5em 1.2em 1.5em !important;
+    background: #1e1e1e !important;
+    color: #d4d4d4 !important;
+    border-radius: 8px;
+    font-weight: 400;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+}
+
+/* Copy button styling for enhanced code blocks */
+.hljs-enhanced + .copy-btn {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.hljs-enhanced:hover + .copy-btn,
+.hljs-enhanced + .copy-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+    .hljs-enhanced {
+        font-size: 12px !important;
+        padding: 1em !important;
+        margin: 0.8em 0 !important;
+    }
+    
+    .hljs-enhanced:before {
+        font-size: 10px;
+        padding: 1px 6px;
+        top: 6px;
+        right: 8px;
+    }
+    
+    pre code.hljs-enhanced {
+        padding: 1em !important;
+    }
+}
+
+/* Disabilita il riconoscimento automatico di link nei browser */
+.argomento-preview,
+.preview-text {
+    /* Disabilita il rilevamento automatico di pattern URL/email */
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    -ms-text-size-adjust: none;
+    text-size-adjust: none;
+    
+    /* Forza il testo a essere trattato come testo normale */
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Forza lo stile del testo per essere completamente normale */
+.argomento-preview *,
+.preview-text * {
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}

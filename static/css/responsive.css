@@ -1,0 +1,227 @@
+/**
+* Responsive styles and media queries
+* ConnectStudy Application
+*/
+
+/* Responsive design for action buttons */
+@media (max-width: 768px) {
+    .argomento-header-section {
+        gap: 0.8em;
+        margin-bottom: 1em;
+    }
+    
+    .argomento-title-container h1 {
+        font-size: 1.6em;
+    }
+    
+    .argomento-label-container {
+        padding-left: 0;
+    }
+    
+    .argomento-actions-section {
+        padding: 1.2em 1.5em;
+        margin-bottom: 1.5em;
+    }
+    
+    .argomento-actions {
+        justify-content: center;
+        gap: 0.8em;
+    }
+    
+    .action-btn {
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+        padding: 0.8em 1.2em;
+        font-size: 0.9em;
+    }
+
+    /* Responsive search */
+    .search-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .search-group:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+    
+    .clear-btn {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: fit-content;
+        padding: 12px 32px;
+    }
+
+    /* Search filters section responsive */
+    .search-filters-section {
+        margin: 0 1em 2em 1em;
+        padding: 20px;
+        border-radius: 12px;
+    }
+    
+    .search-group label {
+        font-size: 0.85em;
+    }
+    
+    .search-input,
+    .filter-select,
+    .clear-btn {
+        min-height: 48px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .clear-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Enhanced code blocks responsive */
+    .hljs-enhanced {
+        font-size: 12px !important;
+        padding: 1em !important;
+        margin: 0.8em 0 !important;
+    }
+    
+    .hljs-enhanced:before {
+        font-size: 10px;
+        padding: 1px 6px;
+        top: 6px;
+        right: 8px;
+    }
+    
+    pre code.hljs-enhanced {
+        padding: 1em !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .argomento-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Search responsive for small screens */
+    .search-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .search-filters-section {
+        margin: 0 0.5em 1.5em 0.5em;
+        padding: 16px;
+    }
+    
+    .search-container {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .search-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .search-group:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+    
+    .clear-btn {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: fit-content;
+        padding: 12px 32px;
+    }
+}
+
+/* General responsive utilities */
+@media (max-width: 768px) {
+    .header {
+        padding: 1.5em 1em 0.5em 1em;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .materie-list {
+        padding: 0 1em 2em 1em;
+        gap: 1.5em;
+    }
+
+    .argomenti-list {
+        padding: 0 1em 2em 1em;
+        gap: 1em;
+    }
+
+    .argomento-content {
+        padding: 0 1em;
+    }
+
+    .popup, .popup-large {
+        max-width: 95vw;
+        margin: 0 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 1em 0.5em 0.5em 0.5em;
+        flex-direction: column;
+        gap: 1em;
+        align-items: flex-start;
+    }
+
+    h1 {
+        font-size: 1.6em;
+    }
+
+    .materie-list {
+        padding: 0 0.5em 1.5em 0.5em;
+        gap: 1em;
+    }
+
+    .argomenti-list {
+        padding: 0 0.5em 1.5em 0.5em;
+        gap: 0.8em;
+    }
+
+    .argomento-content {
+        padding: 0 0.5em;
+    }
+
+    .materia-card {
+        min-width: 120px;
+        padding: 1.5em 2em;
+        font-size: 1.1em;
+    }
+
+    .argomento-card {
+        padding: 1.2em;
+    }
+
+    .popup, .popup-large {
+        max-width: 98vw;
+        margin: 0 0.5em;
+        max-height: 95vh;
+    }
+
+    .popup-large form {
+        padding: 0.8em 1.5em 1.2em 1.5em;
+    }
+
+    .popup-large h2 {
+        padding: 1.2em 1.5em 0.8em 1.5em;
+        font-size: 1.3em;
+    }
+
+    .popup-large .popup-actions {
+        padding: 0.8em 1.5em 1.2em 1.5em;
+    }
+}
