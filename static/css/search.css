@@ -59,7 +59,7 @@
 /* Add icons to labels */
 .search-group label[for="search-title"]::before {
     content: "";
-    background-image: url('./icons/search-icon.svg');
+    background-image: url('../icons/search-icon.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -71,7 +71,7 @@
 
 .search-group label[for="search-content"]::before {
     content: "";
-    background-image: url('./icons/document-icon.svg');
+    background-image: url('../icons/document-icon.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -83,7 +83,7 @@
 
 .search-group label[for="filter-etichetta"]::before {
     content: "";
-    background-image: url('./icons/label-icon.svg');
+    background-image: url('../icons/label-icon.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
