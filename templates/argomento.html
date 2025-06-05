@@ -12,54 +12,83 @@
     <link rel="stylesheet" href="/static/css/markdown.css">
     <link rel="stylesheet" href="/static/css/allegati.css">
     <link rel="stylesheet" href="/static/css/context-menu.css">
-    <link rel="stylesheet" href="/static/css/responsive.css">
-    <link rel="stylesheet" href="/static/css/argomento-page.css"><!-- KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
-    <!-- Highlight.js CSS - VS Code Dark theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
-      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>    <!-- CodeMirror for Markdown syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gfm/gfm.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+    <link rel="stylesheet" href="/static/css/responsive.css">    <link rel="stylesheet" href="/static/css/argomento-page.css">
+      <!-- Local libraries CSS -->
+    <link rel="stylesheet" href="/static/libs/katex/katex.min.css">
+    <link rel="stylesheet" href="/static/libs/highlightjs/vs2015.min.css">
+    <link rel="stylesheet" href="/static/libs/codemirror/codemirror.min.css">
+    <link rel="stylesheet" href="/static/libs/codemirror/monokai.min.css">
+    
+    <!-- Local libraries JavaScript -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
+    
+    <!-- CodeMirror for Markdown syntax highlighting -->
+    <script src="/static/libs/codemirror/codemirror.min.js"></script>
+    <script src="/static/libs/codemirror/overlay.min.js"></script>
+    <script src="/static/libs/codemirror/xml.min.js"></script>
+    <script src="/static/libs/codemirror/markdown.min.js"></script>
+    <script src="/static/libs/codemirror/gfm.min.js"></script>
+    <script src="/static/libs/codemirror/closebrackets.min.js"></script>
+    <script src="/static/libs/codemirror/matchbrackets.min.js"></script>
+    <script src="/static/libs/codemirror/active-line.min.js"></script>
     
     <!-- KaTeX JavaScript -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
-    <!-- KaTeX auto-render extension -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script defer src="/static/libs/katex/katex.min.js"></script>
+    <script defer src="/static/libs/katex/auto-render.min.js"></script>
     
     <!-- Highlight.js Core + Popular Languages -->
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/sql.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/php.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/java.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/cpp.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/csharp.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/go.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/rust.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/kotlin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/swift.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/ruby.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/perl.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/r.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/matlab.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/shell.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/powershell.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/dockerfile.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/xml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/json.min.js"></script>
+    <script src="/static/libs/highlightjs/highlight.min.js"></script>
+    <script src="/static/libs/highlightjs/sql.min.js"></script>
+    <script src="/static/libs/highlightjs/php.min.js"></script>
+    <script src="/static/libs/highlightjs/python.min.js"></script>
+    <script src="/static/libs/highlightjs/java.min.js"></script>
+    <script src="/static/libs/highlightjs/cpp.min.js"></script>
+    <script src="/static/libs/highlightjs/csharp.min.js"></script>
+    <script src="/static/libs/highlightjs/go.min.js"></script>
+    <script src="/static/libs/highlightjs/rust.min.js"></script>
+    <script src="/static/libs/highlightjs/kotlin.min.js"></script>
+    <script src="/static/libs/highlightjs/swift.min.js"></script>
+    <script src="/static/libs/highlightjs/ruby.min.js"></script>
+    <script src="/static/libs/highlightjs/perl.min.js"></script>
+    <script src="/static/libs/highlightjs/r.min.js"></script>
+    <script src="/static/libs/highlightjs/matlab.min.js"></script>    <script src="/static/libs/highlightjs/shell.min.js"></script>
+    <script src="/static/libs/highlightjs/powershell.min.js"></script>
+    <script src="/static/libs/highlightjs/dockerfile.min.js"></script>
+    <script src="/static/libs/highlightjs/yaml.min.js"></script>
+    <script src="/static/libs/highlightjs/xml.min.js"></script>
+    <script src="/static/libs/highlightjs/json.min.js"></script>
+    <script src="/static/libs/highlightjs/math.min.js"></script>
 </head>
 <body>
-    <div class="header">
+    <!-- Left Sidebar for Connections -->
+    <div id="left-sidebar" class="left-sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">🔗</span>
+            <span class="toggle-text">Collegamenti</span>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Collegamenti</h3>
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModal({{ argomento.id }})">
+                    <span class="icon">➕</span>
+                    Nuovo
+                </button>
+            </div>
+            
+            <div class="sidebar-sections">
+                <!-- Materie with their connections -->
+                <div id="sidebar-materie" class="sidebar-materie">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="main-content">
+        <div class="header">
         <div class="breadcrumb">
             <a href="/" class="breadcrumb-link">Materie</a>
             <span class="breadcrumb-separator">/</span>
@@ -76,8 +105,7 @@
                 </span>
             </div>
         </div>
-        
-        <!-- Action buttons section -->
+          <!-- Action buttons section -->
         <div class="argomento-actions-section">
             <div class="argomento-actions">
                 <button id="editBtn" class="action-btn primary-btn">
@@ -86,6 +114,13 @@
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     Modifica
+                </button>
+                <button id="collegaBtn" class="action-btn secondary-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Collega
                 </button>
                 <button id="addAllegatoBtn" class="action-btn secondary-btn">
                     <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -255,19 +290,107 @@
             <div class="popup-actions">
                 <button type="button" id="closeViewAllegatoPopup" class="cancel-btn">Chiudi</button>
             </div>        </div>
-    </div>
-
-    <!-- Modal di conferma eliminazione argomento -->
+    </div>    <!-- Modal di conferma eliminazione argomento -->
     <div id="confirm-delete-argomento-modal" class="modal" style="display: none;">
-        <div class="modal-content">            <h3>Elimina argomento</h3>
-            <p>Per eliminare <b>{{ argomento.titolo }}</b>, scrivi il titolo esatto qui sotto e conferma:</p>
-            <p><small>Questa azione eliminerà anche tutti gli allegati associati e non può essere annullata.</small></p>
-            <input type="text" id="delete-single-argomento-input" placeholder="{{ argomento.titolo }}">
-            <div class="modal-buttons">
-                <button id="confirm-delete-argomento-btn" class="btn btn-danger">Elimina</button>
-                <button id="cancel-delete-argomento-btn" class="btn btn-secondary">Annulla</button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Elimina argomento</h3>
+                <button class="modal-close" onclick="document.getElementById('confirm-delete-argomento-modal').style.display = 'none'">&times;</button>
             </div>
-        </div>    </div>
+            <div class="modal-body">
+                <p>Per eliminare <b>{{ argomento.titolo }}</b>, scrivi il titolo esatto qui sotto e conferma:</p>
+                <p><small>Questa azione eliminerà anche tutti gli allegati associati e non può essere annullata.</small></p>
+                <input type="text" id="delete-single-argomento-input" placeholder="{{ argomento.titolo }}">
+                <div class="modal-buttons">
+                    <button id="confirm-delete-argomento-btn" class="btn btn-danger">Elimina</button>
+                    <button id="cancel-delete-argomento-btn" class="btn btn-secondary">Annulla</button>
+                </div>
+            </div>
+        </div>
+    </div><!-- Modal per creare collegamenti -->
+    <div id="collegamento-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Crea Collegamento</h3>
+                <button class="modal-close" onclick="closeCollegamentoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="collegamento-form">
+                    <div class="form-group">
+                        <label for="collegamento-titolo">Titolo del collegamento:</label>
+                        <input type="text" id="collegamento-titolo" name="titolo" required placeholder="Inserisci il titolo del collegamento">
+                    </div>
+                    <div class="connection-endpoints">
+                        <div class="endpoint">
+                            <label>Argomento 1:</label>
+                            <div class="selected-argomento" id="selected-argomento-1">
+                                <span class="materia-badge" style="background-color: {{ materia.colore }}">{{ materia.nome }}</span>
+                                <span class="argomento-title">{{ argomento.titolo }}</span>
+                                <button type="button" class="cancel-btn" onclick="clearArgomento(1)">&times;</button>
+                            </div>
+                            <button type="button" class="add-btn" onclick="showMaterieSelector(1)">Cambia argomento</button>
+                        </div>
+                        <div class="connection-arrow">↔</div>
+                        <div class="endpoint">
+                            <label>Argomento 2:</label>
+                            <div class="selected-argomento" id="selected-argomento-2" style="display: none;">
+                                <span class="materia-badge"></span>
+                                <span class="argomento-title"></span>
+                                <button type="button" class="cancel-btn" onclick="clearArgomento(2)">&times;</button>
+                            </div>
+                            <div id="no-selection-2" class="no-selection">
+                                <span>Nessun argomento selezionato</span>
+                            </div>
+                            <button type="button" class="add-btn" onclick="showMaterieSelector(2)">Seleziona argomento</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="collegamento-dettagli">Dettagli del collegamento:</label>
+                        <textarea id="collegamento-dettagli" name="dettagli" rows="4" placeholder="Spiega come sono collegati questi argomenti..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="collegamento-qualita">Qualità del collegamento:</label>
+                        <select id="collegamento-qualita" name="etichetta_qualita" required>
+                            <option value="">Seleziona qualità</option>
+                            <option value="collegamento forzato">Collegamento forzato</option>
+                            <option value="collegamento media qualità">Collegamento media qualità</option>
+                            <option value="collegamento buona qualità">Collegamento buona qualità</option>
+                            <option value="collegamento alta qualità">Collegamento alta qualità</option>
+                        </select>
+                    </div>
+                    <div class="popup-actions">
+                        <button type="submit" class="add-btn">Salva Collegamento</button>
+                        <button type="button" class="cancel-btn" onclick="closeCollegamentoModal()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <!-- Modal per selezionare materie e argomenti -->
+    <div id="materie-selector-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Seleziona Argomento</h3>
+                <button class="modal-close" onclick="closeMaterieSelector()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="search-container">
+                    <input type="text" id="argomenti-search" placeholder="Cerca argomenti..." class="search-input">
+                </div>
+                
+                <div id="materie-list" class="materie-list">
+                    <!-- Le materie saranno caricate dinamicamente -->
+                </div>
+                
+                <div id="argomenti-list" class="argomenti-list" style="display: none;">
+                    <button class="btn btn-secondary back-btn" onclick="showMaterieList()">← Torna alle materie</button>
+                    <div id="argomenti-grid" class="argomenti-grid">
+                        <!-- Gli argomenti saranno caricati dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const socket = io();
@@ -447,10 +570,14 @@
             // Gestione salvataggio
             document.getElementById('saveBtn').addEventListener('click', saveArgomento);
             document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
-            
-            // Gestione allegati
+              // Gestione allegati
             document.getElementById('addAllegatoBtn').addEventListener('click', function() {
                 document.getElementById('allegatoPopup').style.display = 'flex';
+            });
+            
+            // Gestione collegamenti
+            document.getElementById('collegaBtn').addEventListener('click', function() {
+                showCollegamentoModal({{ argomento.id }});
             });
             
             document.getElementById('closeAllegatoPopup').addEventListener('click', function() {
@@ -495,6 +622,11 @@
                     fileModeSection.style.display = 'none';
                 }
             });
+            
+            // Gestione collegamenti
+            document.getElementById('collegaBtn').addEventListener('click', function() {
+                showCollegamentoModal({{ argomento.id }});
+            });
         }
         
         function updateMarkdownPreview() {
@@ -533,19 +665,20 @@
                 
                 // Step 2: Create temporary container for KaTeX rendering
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlContent;
-                
-                // Step 3: Apply syntax highlighting with highlight.js
+                tempDiv.innerHTML = htmlContent;                // Step 3: Apply syntax highlighting with highlight.js
                 console.log('🎨 Applicando syntax highlighting...');
                 tempDiv.querySelectorAll('pre code').forEach((block) => {
                     // Rimuovi eventuali classi esistenti di highlight.js
                     block.className = block.className.replace(/hljs\S*/g, '');
                     
-                    // Applica la syntax highlighting
-                    hljs.highlightElement(block);
-                    
-                    // Aggiungi una classe per lo styling personalizzato
-                    block.classList.add('hljs-enhanced');
+                    // Applica la syntax highlighting solo per linguaggi supportati
+                    try {
+                        hljs.highlightElement(block);
+                        // Aggiungi una classe per lo styling personalizzato
+                        block.classList.add('hljs-enhanced');
+                    } catch (error) {
+                        console.warn('⚠️ Could not highlight code block:', error);
+                    }
                 });
                 
                 // Step 4: Render math with KaTeX
@@ -674,29 +807,66 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        }        function updateMarkdownView() {
+        }        
+        
+        function updateMarkdownView() {
             // Uso JSON per evitare problemi con backtick e caratteri speciali
             const content = {{ (argomento.contenuto_md or '') | tojson }};
-            console.log('📝 Contenuto caricato:', content.substring(0, 100) + '...');
+            console.log('📝 Contenuto caricato:', content ? content.substring(0, 100) + '...' : 'NESSUN CONTENUTO');
             
-            const renderedContent = parseMarkdownSafely(content);
             const markdownElement = document.getElementById('rendered-markdown');
             
             if (!markdownElement) {
-                console.error('Elemento rendered-markdown non trovato nel DOM');
+                console.error('❌ Elemento rendered-markdown non trovato nel DOM');
                 return;
             }
             
-            if (renderedContent) {
-                markdownElement.innerHTML = renderedContent;
-            } else {
+            // Verifica che le librerie siano caricate
+            if (typeof marked === 'undefined') {
+                console.error('❌ Libreria marked non caricata');
+                markdownElement.innerHTML = '<div class="error">Errore: Libreria markdown non caricata</div>';
+                return;
+            }
+            
+            if (!content || !content.trim()) {
+                console.log('⚠️ Nessun contenuto da renderizzare');
                 markdownElement.innerHTML = `
                     <div class="empty-content">
                         <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
                     </div>
                 `;
+                return;
+            }
+            
+            const renderedContent = parseMarkdownSafely(content);
+              if (renderedContent) {
+                console.log('✅ Contenuto renderizzato con successo');
+                markdownElement.innerHTML = renderedContent;
+            } else {
+                console.error('❌ Errore nel rendering del contenuto');
+                markdownElement.innerHTML = `
+                    <div class="empty-content">
+                        <p>Errore nel rendering del contenuto. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
+                    </div>
+                `;
+            }
+            
+            // Riattiva i listener per i nuovi elementi
+            setupContentLinks();
+        }
+        
+        function setupContentLinks() {
+            // Setup add content link
+            const addContentLink = document.getElementById('add-content-link');
+            if (addContentLink) {
+                addContentLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleEditMode();
+                });
             }
         }
+            
+        
           function toggleEditMode() {
             const viewSection = document.getElementById('markdown-view');
             const editorSection = document.getElementById('markdown-editor-section');
@@ -752,13 +922,14 @@
                     const previewContent = parseMarkdownSafely(content) || '<p>Nessun contenuto da visualizzare</p>';
                     preview.innerHTML = previewContent;
                 } else {
-                    textarea.style.display = 'none';
-                    const previewContent = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
+                    textarea.style.display = 'none';                    const previewContent = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
                     preview.innerHTML = previewContent;
                 }
                 preview.style.display = 'block';
             }
-        }function saveArgomento() {
+        }
+
+        function saveArgomento() {
             const contenutoElement = document.getElementById('contenuto_md');
             const etichettaElement = document.getElementById('etichetta_preparazione');
             
@@ -786,13 +957,13 @@
                 body: formData
             }).then(response => {
                 if (response.ok) {
-                    location.reload(); // Ricarica la pagina per mostrare le modifiche
-                } else {
+                    location.reload(); // Ricarica la pagina per mostrare le modifiche                } else {
                     alert('Errore nel salvataggio');
                 }
             });
         }
-          function cancelEdit() {
+        
+        function cancelEdit() {
             document.getElementById('contenuto_md').value = originalContent;
             document.getElementById('file_content').value = '';
             document.getElementById('file-mode-section').style.display = 'none';
@@ -802,8 +973,7 @@
         function uploadAllegato(e) {
             e.preventDefault();
             const formData = new FormData(this);
-            
-            fetch(`/add_allegato/${argomentoId}`, {
+              fetch(`/add_allegato/${argomentoId}`, {
                 method: 'POST',
                 body: formData
             }).then(response => {
@@ -1205,12 +1375,313 @@
                 fileDisplay.style.backgroundColor = '';
                 
                 const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
+                if (files.length > 0) {                fileInput.files = files;
                     fileInput.dispatchEvent(new Event('change'));
                 }
             });
         }
+
+        // === COLLEGAMENTI FUNCTIONALITY ===
+        let selectedEndpoint = null;
+        let selectedArgomento1 = { id: {{ argomento.id }}, titolo: "{{ argomento.titolo }}", materia: "{{ materia.nome }}", colore: "{{ materia.colore }}" };
+        let selectedArgomento2 = null;
+
+        function showCollegamentoModal(argomentoId) {
+            // Pre-populate first argument
+            selectedArgomento1 = { 
+                id: argomentoId, 
+                titolo: "{{ argomento.titolo }}", 
+                materia: "{{ materia.nome }}", 
+                colore: "{{ materia.colore }}" 
+            };
+            
+            document.getElementById('collegamento-modal').style.display = 'flex';
+            
+            // Clear form
+            document.getElementById('collegamento-form').reset();
+            clearArgomento(2);
+        }
+
+        function closeCollegamentoModal() {
+            document.getElementById('collegamento-modal').style.display = 'none';
+            document.getElementById('collegamento-form').reset();
+            clearArgomento(2);
+        }
+
+        function showMaterieSelector(endpoint) {
+            selectedEndpoint = endpoint;
+            document.getElementById('materie-selector-modal').style.display = 'flex';
+            loadMaterie();
+        }
+
+        function closeMaterieSelector() {
+            document.getElementById('materie-selector-modal').style.display = 'none';
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        function clearArgomento(endpoint) {
+            if (endpoint === 1) {
+                selectedArgomento1 = null;
+                document.getElementById('selected-argomento-1').style.display = 'none';
+            } else {
+                selectedArgomento2 = null;
+                document.getElementById('selected-argomento-2').style.display = 'none';
+                document.getElementById('no-selection-2').style.display = 'block';
+            }
+        }
+
+        function loadMaterie() {
+            fetch('/api/materie')
+                .then(response => response.json())
+                .then(materie => {
+                    const materieList = document.getElementById('materie-list');
+                    materieList.innerHTML = '';
+                    
+                    materie.forEach(materia => {
+                        const materiaCard = document.createElement('div');
+                        materiaCard.className = 'materia-card';
+                        materiaCard.style.backgroundColor = materia.colore;
+                        materiaCard.innerHTML = `
+                            <h3>${materia.nome}</h3>
+                            <p>${materia.argomenti_count || 0} argomenti</p>
+                        `;
+                        materiaCard.onclick = () => loadArgomenti(materia.id, materia.nome, materia.colore);
+                        materieList.appendChild(materiaCard);
+                    });
+                })
+                .catch(error => console.error('Error loading materie:', error));
+        }
+
+        function loadArgomenti(materiaId, materiaNome, materiaColore) {
+            fetch(`/api/argomenti/materia/${materiaId}`)
+                .then(response => response.json())
+                .then(argomenti => {
+                    const argomentiGrid = document.getElementById('argomenti-grid');
+                    argomentiGrid.innerHTML = '';
+                    
+                    argomenti.forEach(argomento => {
+                        const argomentoCard = document.createElement('div');
+                        argomentoCard.className = 'argomento-card';
+                        argomentoCard.innerHTML = `
+                            <div class="argomento-header">
+                                <h4>${argomento.titolo}</h4>
+                                <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
+                            </div>
+                            <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
+                        `;
+                        argomentoCard.onclick = () => selectArgomento(argomento.id, argomento.titolo, materiaNome, materiaColore);
+                        argomentiGrid.appendChild(argomentoCard);
+                    });
+                    
+                    document.getElementById('materie-list').style.display = 'none';
+                    document.getElementById('argomenti-list').style.display = 'block';
+                })
+                .catch(error => console.error('Error loading argomenti:', error));
+        }
+
+        function showMaterieList() {
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        function selectArgomento(id, titolo, materia, colore) {
+            if (selectedEndpoint === 1) {
+                selectedArgomento1 = { id, titolo, materia, colore };
+                updateSelectedArgomento(1, titolo, materia, colore);
+            } else {
+                selectedArgomento2 = { id, titolo, materia, colore };
+                updateSelectedArgomento(2, titolo, materia, colore);
+            }
+            closeMaterieSelector();
+        }
+
+        function updateSelectedArgomento(endpoint, titolo, materia, colore) {
+            const container = document.getElementById(`selected-argomento-${endpoint}`);
+            const noSelection = document.getElementById(`no-selection-${endpoint}`);
+            
+            container.querySelector('.materia-badge').textContent = materia;
+            container.querySelector('.materia-badge').style.backgroundColor = colore;
+            container.querySelector('.argomento-title').textContent = titolo;
+            
+            container.style.display = 'flex';
+            if (noSelection) noSelection.style.display = 'none';
+        }
+
+        // Handle collegamento form submission
+        document.getElementById('collegamento-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedArgomento1 || !selectedArgomento2) {
+                alert('Seleziona entrambi gli argomenti per creare il collegamento.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('titolo', document.getElementById('collegamento-titolo').value);
+            formData.append('id_argomento1', selectedArgomento1.id);
+            formData.append('id_argomento2', selectedArgomento2.id);
+            formData.append('dettagli', document.getElementById('collegamento-dettagli').value);
+            formData.append('etichetta_qualita', document.getElementById('collegamento-qualita').value);
+              fetch('/add_collegamento', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeCollegamentoModal();
+                    // Reload sidebar connections
+                    loadSidebarConnections();
+                    // Show success message
+                    showNotification('Collegamento creato con successo!', 'success');                } else {
+                    showNotification('Errore nella creazione del collegamento: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Errore nella creazione del collegamento.', 'error');
+            });
+        });
+        
+        // === NOTIFICATION SYSTEM ===
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 4000);        }
+        
+        // === LEFT SIDEBAR FUNCTIONALITY ===
+        function toggleSidebar() {
+            const sidebar = document.getElementById('left-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('sidebar-open');
+            
+            // Create/remove overlay for mobile
+            if (sidebar.classList.contains('open')) {
+                loadSidebarConnections();
+                
+                // Add overlay on mobile
+                if (window.innerWidth <= 768) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay';
+                    overlay.onclick = () => toggleSidebar();
+                    document.body.appendChild(overlay);
+                }
+            } else {
+                // Remove overlay
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+            }
+        }
+
+        function loadSidebarConnections() {
+            fetch('/api/collegamenti')
+                .then(response => response.json())
+                .then(collegamenti => {
+                    updateSidebarConnections(collegamenti);
+                })
+                .catch(error => console.error('Error loading sidebar connections:', error));
+        }
+
+        function updateSidebarConnections(collegamenti) {
+            const sidebarMaterie = document.getElementById('sidebar-materie');
+            
+            // Group connections by materia
+            const materieMap = new Map();
+            
+            collegamenti.forEach(collegamento => {
+                // Add to materia 1
+                const materia1 = collegamento.materia1_nome;
+                if (!materieMap.has(materia1)) {
+                    materieMap.set(materia1, {
+                        nome: materia1,
+                        colore: collegamento.materia1_colore,
+                        collegamenti: []
+                    });
+                }
+                materieMap.get(materia1).collegamenti.push(collegamento);
+                
+                // Add to materia 2 if different
+                const materia2 = collegamento.materia2_nome;
+                if (materia2 !== materia1) {
+                    if (!materieMap.has(materia2)) {
+                        materieMap.set(materia2, {
+                            nome: materia2,
+                            colore: collegamento.materia2_colore,
+                            collegamenti: []
+                        });
+                    }
+                    materieMap.get(materia2).collegamenti.push(collegamento);
+                }
+            });
+            
+            // Generate sidebar HTML
+            sidebarMaterie.innerHTML = '';
+            
+            materieMap.forEach((materiaData, materiaNome) => {
+                const materiaDiv = document.createElement('div');
+                materiaDiv.className = 'sidebar-materia';
+                
+                materiaDiv.innerHTML = `
+                    <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
+                        <div class="sidebar-materia-title">
+                            <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
+                            ${materiaNome}
+                        </div>
+                        <span class="sidebar-materia-toggle">▶</span>
+                    </div>
+                    <div class="sidebar-collegamenti">
+                        ${materiaData.collegamenti.map(conn => `
+                            <div class="sidebar-collegamento" onclick="viewCollegamento(${conn.id})">
+                                <div class="collegamento-title">${conn.titolo}</div>
+                                <div class="collegamento-endpoints">
+                                    ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
+                                </div>
+                                <div class="collegamento-quality quality-${conn.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${conn.etichetta_qualita}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                sidebarMaterie.appendChild(materiaDiv);
+            });
+        }
+
+        function toggleMateriaConnections(headerElement) {
+            const materiaDiv = headerElement.parentElement;
+            materiaDiv.classList.toggle('expanded');
+        }
+
+        function viewCollegamento(collegamentoId) {
+            window.location.href = `/collegamento/${collegamentoId}`;
+        }
+
+        //Load sidebar connections on page load        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarConnections();
+        });
     </script>
+    </div> <!-- End main-content -->
 </body>
 </html>

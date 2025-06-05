@@ -93,6 +93,43 @@
     vertical-align: middle;
 }
 
+/* Labels for collegamenti search */
+.search-group label[for="search-titolo"]::before {
+    content: "";
+    background-image: url('../icons/search-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 1.1em;
+    height: 1.1em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.search-group label[for="search-dettagli"]::before {
+    content: "";
+    background-image: url('../icons/document-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 1.1em;
+    height: 1.1em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.search-group label[for="filter-qualita"]::before {
+    content: "";
+    background-image: url('../icons/label-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 1.1em;
+    height: 1.1em;
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .search-input,
 .filter-select {
     padding: 12px 16px;
@@ -402,11 +439,12 @@
 
 /* Search Input Styles for argomento page */
 .search-in-content {
-    margin: 20px 0;
+    margin: 0 0 10px 0;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
     flex-direction: column;
 }
 
@@ -414,8 +452,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    width: 300px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 500px;
 }
 
 .search-icon {
@@ -498,4 +536,55 @@
     font-size: 14px;
     color: #0066cc;
     display: none;
+}
+
+/* Additional styles for search container and clear filters button */
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input-wrapper .search-icon {
+    position: absolute;
+    right: 15px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.search-input-wrapper .search-input {
+    padding-right: 40px;
+}
+
+/* Clear filters button styles */
+#clear-filters {
+    align-self: end;
+    height: 44px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+#clear-filters:hover {
+    background-color: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+/* Responsive layout for search container */
+@media (max-width: 992px) {
+    .search-container {
+        grid-template-columns: 1fr;
+    }
+    
+    #clear-filters {
+        margin-top: 8px;
+        justify-content: center;
+    }
 }

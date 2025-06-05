@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Collegamenti{% if materia_selezionata %} - {{ materia_selezionata.nome }}{% endif %} - ConnectStudy</title>
+    
+    <!-- Modular CSS imports -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/animations.css">    <link rel="stylesheet" href="/static/css/buttons.css">
+    <link rel="stylesheet" href="/static/css/cards.css">
+    <link rel="stylesheet" href="/static/css/modals.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="stylesheet" href="/static/css/search.css">    <link rel="stylesheet" href="/static/css/context-menu.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/collegamenti-page.css">
+    <link rel="stylesheet" href="/static/css/collegamenti-page-responsive.css">
+    <link rel="stylesheet" href="/static/css/button-icons.css">
+    
+    <!-- Local libraries CSS -->
+    <link rel="stylesheet" href="/static/libs/highlightjs/vs2015.min.css">
+    
+    <!-- Local libraries JavaScript -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
+      <!-- Highlight.js for code syntax highlighting -->
+    <script src="/static/libs/highlightjs/highlight.min.js"></script>
+    <script src="/static/libs/highlightjs/python.min.js"></script>
+    <script src="/static/libs/highlightjs/sql.min.js"></script>
+    <script src="/static/libs/highlightjs/json.min.js"></script>
+    <script src="/static/libs/highlightjs/xml.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="page-title">
+                        <span class="icon">🔗</span>
+                        Collegamenti
+                        {% if materia_selezionata %}
+                            <span class="subtitle" style="color: {{ materia_selezionata.colore }}">{{ materia_selezionata.nome }}</span>
+                        {% endif %}
+                    </h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-primary" onclick="showCollegamentoModal()">
+                        <span class="icon">➕</span>
+                        Nuovo Collegamento
+                    </button>
+                    <a href="/" class="btn btn-secondary">
+                        <span class="icon">🏠</span>
+                        Home
+                    </a>
+                </div>
+            </div>        </header>        <!-- Search and filters -->
+        <div class="search-filters-section">
+            <div class="search-container">
+                <div class="search-group">
+                    <label for="search-titolo">Cerca per titolo:</label>
+                    <input type="text" id="search-titolo" placeholder="Cerca collegamenti per titolo..." class="search-input">
+                </div>
+                <div class="search-group">
+                    <label for="search-dettagli">Cerca nei dettagli:</label>
+                    <input type="text" id="search-dettagli" placeholder="Cerca nei dettagli dei collegamenti..." class="search-input">
+                </div>
+                <div class="search-group">
+                    <label for="search-argomenti">Cerca negli argomenti:</label>
+                    <input type="text" id="search-argomenti" placeholder="Cerca tra gli argomenti coinvolti..." class="search-input">
+                </div>
+                <div class="search-group">
+                    <label for="filter-qualita">Filtra per qualità:</label>
+                    <select id="filter-qualita" class="filter-select">
+                        <option value="">Tutte le qualità</option>
+                        <option value="collegamento forzato">Forzato</option>
+                        <option value="collegamento media qualità">Media qualità</option>
+                        <option value="collegamento buona qualità">Buona qualità</option>
+                        <option value="collegamento alta qualità">Alta qualità</option>
+                    </select>
+                </div>
+                {% if not materia_selezionata %}
+                <div class="search-group">
+                    <label for="filter-materia">Filtra per materia:</label>
+                    <select id="filter-materia" class="filter-select">
+                        <option value="">Tutte le materie</option>
+                        {% for materia in materie %}
+                        <option value="{{ materia.nome }}">{{ materia.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <button id="clear-filters" class="clear-btn">
+                    <span class="icon">🗑️</span>
+                    Pulisci filtri
+                </button>
+            </div>
+        </div><!-- Navigation breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="/">Home</a>
+            {% if materia_selezionata %}
+                <span class="separator">›</span>
+                <a href="/materia/{{ materia_selezionata.id }}">{{ materia_selezionata.nome }}</a>
+                <span class="separator">›</span>
+                <span class="current">Collegamenti</span>
+            {% else %}
+                <span class="separator">›</span>
+                <span class="current">Tutti i Collegamenti</span>
+            {% endif %}
+        </nav>
+
+        <!-- Collegamenti grid -->
+        <div class="content">
+            <div id="collegamenti-grid" class="collegamenti-grid">
+                {% for collegamento in collegamenti %}
+                <div class="collegamento-card" data-id="{{ collegamento.id }}">
+                    <div class="collegamento-header">
+                        <h3 class="collegamento-title">{{ collegamento.titolo }}</h3>
+                        <div class="collegamento-actions">
+                            <button class="btn-icon" onclick="editCollegamento({{ collegamento.id }})" title="Modifica">
+                                <img src="/static/icons/modify-icon.svg" alt="Modifica">
+                            </button>
+                            <button class="btn-icon btn-danger" onclick="deleteCollegamento({{ collegamento.id }})" title="Elimina">
+                                <img src="/static/icons/delete-icon.svg" alt="Elimina">
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="collegamento-argomenti">
+                        <div class="argomento-tag" style="border: 2.5px solid {{ collegamento.materia1_colore }};">
+                            <a href="/argomento/{{ collegamento.id_argomento1 }}">
+                                {{ collegamento.argomento1_titolo }}
+                            </a>
+                            <span class="materia-name">{{ collegamento.materia1_nome }}</span>
+                        </div>
+                        <div class="collegamento-arrow">⟷</div>
+                        <div class="argomento-tag" style="border: 2.5px solid {{ collegamento.materia2_colore }};">
+                            <a href="/argomento/{{ collegamento.id_argomento2 }}">
+                                {{ collegamento.argomento2_titolo }}
+                            </a>
+                            <span class="materia-name">{{ collegamento.materia2_nome }}</span>
+                        </div>
+                    </div>
+
+                    {% if collegamento.dettagli %}
+                    <div class="collegamento-dettagli">
+                        <button class="dettagli-toggle" onclick="toggleDettagli({{ collegamento.id }})">
+                            <span class="icon">🔎</span> Visualizza dettagli
+                        </button>
+                    </div>
+                    {% endif %}                    <div class="collegamento-footer">
+                        <span class="etichetta-qualita {{ collegamento.etichetta_qualita.replace(' ', '-') }}">
+                            {{ collegamento.etichetta_qualita|title }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not collegamenti %}
+            <div class="empty-state">
+                <div class="empty-icon">🔗</div>
+                <h3>Nessun collegamento trovato</h3>
+                <p>{% if materia_selezionata %}
+                    Non ci sono ancora collegamenti per la materia "{{ materia_selezionata.nome }}".
+                   {% else %}
+                    Non hai ancora creato nessun collegamento.
+                   {% endif %}
+                </p>
+                <button class="btn btn-primary" onclick="showCollegamentoModal()">
+                    Crea il primo collegamento
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>    <!-- Modal per i dettagli del collegamento -->
+    <div id="dettagli-modal" class="modal" style="display: none;">
+        <div class="modal-content">            <div class="modal-header">
+                <h3>Dettagli Collegamento</h3>
+                <button class="modal-close" onclick="closeDettagliModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dettagli-content" class="markdown-content"></div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button type="button" class="cancel-btn" onclick="closeDettagliModal()">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Modal per creare/modificare collegamento -->
+    <div id="collegamento-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modal-title">Nuovo Collegamento</h3>
+                <button class="modal-close" onclick="closeCollegamentoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="collegamento-form">
+                    <input type="hidden" id="collegamento-id" value="">
+                    <div class="form-group">
+                        <label for="titolo">Titolo del collegamento:</label>
+                        <input type="text" id="titolo" name="titolo" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Primo argomento:</label>
+                            <div class="argomento-selector">
+                                <div id="argomento1-selected" class="argomento-selected">
+                                    <span class="placeholder">Seleziona argomento</span>
+                                    <button type="button" class="cancel-btn" onclick="clearArgomento(1)">✕</button>
+                                </div>
+                                <button type="button" class="add-btn" onclick="selectArgomento(1)">
+                                    Scegli Argomento
+                                </button>
+                                <input type="hidden" id="id_argomento1" name="id_argomento1">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Secondo argomento:</label>
+                            <div class="argomento-selector">
+                                <div id="argomento2-selected" class="argomento-selected">
+                                    <span class="placeholder">Seleziona argomento</span>
+                                    <button type="button" class="cancel-btn" onclick="clearArgomento(2)">✕</button>
+                                </div>
+                                <button type="button" class="add-btn" onclick="selectArgomento(2)">
+                                    Scegli Argomento
+                                </button>
+                                <input type="hidden" id="id_argomento2" name="id_argomento2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="etichetta_qualita">Qualità del collegamento:</label>
+                        <select id="etichetta_qualita" name="etichetta_qualita">
+                            <option value="collegamento forzato">Collegamento forzato</option>
+                            <option value="collegamento media qualità" selected>Collegamento media qualità</option>
+                            <option value="collegamento buona qualità">Collegamento buona qualità</option>
+                            <option value="collegamento alta qualità">Collegamento alta qualità</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dettagli">Dettagli del collegamento:</label>
+                        <textarea id="dettagli" name="dettagli" rows="6" 
+                                placeholder="Spiega come questi argomenti sono collegati..."></textarea>
+                    </div>
+                    <div class="popup-actions">
+                        <button type="submit" class="add-btn">
+                            Salva Collegamento
+                        </button>
+                        <button type="button" class="cancel-btn" onclick="closeCollegamentoModal()">
+                            Annulla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <!-- Modal per selezionare argomento -->
+    <div id="argomento-selector-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Seleziona Argomento</h3>
+                <button class="modal-close" onclick="closeArgomentoSelectorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="argomento-search">
+                    <input type="text" id="argomento-search" placeholder="Cerca argomenti..." class="search-input">
+                </div>
+                <div id="materie-list" class="materie-list">
+                    {% for materia in materie %}
+                    <div class="materia-item" data-id="{{ materia.id }}" style="border-left: 4px solid {{ materia.colore }}">
+                        <h4 class="materia-name" onclick="toggleMateriaArgomenti({{ materia.id }})">
+                            <span class="expand-icon">▶</span>
+                            {{ materia.nome }}
+                        </h4>
+                        <div id="argomenti-{{ materia.id }}" class="argomenti-list" style="display: none;">
+                            <!-- Gli argomenti verranno caricati dinamicamente -->
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="argomenti-list" class="argomenti-list" style="display: none;">
+                    <button class="cancel-btn back-btn" onclick="showMaterieList()">← Torna alle materie</button>
+                    <div id="argomenti-grid" class="argomenti-grid">
+                        <!-- Gli argomenti verranno caricati dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const socket = io();
+    let currentArgomentoSlot = null;
+    let editingCollegamentoId = null;
+
+    // Socket events
+    socket.on('update_collegamenti', function() {
+        location.reload();
+    });    // Search functionality
+    let searchTimeout;
+    let allCollegamenti = [];
+    
+    function setupSearch() {
+        const searchTitolo = document.getElementById('search-titolo');
+        const searchDettagli = document.getElementById('search-dettagli');
+        const searchArgomenti = document.getElementById('search-argomenti');
+        const filterQualita = document.getElementById('filter-qualita');
+        const filterMateria = document.getElementById('filter-materia');
+
+        function performSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const params = new URLSearchParams({
+                    titolo: searchTitolo.value,
+                    dettagli: searchDettagli.value,
+                    argomenti: searchArgomenti ? searchArgomenti.value : '',
+                    etichetta_qualita: filterQualita.value,
+                    materia: filterMateria ? filterMateria.value : ''
+                });
+                fetch('/api/search_collegamenti?' + params)
+                    .then(response => response.json())
+                    .then(collegamenti => {
+                        allCollegamenti = collegamenti.map(collegamento => ({
+                            ...collegamento,
+                            originalTitle: collegamento.titolo,
+                            originalDettagli: collegamento.dettagli || '',
+                            originalArgomento1: collegamento.argomento1_titolo,
+                            originalArgomento2: collegamento.argomento2_titolo
+                        }));
+                        updateCollegamentiGrid(collegamenti);
+                    });
+            }, 300);
+        }
+
+        searchTitolo.addEventListener('input', performSearch);
+        searchDettagli.addEventListener('input', performSearch);
+        if (searchArgomenti) searchArgomenti.addEventListener('input', performSearch);
+        filterQualita.addEventListener('change', performSearch);
+        if (filterMateria) filterMateria.addEventListener('change', performSearch);
+    }
+    
+    // Utility functions for text highlighting
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    function highlightText(text, query) {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+        return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }    function cleanPreviewText(text) {
+        if (!text) return '';
+        return text
+            .replace(/```[\w]*\n[\s\S]*?\n```/g, '[Code Block]')
+            .replace(/`([^`]+)`/g, '$1')
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/#{1,6}\s/g, '')
+            .replace(/!\[([^\]]*)\]\([^\)]*\)/g, '[Image: $1]')
+            .replace(/\[([^\]]*)\]\([^\)]*\)/g, '$1')
+            .replace(/^\s*[-*+]\s/gm, '• ')
+            .replace(/^\s*\d+\.\s/gm, '• ')
+            .replace(/>\s/g, '')
+            .replace(/\$\$[\s\S]*?\$\$/g, '[Math Formula]')
+            .replace(/\$([^$\n]+)\$/g, '[Math: $1]')
+            .replace(/\n+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF.,!?;:()\[\]{}'"«»""''–—]/g, '')
+            .trim();
+    }
+
+    function createCleanPreview(content, maxLength = 200) {
+        if (!content) return '';
+        const cleanText = cleanPreviewText(content);
+        if (cleanText.length <= maxLength) {
+            return cleanText;
+        }
+        let breakPoint = maxLength;
+        const lastSpace = cleanText.lastIndexOf(' ', maxLength);
+        const lastPunctuation = Math.max(
+            cleanText.lastIndexOf('.', maxLength),
+            cleanText.lastIndexOf('!', maxLength),
+            cleanText.lastIndexOf('?', maxLength)
+        );
+        if (lastPunctuation > maxLength - 50) {
+            breakPoint = lastPunctuation + 1;
+        } else if (lastSpace > maxLength - 30) {
+            breakPoint = lastSpace;
+        }
+        return cleanText.substring(0, breakPoint).trim() + '...';
+    }
+
+    function updateCollegamentiGrid(collegamenti) {
+        const grid = document.getElementById('collegamenti-grid');
+        const titleQuery = document.getElementById('search-titolo').value.toLowerCase().trim();
+        const dettagliQuery = document.getElementById('search-dettagli').value.toLowerCase().trim();
+        const argomentiQuery = document.getElementById('search-argomenti') ? document.getElementById('search-argomenti').value.toLowerCase().trim() : '';
+        const materiaFilter = document.getElementById('filter-materia') ? document.getElementById('filter-materia').value.toLowerCase().trim() : '';
+        let filtered = collegamenti;
+        // Filtro lato client per materia se necessario (in caso l'API non lo gestisca)
+        if (materiaFilter) {
+            filtered = filtered.filter(c =>
+                c.materia1_nome.toLowerCase() === materiaFilter ||
+                c.materia2_nome.toLowerCase() === materiaFilter
+            );
+        }
+        grid.innerHTML = filtered.length === 0 ? `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-icon">🔍</div>
+                <h3>Nessun collegamento trovato</h3>
+                <p>Nessun collegamento corrisponde ai criteri di ricerca.</p>
+            </div>
+        ` : filtered.map(collegamento => {
+            // Evidenziazione titolo
+            let highlightedTitle = collegamento.titolo;
+            if (titleQuery) highlightedTitle = highlightText(escapeHtml(collegamento.titolo), titleQuery);
+            // Evidenziazione argomenti
+            let highlightedArgomento1 = collegamento.argomento1_titolo;
+            let highlightedArgomento2 = collegamento.argomento2_titolo;
+            if (argomentiQuery) {
+                highlightedArgomento1 = highlightText(escapeHtml(collegamento.argomento1_titolo), argomentiQuery);
+                highlightedArgomento2 = highlightText(escapeHtml(collegamento.argomento2_titolo), argomentiQuery);
+            }
+            // Evidenziazione dettagli/preview
+            let dettagliPreview = '';
+            let dettagliSnippet = '';
+            if (collegamento.dettagli) {
+                const cleanDettagli = cleanPreviewText(collegamento.dettagli);
+                if (dettagliQuery) {
+                    const lowerDettagli = collegamento.dettagli.toLowerCase();
+                    const queryPos = lowerDettagli.indexOf(dettagliQuery.toLowerCase());
+                    if (queryPos !== -1) {
+                        const snippetStart = Math.max(0, queryPos - 50);
+                        const snippetEnd = Math.min(collegamento.dettagli.length, queryPos + dettagliQuery.length + 50);
+                        let snippet = collegamento.dettagli.substring(snippetStart, snippetEnd);
+                        if (snippetStart > 0) snippet = '...' + snippet;
+                        if (snippetEnd < collegamento.dettagli.length) snippet = snippet + '...';
+                        const highlightedSnippet = highlightText(escapeHtml(snippet), dettagliQuery);
+                        dettagliSnippet = `
+                            <div class="search-result">
+                                <div class="search-snippet">
+                                    <strong>Trovato in:</strong> ${highlightedSnippet}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                if (!dettagliSnippet) {
+                    dettagliPreview = `
+                        <div class="search-result">
+                            <div class="search-snippet">
+                                ${escapeHtml(createCleanPreview(collegamento.dettagli))}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            return `
+            <div class="collegamento-card" data-id="${collegamento.id}">
+                <div class="collegamento-header">
+                    <h3 class="collegamento-title">${highlightedTitle}</h3>
+                    <div class="collegamento-actions">
+                        <button class="btn-icon" onclick="editCollegamento(${collegamento.id})" title="Modifica">
+                            <img src="/static/icons/modify-icon.svg" alt="Modifica">
+                        </button>
+                        <button class="btn-icon btn-danger" onclick="deleteCollegamento(${collegamento.id})" title="Elimina">
+                            <img src="/static/icons/delete-icon.svg" alt="Elimina">
+                        </button>
+                    </div>
+                </div>
+                <div class="collegamento-argomenti">
+                    <div class="argomento-tag" style="border: 2.5px solid ${collegamento.materia1_colore}">
+                        <a href="/argomento/${collegamento.id_argomento1}">
+                            ${highlightedArgomento1}
+                        </a>
+                        <span class="materia-name">${collegamento.materia1_nome}</span>
+                    </div>
+                    <div class="collegamento-arrow">⟷</div>
+                    <div class="argomento-tag" style="border: 2.5px solid ${collegamento.materia2_colore}">
+                        <a href="/argomento/${collegamento.id_argomento2}">
+                            ${highlightedArgomento2}
+                        </a>
+                        <span class="materia-name">${collegamento.materia2_nome}</span>
+                    </div>
+                </div>
+                ${dettagliSnippet || dettagliPreview}
+                ${collegamento.dettagli && !dettagliSnippet ? `
+                <div class="collegamento-dettagli">
+                    <button class="dettagli-toggle" onclick="toggleDettagli(${collegamento.id})">
+                        <span class="icon">🔎</span> Visualizza dettagli
+                    </button>
+                </div>
+                ` : ''}
+                <div class="collegamento-footer">
+                    <span class="etichetta-qualita ${collegamento.etichetta_qualita.replace(/ /g, '-').toLowerCase()}">
+                        ${collegamento.etichetta_qualita.charAt(0).toUpperCase() + collegamento.etichetta_qualita.slice(1)}
+                    </span>
+                </div>
+            </div>
+        `;
+        }).join('');
+        
+        // Add search results info
+        updateSearchResults(filtered.length);
+    }
+    
+    function updateSearchResults(count) {
+        // Remove existing results info
+        const existingInfo = document.querySelector('.search-results-info');
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+        
+        const searchTitolo = document.getElementById('search-titolo').value;
+        const searchDettagli = document.getElementById('search-dettagli').value;
+        const filterQualita = document.getElementById('filter-qualita').value;
+        
+        // Only show results info if search/filter is active
+        if (searchTitolo || searchDettagli || filterQualita) {
+            const resultsInfo = document.createElement('div');
+            resultsInfo.className = 'search-results-info';
+            resultsInfo.innerHTML = `
+                <span class="results-count">
+                    Trovati ${count} collegamenti
+                </span>
+            `;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(resultsInfo, content.firstChild);
+        }
+    }
+
+    // Modal functions
+    function showCollegamentoModal(argomentoId = null) {
+        editingCollegamentoId = null;
+        document.getElementById('modal-title').textContent = 'Nuovo Collegamento';
+        document.getElementById('collegamento-form').reset();
+        document.getElementById('collegamento-id').value = '';
+        
+        // Reset argomento selectors
+        resetArgomentoSelector(1);
+        resetArgomentoSelector(2);
+        
+        // Pre-fill if coming from an argomento page
+        if (argomentoId) {
+            // This would be implemented when calling from argomento page
+        }
+        
+        document.getElementById('collegamento-modal').style.display = 'flex';
+    }
+
+    function closeCollegamentoModal() {
+        document.getElementById('collegamento-modal').style.display = 'none';
+    }
+
+    function editCollegamento(id) {
+        editingCollegamentoId = id;
+        document.getElementById('modal-title').textContent = 'Modifica Collegamento';
+        
+        fetch(`/api/collegamenti`)
+            .then(response => response.json())
+            .then(collegamenti => {
+                const collegamento = collegamenti.find(c => c.id === id);
+                if (collegamento) {
+                    document.getElementById('collegamento-id').value = id;
+                    document.getElementById('titolo').value = collegamento.titolo;
+                    document.getElementById('dettagli').value = collegamento.dettagli || '';
+                    document.getElementById('etichetta_qualita').value = collegamento.etichetta_qualita;
+                    
+                    // Set selected argomenti
+                    setSelectedArgomento(1, collegamento.id_argomento1, collegamento.argomento1_titolo, collegamento.materia1_nome);
+                    setSelectedArgomento(2, collegamento.id_argomento2, collegamento.argomento2_titolo, collegamento.materia2_nome);
+                    
+                    document.getElementById('collegamento-modal').style.display = 'flex';
+                }
+            });
+    }
+
+    function deleteCollegamento(id) {
+        if (confirm('Sei sicuro di voler eliminare questo collegamento?')) {
+            fetch(`/delete_collegamento/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.querySelector(`[data-id="${id}"]`).remove();
+                }
+            });
+        }
+    }
+
+    function toggleDettagli(id) {
+        fetch(`/api/collegamenti`)
+            .then(response => response.json())
+            .then(collegamenti => {
+                const collegamento = collegamenti.find(c => c.id === id);
+                if (collegamento && collegamento.dettagli) {
+                    document.getElementById('dettagli-content').innerHTML = marked.parse(collegamento.dettagli);
+                    document.getElementById('dettagli-modal').style.display = 'flex';
+                }
+            });
+    }
+
+    function closeDettagliModal() {
+        document.getElementById('dettagli-modal').style.display = 'none';
+    }
+
+    // Argomento selection
+    function selectArgomento(slot) {
+        currentArgomentoSlot = slot;
+        document.getElementById('argomento-selector-modal').style.display = 'flex';
+        loadAllMaterieArgomenti();
+    }
+
+    function closeArgomentoSelectorModal() {
+        document.getElementById('argomento-selector-modal').style.display = 'none';
+        currentArgomentoSlot = null;
+    }
+
+    function clearArgomento(slot) {
+        resetArgomentoSelector(slot);
+    }
+
+    function resetArgomentoSelector(slot) {
+        const selectedDiv = document.getElementById(`argomento${slot}-selected`);
+        selectedDiv.className = 'argomento-selected';
+        selectedDiv.innerHTML = '<span class="placeholder">Seleziona argomento</span><button type="button" class="cancel-btn" onclick="clearArgomento(' + slot + ')">&times;</button>';
+        document.getElementById(`id_argomento${slot}`).value = '';
+    }
+
+    function setSelectedArgomento(slot, id, titolo, materia) {
+        const selectedDiv = document.getElementById(`argomento${slot}-selected`);
+        selectedDiv.className = 'argomento-selected has-selection';
+        selectedDiv.innerHTML = `
+            <div class="selected-info">
+                <div class="selected-title">${titolo}</div>
+                <div class="selected-materia">${materia}</div>
+            </div>
+            <button type="button" class="cancel-btn" onclick="clearArgomento(${slot})">&times;</button>
+        `;
+        document.getElementById(`id_argomento${slot}`).value = id;
+    }
+
+    function toggleMateriaArgomenti(materiaId) {
+        const argomentiDiv = document.getElementById(`argomenti-${materiaId}`);
+        const icon = document.querySelector(`[onclick="toggleMateriaArgomenti(${materiaId})"] .expand-icon`);
+        
+        if (argomentiDiv.style.display === 'none') {
+            argomentiDiv.style.display = 'block';
+            icon.classList.add('expanded');
+            loadMateriaArgomenti(materiaId);
+        } else {
+            argomentiDiv.style.display = 'none';
+            icon.classList.remove('expanded');
+        }
+    }
+
+    function loadMateriaArgomenti(materiaId) {
+        fetch(`/api/argomenti/${materiaId}`)
+            .then(response => response.json())
+            .then(argomenti => {
+                const argomentiDiv = document.getElementById(`argomenti-${materiaId}`);
+                argomentiDiv.innerHTML = argomenti.map(argomento => `
+                    <div class="argomento-item" onclick="selectArgomentoFromList(${argomento.id}, '${argomento.titolo}', '${argomento.id_materia}')">
+                        <div class="argomento-item-title">${argomento.titolo}</div>
+                        <span class="argomento-item-preparazione preparazione-${argomento.etichetta_preparazione.split(' ')[0]}">
+                            ${argomento.etichetta_preparazione}
+                        </span>
+                    </div>
+                `).join('');
+            });
+    }
+
+    function loadAllMaterieArgomenti() {
+        // Load all argomenti for search functionality
+        fetch('/api/materie')
+            .then(response => response.json())
+            .then(materie => {
+                materie.forEach(materia => {
+                    const argomentiDiv = document.getElementById(`argomenti-${materia.id}`);
+                    if (argomentiDiv && argomentiDiv.style.display === 'block') {
+                        loadMateriaArgomenti(materia.id);
+                    }
+                });
+            });
+    }
+
+    function selectArgomentoFromList(id, titolo, materiaId) {
+        if (currentArgomentoSlot) {
+            // Get materia name
+            fetch('/api/materie')
+                .then(response => response.json())
+                .then(materie => {
+                    const materia = materie.find(m => m.id == materiaId);
+                    setSelectedArgomento(currentArgomentoSlot, id, titolo, materia.nome);
+                    closeArgomentoSelectorModal();
+                });
+        }
+    }
+
+    // Form submission
+    document.getElementById('collegamento-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const id = document.getElementById('collegamento-id').value;
+        
+        // Validation
+        if (!formData.get('id_argomento1') || !formData.get('id_argomento2')) {
+            alert('Devi selezionare entrambi gli argomenti');
+            return;
+        }
+        
+        if (formData.get('id_argomento1') === formData.get('id_argomento2')) {
+            alert('Non puoi collegare un argomento a se stesso');
+            return;
+        }
+        
+        const url = id ? `/update_collegamento/${id}` : '/add_collegamento';
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                closeCollegamentoModal();
+                location.reload();
+            }
+        });    });
+      // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        setupSearch();
+        
+        // Setup clear filters button
+        document.getElementById('clear-filters').addEventListener('click', clearFilters);
+        
+        // Make sure modals are initially hidden with display: none
+        document.getElementById('dettagli-modal').style.display = 'none';
+        document.getElementById('collegamento-modal').style.display = 'none';
+        document.getElementById('argomento-selector-modal').style.display = 'none';
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+    });// Make functions globally available
+    window.showCollegamentoModal = showCollegamentoModal;
+    window.closeCollegamentoModal = closeCollegamentoModal;
+    window.editCollegamento = editCollegamento;
+    window.deleteCollegamento = deleteCollegamento;
+    window.toggleDettagli = toggleDettagli;
+    window.closeDettagliModal = closeDettagliModal;
+    window.selectArgomento = selectArgomento;
+    window.closeArgomentoSelectorModal = closeArgomentoSelectorModal;
+    window.clearArgomento = clearArgomento;    window.toggleMateriaArgomenti = toggleMateriaArgomenti;
+    window.selectArgomentoFromList = selectArgomentoFromList;
+    
+    // Clear all filters function
+    function clearFilters() {
+        document.getElementById('search-titolo').value = '';
+        document.getElementById('search-dettagli').value = '';
+        if (document.getElementById('search-argomenti')) document.getElementById('search-argomenti').value = '';
+        document.getElementById('filter-qualita').value = '';
+        if (document.getElementById('filter-materia')) document.getElementById('filter-materia').value = '';
+        // Trigger search to reset results
+        const searchEvent = new Event('input');
+        document.getElementById('search-titolo').dispatchEvent(searchEvent);
+    }
+    </script>
+</body>
+</html>

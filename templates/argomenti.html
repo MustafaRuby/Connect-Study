@@ -12,54 +12,83 @@
     <link rel="stylesheet" href="/static/css/markdown.css">
     <link rel="stylesheet" href="/static/css/allegati.css">
     <link rel="stylesheet" href="/static/css/context-menu.css">
-    <link rel="stylesheet" href="/static/css/responsive.css">
-    <link rel="stylesheet" href="/static/css/argomenti-page.css"><!-- KaTeX CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
-    <!-- Highlight.js CSS - VS Code Dark theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/vs2015.min.css">
-      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>    <!-- CodeMirror for Markdown syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/overlay.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gfm/gfm.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+    <link rel="stylesheet" href="/static/css/responsive.css">    <link rel="stylesheet" href="/static/css/argomenti-page.css">
+    
+    <!-- Local libraries CSS -->
+    <link rel="stylesheet" href="/static/libs/katex/katex.min.css">
+    <link rel="stylesheet" href="/static/libs/highlightjs/vs2015.min.css">
+    <link rel="stylesheet" href="/static/libs/codemirror/codemirror.min.css">
+    <link rel="stylesheet" href="/static/libs/codemirror/monokai.min.css">
+    
+    <!-- Local libraries JavaScript -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
+    
+    <!-- CodeMirror for Markdown syntax highlighting -->
+    <script src="/static/libs/codemirror/codemirror.min.js"></script>
+    <script src="/static/libs/codemirror/overlay.min.js"></script>
+    <script src="/static/libs/codemirror/xml.min.js"></script>
+    <script src="/static/libs/codemirror/markdown.min.js"></script>
+    <script src="/static/libs/codemirror/gfm.min.js"></script>
+    <script src="/static/libs/codemirror/closebrackets.min.js"></script>
+    <script src="/static/libs/codemirror/matchbrackets.min.js"></script>
+    <script src="/static/libs/codemirror/active-line.min.js"></script>
     
     <!-- KaTeX JavaScript -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
-    <!-- KaTeX auto-render extension -->
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <script defer src="/static/libs/katex/katex.min.js"></script>
+    <script defer src="/static/libs/katex/auto-render.min.js"></script>
     
     <!-- Highlight.js Core + Popular Languages -->
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/sql.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/php.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/java.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/cpp.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/csharp.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/go.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/rust.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/kotlin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/swift.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/ruby.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/perl.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/r.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/matlab.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/shell.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/powershell.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/dockerfile.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/yaml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/xml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/json.min.js"></script>
+    <script src="/static/libs/highlightjs/highlight.min.js"></script>
+    <script src="/static/libs/highlightjs/sql.min.js"></script>
+    <script src="/static/libs/highlightjs/php.min.js"></script>
+    <script src="/static/libs/highlightjs/python.min.js"></script>
+    <script src="/static/libs/highlightjs/java.min.js"></script>
+    <script src="/static/libs/highlightjs/cpp.min.js"></script>
+    <script src="/static/libs/highlightjs/csharp.min.js"></script>
+    <script src="/static/libs/highlightjs/go.min.js"></script>
+    <script src="/static/libs/highlightjs/rust.min.js"></script>
+    <script src="/static/libs/highlightjs/kotlin.min.js"></script>
+    <script src="/static/libs/highlightjs/swift.min.js"></script>
+    <script src="/static/libs/highlightjs/ruby.min.js"></script>
+    <script src="/static/libs/highlightjs/perl.min.js"></script>
+    <script src="/static/libs/highlightjs/r.min.js"></script>
+    <script src="/static/libs/highlightjs/matlab.min.js"></script>
+    <script src="/static/libs/highlightjs/shell.min.js"></script>
+    <script src="/static/libs/highlightjs/powershell.min.js"></script>
+    <script src="/static/libs/highlightjs/dockerfile.min.js"></script>
+    <script src="/static/libs/highlightjs/yaml.min.js"></script>
+    <script src="/static/libs/highlightjs/xml.min.js"></script>
+    <script src="/static/libs/highlightjs/json.min.js"></script>
 </head>
 <body>
-    <!-- Context Menu per le card degli argomenti -->
+    <!-- Left Sidebar for Connections -->
+    <div id="left-sidebar" class="left-sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">🔗</span>
+            <span class="toggle-text">Collegamenti</span>
+        </div>
+        
+        <div class="sidebar-content">            <div class="sidebar-header">
+                <h3>Collegamenti</h3>
+                <button class="btn btn-sm add-btn" onclick="showCollegamentoModalEmpty()">
+                    <span class="icon">➕</span>
+                    Nuovo
+                </button>
+            </div>
+            
+            <div class="sidebar-sections">
+                <!-- Materie with their connections -->
+                <div id="sidebar-materie" class="sidebar-materie">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="main-content">
+        <!-- Context Menu per le card degli argomenti -->
     <div id="context-menu" class="context-menu">
         <div class="context-menu-item" data-action="edit">
             <span><img src="/static/icons/modify-icon.svg" width="16" height="16" style="vertical-align: middle;"> Modifica</span>
@@ -67,27 +96,35 @@
         <div class="context-menu-item" data-action="delete">
             <span><img src="/static/icons/delete-icon.svg" width="16" height="16" style="vertical-align: middle;"> Elimina</span>
         </div>
-    </div>
-
-    <!-- Modal di conferma eliminazione -->    <div id="confirm-delete-modal" class="modal" style="display: none;">
+    </div>    <!-- Modal di conferma eliminazione -->    
+    <div id="confirm-delete-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>Elimina argomento</h3>
-            <p>Per eliminare <b id="delete-argomento-title"></b>, scrivi il titolo esatto qui sotto e conferma:</p>
-            <input type="text" id="delete-argomento-input" placeholder="Titolo argomento">
-            <div class="modal-buttons">
-                <button id="confirm-delete-btn" class="btn btn-danger">Elimina</button>
-                <button id="cancel-delete-btn" class="btn btn-secondary">Annulla</button>
+            <div class="modal-header">
+                <h3>Elimina argomento</h3>
+                <button class="modal-close" onclick="document.getElementById('confirm-delete-modal').style.display = 'none'">&times;</button>
+            </div>            <div class="modal-body">
+                <p>Per eliminare <b id="delete-argomento-title"></b>, scrivi il titolo esatto qui sotto e conferma:</p>
+                <input type="text" id="delete-argomento-input" placeholder="Titolo argomento">
+                <div class="modal-buttons">
+                    <button id="confirm-delete-btn" class="add-btn">Elimina</button>
+                    <button id="cancel-delete-btn" class="cancel-btn">Annulla</button>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="header">
+    </div><div class="header">
         <div class="breadcrumb">
             <a href="/" class="breadcrumb-link">Materie</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-current">{{ materia.nome }}</span>
         </div>
         <h1 id="materia-title">{{ materia.nome }} - Argomenti</h1>
-        <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
+        <div class="header-buttons">
+            <a href="/collegamenti/materia/{{ materia.id }}" class="btn btn-secondary">
+                <span class="icon">🔗</span>
+                Collegamenti
+            </a>
+            <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>
+        </div>
     </div>
 
     <!-- Sezione ricerca e filtri -->
@@ -208,7 +245,7 @@
     
     <script>
         const socket = io();
-        const materiaId = {{ materia.id }};
+        const materiaId = "{{ materia.id }}";
           // Function to clean preview text from markdown artifacts
         function cleanPreviewText(text) {
             if (!text) return '';
@@ -375,11 +412,131 @@
             }
               return html;
         }
-        
-        function escapeHtml(text) {
+          function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Function to show new collegamento modal (redirects to collegamenti page)
+        function showCollegamentoModalEmpty() {
+            window.location.href = '/collegamenti';
+        }
+
+        // Sidebar functions for collegamenti
+        function loadSidebarConnections() {
+            fetch('/api/collegamenti')
+                .then(response => response.json())
+                .then(collegamenti => {
+                    updateSidebarConnections(collegamenti);
+                })
+                .catch(error => console.error('Error loading sidebar connections:', error));
+        }        function updateSidebarConnections(collegamenti) {
+            const sidebarMaterie = document.getElementById('sidebar-materie');
+            
+            // Group connections by materia
+            const materieMap = new Map();
+            
+            collegamenti.forEach(collegamento => {
+                // Add to materia 1
+                const materia1 = collegamento.materia1_nome;
+                if (!materieMap.has(materia1)) {
+                    materieMap.set(materia1, {
+                        nome: materia1,
+                        colore: collegamento.materia1_colore,
+                        collegamenti: []
+                    });
+                }
+                materieMap.get(materia1).collegamenti.push(collegamento);
+                
+                // Add to materia 2 if different
+                const materia2 = collegamento.materia2_nome;
+                if (materia2 !== materia1) {
+                    if (!materieMap.has(materia2)) {
+                        materieMap.set(materia2, {
+                            nome: materia2,
+                            colore: collegamento.materia2_colore,
+                            collegamenti: []
+                        });
+                    }
+                    materieMap.get(materia2).collegamenti.push(collegamento);
+                }
+            });
+            
+            // Generate sidebar HTML
+            sidebarMaterie.innerHTML = '';
+            
+            if (materieMap.size === 0) {
+                sidebarMaterie.innerHTML = '<p class="no-connections">Nessun collegamento trovato</p>';
+                return;
+            }
+            
+            materieMap.forEach((materiaData, materiaNome) => {
+                const materiaDiv = document.createElement('div');
+                materiaDiv.className = 'sidebar-materia';
+                
+                materiaDiv.innerHTML = `
+                    <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
+                        <div class="sidebar-materia-title">
+                            <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
+                            ${materiaNome}
+                        </div>
+                        <span class="sidebar-materia-toggle">▶</span>
+                    </div>
+                    <div class="sidebar-search-group">
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca collegamento..." oninput="filterCollegamenti(this, 'collegamento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca argomento..." oninput="filterCollegamenti(this, 'argomento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                    </div>
+                    <div class="sidebar-collegamenti">
+                        ${materiaData.collegamenti.map(conn => `
+                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="viewCollegamento(${conn.id})">
+                                <div class="collegamento-title">${conn.titolo}</div>
+                                <div class="collegamento-endpoints">
+                                    ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
+                                </div>
+                                <div class="collegamento-quality quality-${conn.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${conn.etichetta_qualita}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                sidebarMaterie.appendChild(materiaDiv);
+            });
+        }
+
+        function toggleMateriaConnections(headerElement) {
+            const materiaDiv = headerElement.parentElement;
+            materiaDiv.classList.toggle('expanded');
+        }        function viewCollegamento(collegamentoId) {
+            window.location.href = `/collegamento/${collegamentoId}`;
+        }
+
+        function filterCollegamenti(inputElement, filterType) {
+            const searchTerm = inputElement.value.toLowerCase();
+            const materiaDiv = inputElement.closest('.sidebar-materia');
+            const collegamenti = materiaDiv.querySelectorAll('.sidebar-collegamento');
+            
+            collegamenti.forEach(collegamento => {
+                let shouldShow = false;
+                
+                if (filterType === 'collegamento') {
+                    // Filter by connection title
+                    const titolo = collegamento.getAttribute('data-titolo');
+                    shouldShow = titolo.includes(searchTerm);
+                } else if (filterType === 'argomento') {
+                    // Filter by argument titles
+                    const argomenti = collegamento.getAttribute('data-argomenti');
+                    shouldShow = argomenti.includes(searchTerm);
+                }
+                
+                collegamento.style.display = shouldShow ? 'block' : 'none';
+            });
         }
 
         // Gestione popup argomento
@@ -767,9 +924,11 @@
                         argomento.originalPreview = cleanPreview;
                     }
                 }
-            });
-              // Setup search event listeners
+            });            // Setup search event listeners
             setupSearchListeners();
+            
+            // Load sidebar connections
+            loadSidebarConnections();
             
             // Enhanced file input handling
             const fileInput = document.getElementById('file_content');
@@ -1115,6 +1274,33 @@
                 console.error('Errore:', error);
                 alert('Errore durante l\'eliminazione dell\'argomento');                return Promise.reject(error);
             });        }        // Enhanced file input handling - moved to main DOMContentLoaded block
+
+        // === SIDEBAR TOGGLE ===
+function toggleSidebar() {
+    const sidebar = document.getElementById('left-sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (!sidebar || !mainContent) return;
+    sidebar.classList.toggle('open');
+    mainContent.classList.toggle('sidebar-open');
+    // Overlay per mobile
+    if (sidebar.classList.contains('open')) {
+        // Add overlay on mobile
+        if (window.innerWidth <= 768) {
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                overlay.onclick = () => toggleSidebar();
+                document.body.appendChild(overlay);
+            }
+        }
+    } else {
+        // Remove overlay
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (overlay) overlay.remove();
+    }
+}
     </script>
+    </div> <!-- End main-content -->
 </body>
 </html>

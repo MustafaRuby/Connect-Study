@@ -8,13 +8,39 @@
     <link rel="stylesheet" href="/static/css/buttons.css">
     <link rel="stylesheet" href="/static/css/cards.css">
     <link rel="stylesheet" href="/static/css/modals.css">
-    <link rel="stylesheet" href="/static/css/forms.css">
-    <link rel="stylesheet" href="/static/css/context-menu.css">
+    <link rel="stylesheet" href="/static/css/forms.css">    <link rel="stylesheet" href="/static/css/context-menu.css">
     <link rel="stylesheet" href="/static/css/responsive.css">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <!-- Local libraries -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
 </head>
 <body>
-    <div class="header">
+    <!-- Left Sidebar for Connections -->
+    <div id="left-sidebar" class="left-sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">🔗</span>
+            <span class="toggle-text">Collegamenti</span>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Collegamenti</h3>
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()">
+                    <span class="icon">➕</span>
+                    Nuovo
+                </button>
+            </div>
+            
+            <div class="sidebar-sections">
+                <div id="sidebar-materie" class="sidebar-materie">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="main-content">
+        <div class="header">
         <h1>Materie</h1>
         <button id="openMateriaPopup" class="add-btn">Aggiungi materia</button>
     </div>    <div id="materie-list" class="materie-list">
@@ -41,16 +67,144 @@
         </div>    </div>
     <script src="/static/drag.js"></script>
     <script>
-        // Applica il contrasto alle materie già renderizzate dal server
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.materia-card').forEach(card => {
-                const bgColor = card.style.background;
-                if (bgColor) {
-                    const contrastClass = getContrastClass(bgColor);
-                    card.classList.add(contrastClass);
+        // === LEFT SIDEBAR FUNCTIONALITY ===
+        function toggleSidebar() {
+            const sidebar = document.getElementById('left-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('sidebar-open');
+            
+            // Load connections when opening sidebar
+            if (sidebar.classList.contains('open')) {
+                loadSidebarConnections();
+            }
+        }
+
+        function showCollegamentoModalEmpty() {
+            window.location.href = '/collegamenti';
+        }
+
+        function loadSidebarConnections() {
+            fetch('/api/collegamenti')
+                .then(response => response.json())
+                .then(collegamenti => {
+                    updateSidebarConnections(collegamenti);
+                })
+                .catch(error => console.error('Error loading sidebar connections:', error));
+        }
+
+        function updateSidebarConnections(collegamenti) {
+            const sidebarMaterie = document.getElementById('sidebar-materie');
+            
+            // Group connections by materia
+            const materieMap = new Map();
+            
+            collegamenti.forEach(collegamento => {
+                // Add to materia 1
+                const materia1 = collegamento.materia1_nome;
+                if (!materieMap.has(materia1)) {
+                    materieMap.set(materia1, {
+                        nome: materia1,
+                        colore: collegamento.materia1_colore,
+                        collegamenti: []
+                    });
+                }
+                materieMap.get(materia1).collegamenti.push(collegamento);
+                
+                // Add to materia 2 if different
+                const materia2 = collegamento.materia2_nome;
+                if (materia2 !== materia1) {
+                    if (!materieMap.has(materia2)) {
+                        materieMap.set(materia2, {
+                            nome: materia2,
+                            colore: collegamento.materia2_colore,
+                            collegamenti: []
+                        });
+                    }
+                    materieMap.get(materia2).collegamenti.push(collegamento);
                 }
             });
-        });
-    </script>
+            
+            // Generate sidebar HTML
+            sidebarMaterie.innerHTML = '';
+            
+            if (materieMap.size === 0) {
+                sidebarMaterie.innerHTML = '<p class="no-connections">Nessun collegamento trovato</p>';
+                return;
+            }
+            
+            materieMap.forEach((materiaData, materiaNome) => {
+                const materiaDiv = document.createElement('div');
+                materiaDiv.className = 'sidebar-materia';
+                  materiaDiv.innerHTML = `
+                    <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
+                        <div class="sidebar-materia-title">
+                            <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
+                            ${materiaNome}
+                        </div>
+                        <span class="sidebar-materia-toggle">▶</span>
+                    </div>
+                    <div class="sidebar-search-group">
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca collegamento..." oninput="filterCollegamenti(this, 'collegamento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca argomento..." oninput="filterCollegamenti(this, 'argomento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                    </div>
+                    <div class="sidebar-collegamenti">
+                        ${materiaData.collegamenti.map(conn => `
+                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="viewCollegamento(${conn.id})">
+                                <div class="collegamento-title">${conn.titolo}</div>
+                                <div class="collegamento-endpoints">
+                                    ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
+                                </div>
+                                <div class="collegamento-quality quality-${conn.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${conn.etichetta_qualita}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                sidebarMaterie.appendChild(materiaDiv);
+            });
+        }
+
+        function toggleMateriaConnections(headerElement) {
+            const materiaDiv = headerElement.parentElement;
+            materiaDiv.classList.toggle('expanded');
+        }        function viewCollegamento(collegamentoId) {
+            window.location.href = `/collegamento/${collegamentoId}`;
+        }
+
+        function filterCollegamenti(inputElement, filterType) {
+            const searchTerm = inputElement.value.toLowerCase();
+            const materiaDiv = inputElement.closest('.sidebar-materia');
+            const collegamenti = materiaDiv.querySelectorAll('.sidebar-collegamento');
+            
+            collegamenti.forEach(collegamento => {
+                let shouldShow = false;
+                
+                if (filterType === 'collegamento') {
+                    // Filter by connection title
+                    const titolo = collegamento.getAttribute('data-titolo');
+                    shouldShow = titolo.includes(searchTerm);
+                } else if (filterType === 'argomento') {
+                    // Filter by argument titles
+                    const argomenti = collegamento.getAttribute('data-argomenti');
+                    shouldShow = argomenti.includes(searchTerm);
+                }
+                
+                collegamento.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        // Load sidebar connections on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarConnections();
+        });    </script>
+    </div> <!-- End main-content -->
 </body>
 </html>

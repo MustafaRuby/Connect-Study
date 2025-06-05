@@ -1,0 +1,32 @@
+/* 
+* Button icon styles for Collegamenti page
+* Fix for oversized action buttons
+*/
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.btn-icon:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.btn-icon img {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-icon.btn-danger:hover {
+    background: #ffebee;
+}

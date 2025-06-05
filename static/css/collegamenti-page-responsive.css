@@ -1,0 +1,21 @@
+/* Media query for responsive search layout */
+@media (max-width: 768px) {
+    .search-row {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .search-input-group:last-child {
+        grid-column: 1 / -1;
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-input-group {
+        grid-column: 1 / -1;
+    }
+}

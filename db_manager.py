@@ -142,3 +142,147 @@ def delete_allegato(id):
     conn.execute('DELETE FROM allegati WHERE id = ?', (id,))
     conn.commit()
     conn.close()
+
+# === COLLEGAMENTI OPERATIONS ===
+
+def get_all_collegamenti():
+    """Ottiene tutti i collegamenti con i dettagli degli argomenti"""
+    conn = get_db_connection()
+    collegamenti = conn.execute('''
+        SELECT c.*, 
+               a1.titolo as argomento1_titolo, a1.id_materia as argomento1_materia,
+               a2.titolo as argomento2_titolo, a2.id_materia as argomento2_materia,
+               m1.nome as materia1_nome, m1.colore as materia1_colore,
+               m2.nome as materia2_nome, m2.colore as materia2_colore
+        FROM collegamenti c
+        JOIN argomenti a1 ON c.id_argomento1 = a1.id
+        JOIN argomenti a2 ON c.id_argomento2 = a2.id
+        JOIN materie m1 ON a1.id_materia = m1.id
+        JOIN materie m2 ON a2.id_materia = m2.id
+        ORDER BY c.id DESC
+    ''').fetchall()
+    conn.close()
+    return collegamenti
+
+def get_collegamenti_by_materia(id_materia):
+    """Ottiene tutti i collegamenti che coinvolgono argomenti di una materia"""
+    conn = get_db_connection()
+    collegamenti = conn.execute('''
+        SELECT c.*, 
+               a1.titolo as argomento1_titolo, a1.id_materia as argomento1_materia,
+               a2.titolo as argomento2_titolo, a2.id_materia as argomento2_materia,
+               m1.nome as materia1_nome, m1.colore as materia1_colore,
+               m2.nome as materia2_nome, m2.colore as materia2_colore
+        FROM collegamenti c
+        JOIN argomenti a1 ON c.id_argomento1 = a1.id
+        JOIN argomenti a2 ON c.id_argomento2 = a2.id
+        JOIN materie m1 ON a1.id_materia = m1.id
+        JOIN materie m2 ON a2.id_materia = m2.id
+        WHERE a1.id_materia = ? OR a2.id_materia = ?
+        ORDER BY c.id DESC
+    ''', (id_materia, id_materia)).fetchall()
+    conn.close()
+    return collegamenti
+
+def get_collegamenti_by_argomento(id_argomento):
+    """Ottiene tutti i collegamenti che coinvolgono un argomento specifico"""
+    conn = get_db_connection()
+    collegamenti = conn.execute('''
+        SELECT c.*, 
+               a1.titolo as argomento1_titolo, a1.id_materia as argomento1_materia,
+               a2.titolo as argomento2_titolo, a2.id_materia as argomento2_materia,
+               m1.nome as materia1_nome, m1.colore as materia1_colore,
+               m2.nome as materia2_nome, m2.colore as materia2_colore
+        FROM collegamenti c
+        JOIN argomenti a1 ON c.id_argomento1 = a1.id
+        JOIN argomenti a2 ON c.id_argomento2 = a2.id
+        JOIN materie m1 ON a1.id_materia = m1.id
+        JOIN materie m2 ON a2.id_materia = m2.id
+        WHERE c.id_argomento1 = ? OR c.id_argomento2 = ?
+        ORDER BY c.id DESC
+    ''', (id_argomento, id_argomento)).fetchall()
+    conn.close()
+    return collegamenti
+
+def add_collegamento(titolo, id_argomento1, id_argomento2, dettagli='', etichetta_qualita='collegamento media qualità'):
+    """Aggiunge un nuovo collegamento"""
+    conn = get_db_connection()
+    conn.execute('''INSERT INTO collegamenti (titolo, id_argomento1, id_argomento2, dettagli, etichetta_qualita) 
+                    VALUES (?, ?, ?, ?, ?)''', 
+                (titolo, id_argomento1, id_argomento2, dettagli, etichetta_qualita))
+    conn.commit()
+    conn.close()
+
+def get_collegamento_by_id(id):
+    """Ottiene un collegamento per ID con tutti i dettagli"""
+    conn = get_db_connection()
+    collegamento = conn.execute('''
+        SELECT c.*, 
+               a1.titolo as argomento1_titolo, a1.id_materia as argomento1_materia,
+               a2.titolo as argomento2_titolo, a2.id_materia as argomento2_materia,
+               m1.nome as materia1_nome, m1.colore as materia1_colore,
+               m2.nome as materia2_nome, m2.colore as materia2_colore
+        FROM collegamenti c
+        JOIN argomenti a1 ON c.id_argomento1 = a1.id
+        JOIN argomenti a2 ON c.id_argomento2 = a2.id
+        JOIN materie m1 ON a1.id_materia = m1.id
+        JOIN materie m2 ON a2.id_materia = m2.id
+        WHERE c.id = ?
+    ''', (id,)).fetchone()
+    conn.close()
+    return collegamento
+
+def update_collegamento(id, titolo, dettagli, etichetta_qualita):
+    """Aggiorna un collegamento esistente"""
+    conn = get_db_connection()
+    conn.execute('''UPDATE collegamenti SET titolo = ?, dettagli = ?, etichetta_qualita = ? 
+                    WHERE id = ?''', (titolo, dettagli, etichetta_qualita, id))
+    conn.commit()
+    conn.close()
+
+def delete_collegamento(id):
+    """Elimina un collegamento"""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM collegamenti WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+
+def search_collegamenti(query_titolo='', query_dettagli='', etichetta_qualita=''):
+    """Cerca collegamenti per titolo, dettagli e/o etichetta qualità"""
+    conn = get_db_connection()
+    
+    where_conditions = []
+    params = []
+    
+    if query_titolo:
+        where_conditions.append('c.titolo LIKE ?')
+        params.append(f'%{query_titolo}%')
+    
+    if query_dettagli:
+        where_conditions.append('c.dettagli LIKE ?')
+        params.append(f'%{query_dettagli}%')
+    
+    if etichetta_qualita:
+        where_conditions.append('c.etichetta_qualita = ?')
+        params.append(etichetta_qualita)
+    
+    where_clause = ' AND '.join(where_conditions) if where_conditions else '1=1'
+    
+    query = f'''
+        SELECT c.*, 
+               a1.titolo as argomento1_titolo, a1.id_materia as argomento1_materia,
+               a2.titolo as argomento2_titolo, a2.id_materia as argomento2_materia,
+               m1.nome as materia1_nome, m1.colore as materia1_colore,
+               m2.nome as materia2_nome, m2.colore as materia2_colore
+        FROM collegamenti c
+        JOIN argomenti a1 ON c.id_argomento1 = a1.id
+        JOIN argomenti a2 ON c.id_argomento2 = a2.id
+        JOIN materie m1 ON a1.id_materia = m1.id
+        JOIN materie m2 ON a2.id_materia = m2.id
+        WHERE {where_clause}
+        ORDER BY c.id DESC
+    '''
+    
+    collegamenti = conn.execute(query, params).fetchall()
+    conn.close()
+    return collegamenti

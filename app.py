@@ -460,6 +460,12 @@ def api_materie():
     materie = db_manager.get_all_materie()
     return jsonify([dict(m) for m in materie])
 
+@app.route('/api/argomenti/materia/<int:id_materia>')
+def api_argomenti_by_materia(id_materia):
+    """API endpoint per ottenere argomenti di una materia specifica"""
+    argomenti = db_manager.get_argomenti_by_materia(id_materia)
+    return jsonify([dict(a) for a in argomenti])
+
 @app.route('/materia/<int:id>')
 def materia_argomenti(id):
     materia = db_manager.get_materia_by_id(id)
@@ -636,6 +642,104 @@ def delete_argomento(id):
 def api_allegati(id_argomento):
     allegati = db_manager.get_allegati_by_argomento(id_argomento)
     return jsonify([dict(a) for a in allegati])
+
+# === COLLEGAMENTI ROUTES ===
+
+@app.route('/collegamenti')
+def collegamenti_list():
+    """Pagina con tutti i collegamenti"""
+    collegamenti = db_manager.get_all_collegamenti()
+    materie = db_manager.get_all_materie()
+    return render_template('collegamenti.html', collegamenti=collegamenti, materie=materie)
+
+@app.route('/collegamenti/materia/<int:id_materia>')
+def collegamenti_materia(id_materia):
+    """Pagina con i collegamenti di una materia specifica"""
+    materia = db_manager.get_materia_by_id(id_materia)
+    if not materia:
+        return "Materia non trovata", 404
+    collegamenti = db_manager.get_collegamenti_by_materia(id_materia)
+    materie = db_manager.get_all_materie()
+    return render_template('collegamenti.html', collegamenti=collegamenti, materie=materie, 
+                         materia_selezionata=materia)
+
+@app.route('/collegamento/<int:id>')
+def collegamento_dettaglio(id):
+    """Pagina dettaglio di un collegamento"""
+    collegamento = db_manager.get_collegamento_by_id(id)
+    if not collegamento:
+        return "Collegamento non trovato", 404
+    return render_template('collegamento.html', collegamento=collegamento)
+
+@app.route('/add_collegamento', methods=['POST'])
+def add_collegamento():
+    """Aggiunge un nuovo collegamento"""
+    try:
+        titolo = request.form['titolo']
+        id_argomento1 = request.form['id_argomento1']
+        id_argomento2 = request.form['id_argomento2']
+        dettagli = request.form.get('dettagli', '')
+        etichetta_qualita = request.form.get('etichetta_qualita', 'collegamento media qualità')
+        
+        # Verifica che gli argomenti siano diversi
+        if id_argomento1 == id_argomento2:
+            return jsonify({'success': False, 'error': 'Non puoi collegare un argomento a se stesso'})
+        
+        db_manager.add_collegamento(titolo, id_argomento1, id_argomento2, dettagli, etichetta_qualita)
+        socketio.emit('update_collegamenti')
+        return jsonify({'success': True, 'message': 'Collegamento creato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/update_collegamento/<int:id>', methods=['POST'])
+def update_collegamento(id):
+    """Aggiorna un collegamento esistente"""
+    try:
+        titolo = request.form['titolo']
+        dettagli = request.form.get('dettagli', '')
+        etichetta_qualita = request.form.get('etichetta_qualita', 'collegamento media qualità')
+        
+        db_manager.update_collegamento(id, titolo, dettagli, etichetta_qualita)
+        socketio.emit('update_collegamenti')
+        return jsonify({'success': True, 'message': 'Collegamento aggiornato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/delete_collegamento/<int:id>', methods=['DELETE'])
+def delete_collegamento(id):
+    """Elimina un collegamento"""
+    db_manager.delete_collegamento(id)
+    socketio.emit('update_collegamenti')
+    return ('', 204)
+
+# API per ottenere collegamenti
+@app.route('/api/collegamenti')
+def api_collegamenti():
+    """API per ottenere tutti i collegamenti"""
+    collegamenti = db_manager.get_all_collegamenti()
+    return jsonify([dict(c) for c in collegamenti])
+
+@app.route('/api/collegamenti/materia/<int:id_materia>')
+def api_collegamenti_materia(id_materia):
+    """API per ottenere i collegamenti di una materia"""
+    collegamenti = db_manager.get_collegamenti_by_materia(id_materia)
+    return jsonify([dict(c) for c in collegamenti])
+
+@app.route('/api/collegamenti/argomento/<int:id_argomento>')
+def api_collegamenti_argomento(id_argomento):
+    """API per ottenere i collegamenti di un argomento"""
+    collegamenti = db_manager.get_collegamenti_by_argomento(id_argomento)
+    return jsonify([dict(c) for c in collegamenti])
+
+@app.route('/api/search_collegamenti')
+def api_search_collegamenti():
+    """API per cercare collegamenti"""
+    query_titolo = request.args.get('titolo', '')
+    query_dettagli = request.args.get('dettagli', '')
+    etichetta_qualita = request.args.get('etichetta_qualita', '')
+    
+    collegamenti = db_manager.search_collegamenti(query_titolo, query_dettagli, etichetta_qualita)
+    return jsonify([dict(c) for c in collegamenti])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

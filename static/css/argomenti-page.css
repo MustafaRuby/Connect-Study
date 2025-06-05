@@ -187,3 +187,37 @@
     border: none !important;
     background: none !important;
 }
+
+/* Header buttons layout */
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin-top: 1em;
+}
+
+.header-buttons .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.6em 1.2em;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.header-buttons .btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.header-buttons .btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+.header-buttons .icon {
+    font-size: 1.1em;
+}
