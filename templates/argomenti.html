@@ -190,12 +190,19 @@
                         <option value="media preparazione">Media preparazione</option>
                         <option value="buona preparazione">Buona preparazione</option>
                     </select>
-                </div>                  <div class="form-group">
+                </div>                <div class="form-group">
                     <label for="contenuto_md">Contenuto (Markdown):</label>
-                    <div class="markdown-editor">
+                    <div id="add-markdown-editor-section" class="markdown-editor">
                         <div class="editor-tabs">
                             <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
                             <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
+                            
+                            <!-- Editor size controls -->
+                            <div class="editor-size-controls">
+                                <button type="button" class="size-btn" id="add-fullscreen-toggle" title="Attiva/Disattiva modalità fullscreen">
+                                    <span class="size-icon">⛶</span>
+                                </button>
+                            </div>
                         </div>
                         <textarea name="contenuto_md" id="contenuto_md_add" placeholder="Inserisci il contenuto in formato Markdown..." rows="10"></textarea>
                         <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
@@ -617,9 +624,10 @@
                 
                 // Find CodeMirror wrapper
                 const codeMirrorWrapper = textarea.nextElementSibling;
-                
-                if (tab === 'editor') {
+                  if (tab === 'editor') {
                     if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                        // CodeMirror is available, hide textarea and show CodeMirror
+                        textarea.style.display = 'none';
                         codeMirrorWrapper.style.display = 'block';
                         // Refresh CodeMirror when shown
                         const cm = codeMirrorWrapper.CodeMirror;
@@ -627,17 +635,20 @@
                             setTimeout(() => cm.refresh(), 10);
                         }
                     } else {
+                        // No CodeMirror, show textarea
                         textarea.style.display = 'block';
                     }
-                    preview.style.display = 'none';
-                } else {
+                    preview.style.display = 'none';                } else {
                     if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                        // Hide both textarea and CodeMirror, show preview
+                        textarea.style.display = 'none';
                         codeMirrorWrapper.style.display = 'none';
                         // Get content from CodeMirror
                         const cm = codeMirrorWrapper.CodeMirror;
                         const content = cm ? cm.getValue() : textarea.value;
                         preview.innerHTML = parseMarkdownSafely(content) || '<p>Nessun contenuto da visualizzare</p>';
                     } else {
+                        // Hide textarea, show preview
                         textarea.style.display = 'none';
                         preview.innerHTML = parseMarkdownSafely(textarea.value) || '<p>Nessun contenuto da visualizzare</p>';
                     }
@@ -816,11 +827,13 @@
                         }
                     });
                 });
-                observer.observe(argomentoPopup, { attributes: true });
-            }
+                observer.observe(argomentoPopup, { attributes: true });            }
             
             // Tab switching functionality for markdown editor
             setupTabSwitching();
+            
+            // Initialize editor size controls for add argument form
+            setupAddEditorSizeControls();
         });
         
         function setupTabSwitching() {
@@ -846,17 +859,20 @@
                     
                     // Find CodeMirror wrapper
                     const codeMirrorWrapper = textarea.nextElementSibling;
-                    
-                    if (tabType === 'editor') {
-                        // Show editor, hide preview
-                        textarea.style.display = 'block';
+                      if (tabType === 'editor') {
+                        // Show appropriate editor, hide preview
                         if (codeMirrorWrapper && codeMirrorWrapper.classList.contains('CodeMirror')) {
+                            // CodeMirror is available, hide textarea and show CodeMirror
+                            textarea.style.display = 'none';
                             codeMirrorWrapper.style.display = 'block';
                             // Refresh CodeMirror when shown
                             const cm = codeMirrorWrapper.CodeMirror;
                             if (cm) {
                                 setTimeout(() => cm.refresh(), 10);
                             }
+                        } else {
+                            // No CodeMirror, show textarea
+                            textarea.style.display = 'block';
                         }
                         if (previewDiv) {
                             previewDiv.style.display = 'none';
@@ -1374,9 +1390,74 @@ function toggleSidebar() {
             const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
             return text.replace(regex, '<mark class="search-highlight">$1</mark>');
         }
-        
-        function escapeRegex(string) {
+          function escapeRegex(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Function to handle editor size controls for add argument form
+        function setupAddEditorSizeControls() {
+            let isFullscreen = false;
+            
+            // Get the fullscreen toggle button
+            const toggleBtn = document.getElementById('add-fullscreen-toggle');
+            const editorSection = document.getElementById('add-markdown-editor-section');
+            
+            if (!toggleBtn || !editorSection) return;
+            
+            // Add click handler to toggle button
+            toggleBtn.addEventListener('click', function() {
+                isFullscreen = !isFullscreen;
+                
+                // Toggle fullscreen class and active state
+                if (isFullscreen) {
+                    editorSection.classList.add('editor-large');
+                    toggleBtn.classList.add('active');
+                    // Add escape key listener
+                    addFullscreenEscapeListener();
+                } else {
+                    editorSection.classList.remove('editor-large');
+                    toggleBtn.classList.remove('active');
+                    // Remove escape key listener
+                    removeFullscreenEscapeListener();
+                }
+                
+                // Refresh CodeMirror if it exists
+                refreshAddCodeMirror();
+            });
+            
+            // Function to refresh CodeMirror for add editor
+            function refreshAddCodeMirror() {
+                const textarea = document.getElementById('contenuto_md_add');
+                if (textarea && textarea.nextElementSibling && textarea.nextElementSibling.classList.contains('CodeMirror')) {
+                    const cm = textarea.nextElementSibling.CodeMirror;
+                    if (cm) {
+                        setTimeout(() => {
+                            cm.refresh();
+                            cm.focus();
+                        }, 100);
+                    }
+                }
+            }
+            
+            // Escape key handler for fullscreen mode
+            let escapeHandler = null;
+            
+            function addFullscreenEscapeListener() {
+                escapeHandler = function(e) {
+                    if (e.key === 'Escape' && isFullscreen) {
+                        // Click the toggle button to exit fullscreen
+                        toggleBtn.click();
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            }
+            
+            function removeFullscreenEscapeListener() {
+                if (escapeHandler) {
+                    document.removeEventListener('keydown', escapeHandler);
+                    escapeHandler = null;
+                }
+            }
         }
         </script>
     </div> <!-- End main-content --><!-- Sidebar Collegamento Modal -->

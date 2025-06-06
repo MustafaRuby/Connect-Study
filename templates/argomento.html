@@ -183,10 +183,16 @@
         
         <!-- Editor markdown (nascosto di default) -->
         <div id="markdown-editor-section" class="markdown-editor-section" style="display:none;">
-            <div class="editor-container">                <div class="markdown-editor">
+            <div class="editor-container">
+                <div class="markdown-editor">
                     <div class="editor-tabs">
                         <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
-                        <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
+                        <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>                          <!-- Editor size controls -->
+                        <div class="editor-size-controls">
+                            <button type="button" class="size-btn" id="fullscreen-toggle" title="Attiva/Disattiva modalità fullscreen">
+                                <span class="size-icon">⛶</span>
+                            </button>
+                        </div>
                     </div>                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
                     <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
                 </div>
@@ -523,13 +529,11 @@
                     }
                 }
                 return mainEditor;
-            }
-            
-            // Initialize CodeMirror with retry mechanism
+            }            // Initialize CodeMirror with retry mechanism
             initCodeMirror();
-            
-            updateMarkdownView();
+              updateMarkdownView();
             setupEventListeners();
+            setupEditorSizeControls();
             
             // Check if edit mode should be activated from URL parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -572,9 +576,7 @@
             
             // Gestione navigazione ricerca
             document.getElementById('search-prev').addEventListener('click', navigateToPrevious);
-            document.getElementById('search-next').addEventListener('click', navigateToNext);
-            
-            // Gestione tasto Enter per navigazione
+            document.getElementById('search-next').addEventListener('click', navigateToNext);            // Gestione tasto Enter per navigazione
             document.getElementById('search-in-content').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -629,8 +631,7 @@
                     switchTab(this.dataset.tab);
                 });
             });
-            
-            // Gestione selezione file
+              // Gestione selezione file
             document.getElementById('file_content').addEventListener('change', function() {
                 const fileModeSection = document.getElementById('file-mode-section');
                 if (this.files.length > 0) {
@@ -639,8 +640,7 @@
                     fileModeSection.style.display = 'none';
                 }
             });
-            
-            // Gestione collegamenti
+              // Gestione collegamenti
             document.getElementById('collegaBtn').addEventListener('click', function() {
                 showCollegamentoModal({{ argomento.id }});
             });
@@ -968,15 +968,18 @@
                     formData.append('file_mode', selectedModeElement.value);
                 }
             }
-            
-            fetch(`/update_argomento/${argomentoId}`, {
+              fetch(`/update_argomento/${argomentoId}`, {
                 method: 'POST',
                 body: formData
             }).then(response => {
                 if (response.ok) {
-                    location.reload(); // Ricarica la pagina per mostrare le modifiche                } else {
+                    location.reload(); // Ricarica la pagina per mostrare le modifiche
+                } else {
                     alert('Errore nel salvataggio');
                 }
+            }).catch(error => {
+                console.error('Errore durante il salvataggio:', error);
+                alert('Errore nel salvataggio');
             });
         }
         
@@ -1802,9 +1805,73 @@ function closeSidebarCollegamentoModal() {
             const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
             return text.replace(regex, '<mark class="search-highlight">$1</mark>');
         }
-        
-        function escapeRegex(string) {
+          function escapeRegex(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+          // Function to handle editor size controls
+        function setupEditorSizeControls() {
+            let isFullscreen = false;
+            
+            // Get the fullscreen toggle button
+            const toggleBtn = document.getElementById('fullscreen-toggle');
+            const editorSection = document.getElementById('markdown-editor-section');
+            
+            if (!toggleBtn || !editorSection) return;
+            
+            // Add click handler to toggle button
+            toggleBtn.addEventListener('click', function() {
+                isFullscreen = !isFullscreen;
+                
+                // Toggle fullscreen class and active state
+                if (isFullscreen) {
+                    editorSection.classList.add('editor-large');
+                    toggleBtn.classList.add('active');
+                    // Add escape key listener
+                    addFullscreenEscapeListener();
+                } else {
+                    editorSection.classList.remove('editor-large');
+                    toggleBtn.classList.remove('active');
+                    // Remove escape key listener
+                    removeFullscreenEscapeListener();
+                }
+                
+                // Refresh CodeMirror if it exists
+                refreshCodeMirror();
+            });
+            
+            // Function to refresh CodeMirror
+            function refreshCodeMirror() {
+                const textarea = document.getElementById('contenuto_md');
+                if (textarea && textarea.nextElementSibling && textarea.nextElementSibling.classList.contains('CodeMirror')) {
+                    const cm = textarea.nextElementSibling.CodeMirror;
+                    if (cm) {
+                        setTimeout(() => {
+                            cm.refresh();
+                            cm.focus();
+                        }, 100);
+                    }
+                }
+            }
+            
+            // Escape key handler for fullscreen mode
+            let escapeHandler = null;
+            
+            function addFullscreenEscapeListener() {
+                escapeHandler = function(e) {
+                    if (e.key === 'Escape' && isFullscreen) {
+                        // Click the toggle button to exit fullscreen
+                        toggleBtn.click();
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            }
+            
+            function removeFullscreenEscapeListener() {
+                if (escapeHandler) {
+                    document.removeEventListener('keydown', escapeHandler);
+                    escapeHandler = null;
+                }
+            }
         }
     </script>
 </body>
