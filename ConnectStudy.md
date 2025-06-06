@@ -7,7 +7,7 @@ L'idea è di fare un'applicazione che mi permetta di studiare per la fase orale 
 
 ## Funzionamento dell'applicazione
 
-L'applicazione deve usare Python-Flask con SQLi (senza SQLAlchemy, e con un file esterno .sql per la creazione delle tabelle con sintassi SQLi) come backend. Deve usare il templating di Flask e HTML CSS e JS nel frontend per semplicità.
+L'applicazione deve usare Python-Flask con SQLi (senza SQLAlchemy, e con un file esterno .sql per la creazione delle tabelle con sintassi SQLi) come backend. Deve usare il templating di Flask e HTML CSS e JS nel frontend per semplicità. Si ha un file db_manager per gestire le funzionalità dei database, e si importano le sue funzioni nel file principale, app.py
 
 ## Materie e argomenti
 
@@ -39,7 +39,17 @@ C'è anche una sezione simulazioni accessibile da ovunque tramite un bottone.
 Cliccando sul bottone si apre una pagina nuova. Dentro questa pagina si hanno i cosiddetti simulazioni. Lo studente può creare queste simulazioni che venono rappresentati da apposite card. Ogni simulazione contiene:
 - Lo spunto, che potrebbe essere un immagine oppure del testo, se è un immagine lo studente può inserirlo, se è un testo lo studente può scriverlo.
 
-Avendo inserito lo spunto si è creata una simulazione. Dentro la simulazione puoi inserire i cosiddetti collegamentiSimulazione, una tabella separata ma con duplice funzionamento e propria solo della simulazione, puoi usare comunque collegamenti normali, che compilano comunque un nuovo record in collegamntiSimulazione. Questi qua possono partitre sia dallo spunto della simulazione, nel quale caso il campo dell'argomento 1 sarà null, sia da un'altro argomento, altrimenti funzionano esattamente come gli altri collegamenti normali e appaiono dentro la simulazione come dei card. Se si vede nella visualizzazione del collegmanto che arogmento 1 è null, allora si dice che è connesso allo spunto. 
+Avendo inserito lo spunto si è creata una simulazione. Dentro la simulazione puoi inserire i cosiddetti fili di collegamento, dentro ogni filo puoi inserire i cosiddetti collegamentiSimulazione tramite un bottone apposito, una tabella separata ma con duplice funzionamento rispetto al collegamento normale e propria solo della simulazione, puoi usare comunque collegamenti normali, che compilano comunque un nuovo record in collegamntiSimulazione. Questi qua possono partitre sia dallo spunto della simulazione, nel quale caso il campo dell'argomento 1 sarà null, sia da un'altro argomento, altrimenti funzionano esattamente come gli altri collegamenti normali e appaiono dentro la simulazione come dei card. Se si vede nella visualizzazione del collegmanto che arogmento 1 è null, allora si dice che è connesso allo spunto. 
+
+La struttura nel db sarebbe: Simulazione (con immagine), filo (proprio della simulazione), collegamentoSimulazione (proprio del filo). Ogni simulazione può avere più linee, e viceversa (cardinalità N:M), e lo stesso anche per i fili-collegamentiSimulazione.
+
+All'inserimento del collegamento all'interno del filo di collegamento, l'utente è garantito la possibilità di scegliere di importare un "collegamento esterno", o altre alternative discusse di seguito, dove i collegamenti esterni sono i collegamenti normali, mentre i collegamenti simulazioni sono i collegamenti nella tabella CollegamentoSimulazione. Se un utente sceglie di usare un collegamento esterno, al salvataggio del collegamento nel filo, si salva una diretta copia del database nella tabella CollegamentoSimulazione, ovviamente con la chiave esterna del filo in cui si è, e si salva quella nel filo, non il collegamento normale, quindi un collegamento normale non deve avere a che fare con il la simulazione. Altre alternative sono: di importare un "collegamento di simulazione", non necessitando di copiare i dati, oppure la creazione di un collegamento all'interno della simulazione, esattamente come si creerebbe un collegamento normale, solo che si salva nel filo in cui è e si crea semplicemente un record di CollegamentoSimulazione.
+
+I fili di collegamento hanno nomi semplici, filo-id_simulazione-id_filo, ricavabile quindi automaticamente.
+
+Ogni collegamento dentro il filo è dotato di un numero d'ordine all'interno del filo, il display dei card dei collegamenti avviene secondo questo numero d'ordine, e nel card ci sono queste due freccioline, uno diretto verso sopra e l'altro verso sotto, solo così l'utente può cambiare il numero d'ordine. Quando cambi il numero d'ordine, scambi posizioni con quello che poi avrebbe il tuo stesso numero, per esempio se io abbasso al numero 2, il collegamento che era numero 2 diventa numero tre, e quello che ho scelto diveta 2. Viceversa se dovessi essere 3, e alzassi a 4, il 4 diventerebbe il 3 e quello che ho scelto diventa 4.
+
+Il card del collegamento non è grande come nella pagina di collegamenti, è più ridotta, i dettagli riguardo il collegamento però si vedono con un bottone come con il card nella pagina collegamenti.
 
 ## Dettagli tecnici
 
@@ -52,4 +62,6 @@ C'è una cartella static che contiene altre cartelle per le immagini. Le immagin
 Mentre si è nella pagina di argomenti o collegamenti, ci sono sempre due input che aiutano a implementare una ricerca live, una per il titolo, e una per il testo dell'argomento oppure i dettagli del collegamento. Questa ricerca c'è anche durante l'inserimento di un argomento dentro i collegamenti (normali o di simulazione). Le etichette di preparazione ad un argomento o qualità di un collegamento sono anche filtrabili tramite un input list.
 
 Per il polling usa Flask-SocketIO per l'aggiornamento in tempo reale solo quando è necessario, e limita il polling a 15 secondi solo nelle pagine già attive.
+
+Dovrebbe essere possibile, laddove si debba scrivere in markdown, mettere a schermo intero. Dev'essere un editor di testo di tipologia katex per una migliore esperienza all'utente, e deve usare anche i colori per i linguaggi di programmazione.
 
