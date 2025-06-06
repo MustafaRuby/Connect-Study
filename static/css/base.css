@@ -639,3 +639,155 @@ h1 {
     margin-bottom: 0 !important;
 }
 
+/* Editor fullscreen toggle button */
+.editor-size-controls {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding: 0 1em;
+}
+
+.size-btn {
+    background: none;
+    border: 1px solid #e8f2ff;
+    padding: 0.5em;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+}
+
+.size-btn:hover {
+    background: rgba(79, 140, 255, 0.08);
+    color: #4f8cff;
+    border-color: #4f8cff;
+}
+
+.size-btn.active {
+    background: #4f8cff;
+    color: white;
+    border-color: #4f8cff;
+}
+
+.size-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Fullscreen editor mode */
+.markdown-editor-section.editor-large .markdown-editor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #fff;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Layout per l'editor in modalità fullscreen */
+.markdown-editor-section.editor-large .markdown-editor .editor-tabs {
+    flex-shrink: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+.markdown-editor-section.editor-large .markdown-editor textarea,
+.markdown-editor-section.editor-large .markdown-editor .CodeMirror {
+    flex: 1;
+    height: 100% !important;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.markdown-editor-section.editor-large .markdown-editor .markdown-preview {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    background: #fff;
+}
+
+/* Fullscreen editor mode for add argument editor */
+.markdown-editor.editor-large {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #fff;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.markdown-editor.editor-large .editor-tabs {
+    flex-shrink: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+.markdown-editor.editor-large textarea,
+.markdown-editor.editor-large .CodeMirror {
+    flex: 1;
+    height: 100% !important;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.markdown-editor.editor-large .markdown-preview {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    background: #fff;
+}
+
+/* Responsive adjustments for fullscreen toggle */
+@media (max-width: 768px) {
+    .size-btn {
+        min-width: 28px;
+        height: 28px;
+        padding: 0.25em;
+    }
+    
+    .size-icon {
+        font-size: 14px;
+    }
+}
+
