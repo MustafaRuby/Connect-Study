@@ -253,12 +253,151 @@
     flex-shrink: 0;
 }
 
-/* Form actions within modals */
-.form-actions {
+/* Small modal for sidebar connection details */
+.modal-content.small {
+    max-width: 500px;
+    width: 85vw;
+    max-height: 75vh;
+    padding: 20px;
+}
+
+.modal-content.small .modal-header {
+    border-bottom: 1px solid #e8f2ff;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-content.small .modal-body {
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Mini collegamento card styling for modals */
+.mini-collegamento-card {
+    background: #f8fbff;
+    border-radius: 12px;
+    padding: 1.2em;
+    border: 1px solid #e8f2ff;
+}
+
+.mini-collegamento-card .collegamento-header h4 {
+    margin: 0 0 1em 0;
+    color: #2a3a5c;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.mini-collegamento-card .collegamento-argomenti {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin: 0.8em 0;
+    flex-wrap: wrap;
+}
+
+.mini-collegamento-card .argomento-tag {
+    background: linear-gradient(135deg, #f8fbff 0%, #e6f9f2 100%);
+    border-radius: 8px;
+    padding: 0.6em 1em;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #2a3a5c;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 120px;
+    box-shadow: 0 2px 6px rgba(79, 140, 255, 0.08);
+    border: 2px solid;
+}
+
+.mini-collegamento-card .argomento-tag a {
+    color: #2a3a5c;
+    text-decoration: none;
+    font-weight: 700;
+    margin-bottom: 0.2em;
+    transition: color 0.2s;
+}
+
+.mini-collegamento-card .argomento-tag a:hover {
+    color: #4f8cff;
+}
+
+.mini-collegamento-card .argomento-tag .materia-name {
+    font-size: 0.85em;
+    color: #6edb8f;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.mini-collegamento-card .collegamento-arrow {
+    font-size: 1.3em;
+    color: #4f8cff;
+    margin: 0 0.3em;
+    font-weight: bold;
+}
+
+.mini-collegamento-card .collegamento-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.8em 0 0.5em 0;
+}
+
+.mini-collegamento-card .etichetta-qualita {
+    border-radius: 6px;
+    padding: 0.25em 0.8em;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(79, 140, 255, 0.1);
+}
+
+.mini-collegamento-card .collegamento-dettagli {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1em;
+    border: 1px solid #e8f2ff;
+    box-shadow: 0 1px 4px rgba(79, 140, 255, 0.05);
+}
+
+.mini-collegamento-card .markdown-content {
+    color: #2a3a5c;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.mini-collegamento-card .markdown-content h1,
+.mini-collegamento-card .markdown-content h2,
+.mini-collegamento-card .markdown-content h3 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.mini-collegamento-card .markdown-content p {
+    margin-bottom: 0.8em;
+}
+
+.mini-collegamento-card .markdown-content code {
+    background: #f0f4ff;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.mini-collegamento-card .markdown-content pre {
+    background: #f0f4ff;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 0.5em 0;
+}
+
+/* Modal footer with save/cancel buttons */
+.modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     margin-top: 20px;
+    padding-top: 15px;
 }
 
 .btn {

@@ -157,7 +157,7 @@
 /* Page content containers */
 .argomento-content {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: -450px auto;
     padding: 0 2em;
 }
 
