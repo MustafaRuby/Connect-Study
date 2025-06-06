@@ -663,14 +663,6 @@ def collegamenti_materia(id_materia):
     return render_template('collegamenti.html', collegamenti=collegamenti, materie=materie, 
                          materia_selezionata=materia)
 
-@app.route('/collegamento/<int:id>')
-def collegamento_dettaglio(id):
-    """Pagina dettaglio di un collegamento"""
-    collegamento = db_manager.get_collegamento_by_id(id)
-    if not collegamento:
-        return "Collegamento non trovato", 404
-    return render_template('collegamento.html', collegamento=collegamento)
-
 @app.route('/add_collegamento', methods=['POST'])
 def add_collegamento():
     """Aggiunge un nuovo collegamento"""

@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="/static/css/responsive.css">
     <!-- Local libraries -->
     <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
 </head>
 <body>
     <!-- Left Sidebar for Connections -->
-    <div id="left-sidebar" class="left-sidebar">
-        <div class="sidebar-toggle" onclick="toggleSidebar()">
-            <span class="toggle-icon">🔗</span>
+    <div id="left-sidebar" class="left-sidebar">        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">📋</span>
             <span class="toggle-text">Collegamenti</span>
         </div>
         
@@ -65,19 +65,36 @@
                 </div>
             </form>
         </div>    </div>
-    <script src="/static/drag.js"></script>
+    <!-- Modal dettagli collegamento da sidebar -->
+    <div id="sidebar-collegamento-modal" class="modal" style="display:none;">        <div class="modal-content small">
+        <div class="modal-header">
+          <h3 id="sidebar-collegamento-title">Dettagli Collegamento</h3>
+          <button class="modal-close" onclick="closeSidebarCollegamentoModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="sidebar-collegamento-body">
+          <!-- Dettagli caricati dinamicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSidebarCollegamentoModal()">Chiudi</button>
+        </div>
+      </div>
+    </div>    <script src="/static/drag.js"></script>
     <script>
         // === LEFT SIDEBAR FUNCTIONALITY ===
         function toggleSidebar() {
             const sidebar = document.getElementById('left-sidebar');
             const mainContent = document.querySelector('.main-content');
+            const toggleIcon = document.querySelector('.toggle-icon');
             
             sidebar.classList.toggle('open');
             mainContent.classList.toggle('sidebar-open');
             
-            // Load connections when opening sidebar
+            // Change icon based on sidebar state
             if (sidebar.classList.contains('open')) {
+                toggleIcon.textContent = '✖️';
                 loadSidebarConnections();
+                        } else {
+                toggleIcon.textContent = '📋';
             }
         }
 
@@ -137,7 +154,7 @@
             materieMap.forEach((materiaData, materiaNome) => {
                 const materiaDiv = document.createElement('div');
                 materiaDiv.className = 'sidebar-materia';
-                  materiaDiv.innerHTML = `
+                materiaDiv.innerHTML = `
                     <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
                         <div class="sidebar-materia-title">
                             <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
@@ -157,7 +174,7 @@
                     </div>
                     <div class="sidebar-collegamenti">
                         ${materiaData.collegamenti.map(conn => `
-                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="viewCollegamento(${conn.id})">
+                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="showSidebarCollegamentoModal(${conn.id})">
                                 <div class="collegamento-title">${conn.titolo}</div>
                                 <div class="collegamento-endpoints">
                                     ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
@@ -175,36 +192,118 @@
         function toggleMateriaConnections(headerElement) {
             const materiaDiv = headerElement.parentElement;
             materiaDiv.classList.toggle('expanded');
-        }        function viewCollegamento(collegamentoId) {
+        }        
+        function viewCollegamento(collegamentoId) {
             window.location.href = `/collegamento/${collegamentoId}`;
         }
-
+        
         function filterCollegamenti(inputElement, filterType) {
-            const searchTerm = inputElement.value.toLowerCase();
+            const searchTerm = inputElement.value.toLowerCase().trim();
             const materiaDiv = inputElement.closest('.sidebar-materia');
             const collegamenti = materiaDiv.querySelectorAll('.sidebar-collegamento');
             
             collegamenti.forEach(collegamento => {
                 let shouldShow = false;
                 
+                // Get original data if not stored
+                if (!collegamento.originalData) {
+                    const titleElement = collegamento.querySelector('.collegamento-title');
+                    const endpointsElement = collegamento.querySelector('.collegamento-endpoints');
+                    collegamento.originalData = {
+                        title: titleElement ? titleElement.textContent : '',
+                        endpoints: endpointsElement ? endpointsElement.textContent : ''
+                    };
+                }
+                
                 if (filterType === 'collegamento') {
                     // Filter by connection title
                     const titolo = collegamento.getAttribute('data-titolo');
                     shouldShow = titolo.includes(searchTerm);
+                    
+                    // Highlight title if showing and search term exists
+                    const titleElement = collegamento.querySelector('.collegamento-title');
+                    if (titleElement) {
+                        if (shouldShow && searchTerm) {
+                            titleElement.innerHTML = highlightText(collegamento.originalData.title, searchTerm);
+                        } else {
+                            titleElement.textContent = collegamento.originalData.title;
+                        }
+                    }
                 } else if (filterType === 'argomento') {
                     // Filter by argument titles
                     const argomenti = collegamento.getAttribute('data-argomenti');
                     shouldShow = argomenti.includes(searchTerm);
+                    
+                    // Highlight endpoints if showing and search term exists
+                    const endpointsElement = collegamento.querySelector('.collegamento-endpoints');
+                    if (endpointsElement) {
+                        if (shouldShow && searchTerm) {
+                            endpointsElement.innerHTML = highlightText(collegamento.originalData.endpoints, searchTerm);
+                        } else {
+                            endpointsElement.textContent = collegamento.originalData.endpoints;
+                        }
+                    }
                 }
                 
                 collegamento.style.display = shouldShow ? 'block' : 'none';
             });
         }
 
+        // Helper function for text highlighting
+        function highlightText(text, query) {
+            if (!query || !text) return text;
+            
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
         // Load sidebar connections on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadSidebarConnections();
-        });    </script>
+        });
+        
+        function showSidebarCollegamentoModal(id) {
+            fetch('/api/collegamenti')
+                .then(r => r.json())
+                .then(collegamenti => {
+                    const c = collegamenti.find(x => x.id === id);
+                    if (!c) return;
+                    let html = `
+                        <div class='mini-collegamento-card'>
+                            <div class='collegamento-header'><h4>${c.titolo}</h4></div>
+                            <div class='collegamento-argomenti'>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia1_colore}'>
+                                    <a href='/argomento/${c.id_argomento1}'>${c.argomento1_titolo}</a>
+                                    <span class='materia-name'>${c.materia1_nome}</span>
+                                </div>
+                                <div class='collegamento-arrow'>⟷</div>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia2_colore}'>
+                                    <a href='/argomento/${c.id_argomento2}'>${c.argomento2_titolo}</a>
+                                    <span class='materia-name'>${c.materia2_nome}</span>
+                                </div>
+                            </div>
+                            <div class='collegamento-footer'>
+                                <span class='etichetta-qualita ${c.etichetta_qualita.replace(/ /g,'-').toLowerCase()}'>${c.etichetta_qualita}</span>
+                            </div>
+                            <div class='collegamento-dettagli' style='margin-top:1em;'>
+                                ${marked.parse(c.dettagli||'')}
+                            </div>
+                        </div>
+                    `;
+                                        document.getElementById('sidebar-collegamento-body').innerHTML = html;
+                    document.getElementById('sidebar-collegamento-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error loading connection details:', error));
+        }
+
+        function closeSidebarCollegamentoModal() {
+            document.getElementById('sidebar-collegamento-modal').style.display = 'none';
+        }
+    </script>
     </div> <!-- End main-content -->
 </body>
 </html>
