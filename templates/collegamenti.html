@@ -19,6 +19,25 @@
     <!-- Local libraries CSS -->
     <link rel="stylesheet" href="/static/libs/highlightjs/vs2015.min.css">
     
+    <style>
+        /* Highlighting specifico per la modale degli argomenti */
+        .argomenti-modal-highlight {
+            background: linear-gradient(120deg, #ffeb3b 0%, #ffc107 100%) !important;
+            color: #333 !important;
+            padding: 2px 4px !important;
+            border-radius: 3px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 3px rgba(255, 193, 7, 0.5) !important;
+            border: 1px solid #ff9800 !important;
+        }
+        
+        /* Assicuriamoci che sia visibile nella modale */
+        .modal .argomenti-modal-highlight {
+            z-index: 1000 !important;
+            position: relative !important;
+        }
+    </style>
+    
     <!-- Local libraries JavaScript -->
     <script src="/static/libs/socketio/socket.io.min.js"></script>
     <script src="/static/libs/marked/marked.min.js"></script>
@@ -260,9 +279,6 @@
                 <button class="modal-close" onclick="closeArgomentoSelectorModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="argomento-search">
-                    <input type="text" id="argomento-search" placeholder="Cerca argomenti..." class="search-input">
-                </div>
                 <div id="materie-list" class="materie-list">
                     {% for materia in materie %}
                     <div class="materia-item" data-id="{{ materia.id }}" style="border-left: 4px solid {{ materia.colore }}">
@@ -276,8 +292,19 @@
                     </div>
                     {% endfor %}
                 </div>
+                
                 <div id="argomenti-list" class="argomenti-list" style="display: none;">
                     <button class="cancel-btn back-btn" onclick="showMaterieList()">← Torna alle materie</button>
+                    
+                    <div class="search-container">
+                        <div class="search-group">
+                            <input type="text" id="argomenti-search" placeholder="Cerca nei titoli degli argomenti..." class="search-input">
+                        </div>
+                        <div class="search-group">
+                            <input type="text" id="content-search" placeholder="Cerca nel contenuto degli argomenti..." class="search-input">
+                        </div>
+                    </div>
+                    
                     <div id="argomenti-grid" class="argomenti-grid">
                         <!-- Gli argomenti verranno caricati dinamicamente -->
                     </div>
@@ -285,6 +312,161 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // === ENHANCED ARGOMENTI MODAL SEARCH FUNCTIONALITY ===
+        let allArgomentiData = []; // Store all loaded argomenti for search
+        
+        function setupArgomentiModalSearch() {
+            const argomentiSearch = document.getElementById('argomenti-search');
+            const contentSearch = document.getElementById('content-search');
+            
+            if (argomentiSearch) {
+                argomentiSearch.addEventListener('input', function() {
+                    filterArgomentiInModal(this.value, 'title');
+                });
+            }
+            
+            if (contentSearch) {
+                contentSearch.addEventListener('input', function() {
+                    filterArgomentiInModal(this.value, 'content');
+                });
+            }
+        }
+
+        function filterArgomentiInModal(searchTerm, searchType) {
+            const argomentiGrid = document.getElementById('argomenti-grid');
+            const argomentoCards = argomentiGrid.querySelectorAll('.argomento-card');
+            
+            searchTerm = searchTerm.toLowerCase().trim();
+            
+            argomentoCards.forEach((card, index) => {
+                let shouldShow = false;
+                
+                if (!searchTerm) {
+                    shouldShow = true;
+                    // Reset highlighting
+                    const titleElement = card.querySelector('.argomento-header h4');
+                    const previewElement = card.querySelector('.argomento-preview');
+                    if (titleElement && titleElement.originalText) {
+                        titleElement.innerHTML = titleElement.originalText;
+                    }
+                    if (previewElement && previewElement.originalText) {
+                        previewElement.innerHTML = previewElement.originalText;
+                    }
+                } else {
+                    // Store original text if not already stored
+                    const titleElement = card.querySelector('.argomento-header h4');
+                    const previewElement = card.querySelector('.argomento-preview');
+                    
+                    if (!titleElement.originalText) {
+                        titleElement.originalText = titleElement.textContent;
+                    }
+                    if (!previewElement.originalText) {
+                        previewElement.originalText = previewElement.textContent;
+                    }
+
+                    // Get the corresponding argomento data
+                    const argomentoData = allArgomentiData[index];
+                    
+                    if (searchType === 'title') {
+                        // Search only in argomento titles
+                        const title = titleElement.originalText.toLowerCase();
+                        
+                        if (title.includes(searchTerm)) {
+                            shouldShow = true;
+                            titleElement.innerHTML = highlightText(titleElement.originalText, searchTerm);
+                            previewElement.innerHTML = previewElement.originalText;
+                        }
+                    } else if (searchType === 'content') {
+                        // Search in the full content, not just the preview
+                        const fullContent = (argomentoData?.contenuto_md || '').toLowerCase();
+                        
+                        if (fullContent.includes(searchTerm)) {
+                            shouldShow = true;
+                            titleElement.innerHTML = titleElement.originalText;
+                            
+                            // Find the matching portion in the full content for highlighting
+                            const searchIndex = fullContent.indexOf(searchTerm);
+                            if (searchIndex !== -1) {
+                                // Extract a snippet around the match for display
+                                const start = Math.max(0, searchIndex - 50);
+                                const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
+                                let snippet = argomentoData.contenuto_md.substring(start, end);
+                                
+                                // Add ellipsis if needed
+                                if (start > 0) snippet = '...' + snippet;
+                                if (end < fullContent.length) snippet = snippet + '...';
+                                
+                                // Update preview with highlighted snippet
+                                previewElement.innerHTML = highlightText(snippet, searchTerm);
+                            } else {
+                                // Fallback to original preview with highlighting if match was in processed content
+                                previewElement.innerHTML = highlightText(previewElement.originalText, searchTerm);
+                            }
+                        }
+                    }
+                }
+                
+                card.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        // Enhanced loadArgomenti function that stores data for search
+        function loadArgomenti(materiaId, materiaNome, materiaColore) {
+            fetch(`/api/argomenti/materia/${materiaId}`)
+                .then(response => response.json())
+                .then(argomenti => {
+                    allArgomentiData = argomenti; // Store for search
+                    const argomentiGrid = document.getElementById('argomenti-grid');
+                    argomentiGrid.innerHTML = '';
+                    
+                    argomenti.forEach(argomento => {
+                        const argomentoCard = document.createElement('div');
+                        argomentoCard.className = 'argomento-card';
+                        argomentoCard.innerHTML = `
+                            <div class="argomento-header">
+                                <h4>${argomento.titolo}</h4>
+                                <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
+                            </div>
+                            <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
+                        `;
+                        argomentoCard.onclick = () => selectArgomentoFromList(argomento.id, argomento.titolo, materiaId);
+                        argomentiGrid.appendChild(argomentoCard);
+                    });
+                    
+                    document.getElementById('materie-list').style.display = 'none';
+                    document.getElementById('argomenti-list').style.display = 'block';
+                    
+                    // Clear search inputs when switching materia
+                    document.getElementById('argomenti-search').value = '';
+                    document.getElementById('content-search').value = '';
+                })
+                .catch(error => console.error('Error loading argomenti:', error));
+        }
+
+        function showMaterieList() {
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        // Helper function for text highlighting
+        function highlightText(text, query) {
+            if (!query || !text) return text;
+            
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<mark class="argomenti-modal-highlight">$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Initialize enhanced search when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setupArgomentiModalSearch();
+        });
+    </script>
 
     <script src="/static/js/collegamenti.js"></script>
 </body>
