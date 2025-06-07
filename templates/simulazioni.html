@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulazioni - ConnectStudy</title>
+    
+    <!-- Modular CSS imports -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <link rel="stylesheet" href="/static/css/buttons.css">
+    <link rel="stylesheet" href="/static/css/cards.css">    <link rel="stylesheet" href="/static/css/modals.css">
+    <link rel="stylesheet" href="/static/css/forms.css">
+    <link rel="stylesheet" href="/static/css/context-menu.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/collegamenti-page.css">
+    
+    <!-- Local libraries -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
+    
+    <style>
+        .simulazioni-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .simulazioni-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .simulazione-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .simulazione-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .simulazione-header-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .simulazione-data {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .simulazione-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .action-btn.delete:hover {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .spunto-content {
+            margin-bottom: 1rem;
+        }
+
+        .spunto-testo {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .spunto-immagine {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .simulazione-info {
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .form-note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .form-divider span {
+            background: white;
+            padding: 0 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .simulazioni-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .simulazioni-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .header-actions {
+                justify-content: center;
+            }        }
+    </style>
+</head>
+<body>
+    <!-- Left Sidebar for Connections -->
+    <div id="left-sidebar" class="left-sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">📋</span>
+            <span class="toggle-text">Collegamenti</span>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Collegamenti</h3>
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()">
+                    <span class="icon">➕</span>
+                    Nuovo
+                </button>
+            </div>
+            
+            <div class="sidebar-sections">
+                <div id="sidebar-materie" class="sidebar-materie">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="container">
+        <div class="main-content">
+        <div class="simulazioni-header">
+            <h1>Simulazioni</h1>
+            <div class="header-actions">
+                <a href="/" class="btn btn-secondary">
+                    <span class="icon">🏠</span>
+                    Torna alle Materie
+                </a>
+                <button class="btn btn-primary" onclick="showSimulazioneModal()">
+                    <span class="icon">➕</span>
+                    Nuova Simulazione
+                </button>
+            </div>
+        </div>
+
+        <div id="simulazioni-container">
+            {% if simulazioni %}
+                <div class="simulazioni-grid">
+                    {% for simulazione in simulazioni %}
+                    <div class="simulazione-card" onclick="goToSimulazione({{ simulazione.id }})">                        <div class="simulazione-header-card">
+                            <div class="simulazione-data">
+                                {{ simulazione.data_creazione | format_datetime }}
+                            </div>
+                            <div class="simulazione-actions" onclick="event.stopPropagation()">
+                                <button class="action-btn delete" onclick="deleteSimulazione({{ simulazione.id }})" title="Elimina">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="spunto-content">
+                            {% if simulazione.spunto_testo %}
+                                <div class="spunto-testo">
+                                    {{ simulazione.spunto_testo }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if simulazione.spunto_immagine %}
+                                <img src="/static/{{ simulazione.spunto_immagine }}" 
+                                     alt="Spunto immagine" 
+                                     class="spunto-immagine">
+                            {% endif %}
+                        </div>
+
+                        <div class="simulazione-info">
+                            ID: {{ simulazione.id }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="icon">🎯</div>
+                    <h3>Nessuna simulazione</h3>
+                    <p>Crea la tua prima simulazione per iniziare a praticare!</p>
+                    <button class="btn btn-primary" onclick="showSimulazioneModal()">
+                        <span class="icon">➕</span>
+                        Crea Prima Simulazione
+                    </button>
+                </div>
+            {% endif %}        </div>
+    </div>
+
+    <!-- Modal dettagli collegamento da sidebar -->
+    <div id="sidebar-collegamento-modal" class="modal" style="display:none;">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3 id="sidebar-collegamento-title">Dettagli Collegamento</h3>
+                <button class="modal-close" onclick="closeSidebarCollegamentoModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="sidebar-collegamento-body">
+                <!-- Dettagli caricati dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSidebarCollegamentoModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nuova Simulazione -->
+    <div id="simulazione-modal" class="modal" style="display:none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Nuova Simulazione</h3>
+                <button class="modal-close" onclick="closeSimulazioneModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="simulazione-form">
+                    <div class="form-group">
+                        <label for="spunto_testo">Spunto Testuale</label>
+                        <textarea id="spunto_testo" name="spunto_testo" placeholder="Inserisci qui il testo dello spunto (citazione, frase, concetto...)"></textarea>
+                        <div class="form-note">Opzionale: inserisci un testo che servirà come spunto per la simulazione</div>
+                    </div>
+
+                    <div class="form-divider">
+                        <span>OPPURE</span>
+                    </div>                    <div class="form-group">
+                        <label for="spunto_immagine">Spunto Visivo</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="spunto_immagine" name="spunto_immagine" accept="image/*" class="file-input-hidden">
+                            <div class="file-input-display" id="file_display_spunto">
+                                <span class="file-icon">🖼️</span>
+                                <span class="file-text">Scegli immagine o trascina qui</span>
+                                <span class="file-subtext">Clicca per selezionare un'immagine dal tuo computer</span>
+                            </div>
+                        </div>
+                        <div class="form-note">Opzionale: carica un'immagine che servirà come spunto visivo</div>
+                    </div>
+
+                    <div class="form-note" style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 4px;">
+                        <strong>Nota:</strong> Devi inserire almeno un testo o un'immagine come spunto per creare la simulazione.
+                    </div>
+                </form>
+            </div>            <div class="modal-footer">  
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveSimulazione()">Crea Simulazione</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSimulazioneModal()">Annulla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        // Socket events
+        socket.on('update_simulazioni', function() {
+            location.reload();
+        });
+
+        function showSimulazioneModal() {
+            document.getElementById('simulazione-modal').style.display = 'flex';
+            document.getElementById('spunto_testo').focus();
+        }
+
+        function closeSimulazioneModal() {
+            document.getElementById('simulazione-modal').style.display = 'none';
+            document.getElementById('simulazione-form').reset();
+        }
+
+        function saveSimulazione() {
+            const form = document.getElementById('simulazione-form');
+            const formData = new FormData();
+            
+            const spuntoTesto = document.getElementById('spunto_testo').value.trim();
+            const spuntoImmagine = document.getElementById('spunto_immagine').files[0];
+
+            // Verifica che almeno uno dei due sia presente
+            if (!spuntoTesto && !spuntoImmagine) {
+                alert('Inserisci almeno un testo o un\'immagine come spunto');
+                return;
+            }
+
+            formData.append('spunto_testo', spuntoTesto);
+            if (spuntoImmagine) {
+                formData.append('spunto_immagine', spuntoImmagine);
+            }
+
+            fetch('/add_simulazione', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeSimulazioneModal();
+                    // Il reload verrà fatto tramite socket
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nella creazione della simulazione');
+            });
+        }
+
+        function goToSimulazione(id) {
+            window.location.href = `/simulazione/${id}`;
+        }
+
+        function deleteSimulazione(id) {
+            if (confirm('Sei sicuro di voler eliminare questa simulazione? Questa azione non può essere annullata.')) {
+                fetch(`/delete_simulazione/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Il reload verrà fatto tramite socket
+                    } else {
+                        alert('Errore nell\'eliminazione della simulazione');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Errore nell\'eliminazione della simulazione');
+                });
+            }
+        }
+
+        // Chiudi modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSimulazioneModal();
+            }
+        });        // Chiudi modal cliccando fuori
+        document.getElementById('simulazione-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSimulazioneModal();            }
+        });
+
+        // File input styling
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('spunto_immagine');
+            const fileDisplay = document.getElementById('file_display_spunto');
+            const wrapper = fileDisplay.parentElement;
+
+            fileDisplay.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    wrapper.classList.add('has-file');
+                    const fileName = file.name;
+                    fileDisplay.querySelector('.file-text').textContent = fileName;
+                    fileDisplay.querySelector('.file-subtext').textContent = 'File selezionato';
+                } else {
+                    wrapper.classList.remove('has-file');
+                    fileDisplay.querySelector('.file-text').textContent = 'Scegli immagine o trascina qui';
+                    fileDisplay.querySelector('.file-subtext').textContent = 'Clicca per selezionare un\'immagine dal tuo computer';
+                }
+            });
+
+            // Drag and drop
+            fileDisplay.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                wrapper.classList.add('drag-over');
+            });
+
+            fileDisplay.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                wrapper.classList.remove('drag-over');
+            });
+
+            fileDisplay.addEventListener('drop', function(e) {
+                e.preventDefault();
+                wrapper.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }            });
+        });
+
+        // === LEFT SIDEBAR FUNCTIONALITY ===
+        function toggleSidebar() {
+            const sidebar = document.getElementById('left-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const toggleIcon = document.querySelector('.toggle-icon');
+            
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('sidebar-open');
+            
+            // Change icon based on sidebar state
+            if (sidebar.classList.contains('open')) {
+                toggleIcon.textContent = '✖️';
+                loadSidebarConnections();
+            } else {
+                toggleIcon.textContent = '📋';
+            }
+        }
+
+        function showCollegamentoModalEmpty() {
+            window.location.href = '/collegamenti';
+        }
+
+        function loadSidebarConnections() {
+            fetch('/api/collegamenti')
+                .then(response => response.json())
+                .then(collegamenti => {
+                    updateSidebarConnections(collegamenti);
+                })
+                .catch(error => console.error('Error loading sidebar connections:', error));
+        }
+
+        function updateSidebarConnections(collegamenti) {
+            const sidebarMaterie = document.getElementById('sidebar-materie');
+            
+            // Group connections by materia
+            const materieMap = new Map();
+            
+            collegamenti.forEach(collegamento => {
+                // Add to materia 1
+                const materia1 = collegamento.materia1_nome;
+                if (!materieMap.has(materia1)) {
+                    materieMap.set(materia1, {
+                        nome: materia1,
+                        colore: collegamento.materia1_colore,
+                        collegamenti: []
+                    });
+                }
+                materieMap.get(materia1).collegamenti.push(collegamento);
+                
+                // Add to materia 2 if different
+                const materia2 = collegamento.materia2_nome;
+                if (materia2 !== materia1) {
+                    if (!materieMap.has(materia2)) {
+                        materieMap.set(materia2, {
+                            nome: materia2,
+                            colore: collegamento.materia2_colore,
+                            collegamenti: []
+                        });
+                    }
+                    materieMap.get(materia2).collegamenti.push(collegamento);
+                }
+            });
+            
+            // Generate sidebar HTML
+            sidebarMaterie.innerHTML = '';
+            
+            if (materieMap.size === 0) {
+                sidebarMaterie.innerHTML = '<p class="no-connections">Nessun collegamento trovato</p>';
+                return;
+            }
+            
+            materieMap.forEach((materiaData, materiaNome) => {
+                const materiaDiv = document.createElement('div');
+                materiaDiv.className = 'sidebar-materia';
+                materiaDiv.innerHTML = `
+                    <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
+                        <div class="sidebar-materia-title">
+                            <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
+                            ${materiaNome}
+                        </div>
+                        <span class="sidebar-materia-toggle">▶</span>
+                    </div>
+                    <div class="sidebar-search-group">
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca collegamento..." oninput="filterCollegamenti(this, 'collegamento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca argomento..." oninput="filterCollegamenti(this, 'argomento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                    </div>
+                    <div class="sidebar-collegamenti">
+                        ${materiaData.collegamenti.map(conn => `
+                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="showSidebarCollegamentoModal(${conn.id})">
+                                <div class="collegamento-title">${conn.titolo}</div>
+                                <div class="collegamento-endpoints">
+                                    ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
+                                </div>
+                                <div class="collegamento-quality quality-${conn.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${conn.etichetta_qualita}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                sidebarMaterie.appendChild(materiaDiv);
+            });
+        }
+
+        function toggleMateriaConnections(headerElement) {
+            const materiaDiv = headerElement.parentElement;
+            materiaDiv.classList.toggle('expanded');
+        }
+        
+        function filterCollegamenti(inputElement, filterType) {
+            const searchTerm = inputElement.value.toLowerCase().trim();
+            const materiaDiv = inputElement.closest('.sidebar-materia');
+            const collegamenti = materiaDiv.querySelectorAll('.sidebar-collegamento');
+            
+            collegamenti.forEach(collegamento => {
+                let shouldShow = false;
+                
+                // Get original data if not stored
+                if (!collegamento.originalData) {
+                    const titleElement = collegamento.querySelector('.collegamento-title');
+                    const endpointsElement = collegamento.querySelector('.collegamento-endpoints');
+                    collegamento.originalData = {
+                        title: titleElement ? titleElement.textContent : '',
+                        endpoints: endpointsElement ? endpointsElement.textContent : ''
+                    };
+                }
+                
+                if (filterType === 'collegamento') {
+                    // Filter by connection title
+                    const titolo = collegamento.getAttribute('data-titolo');
+                    shouldShow = titolo.includes(searchTerm);
+                    
+                    // Highlight title if showing and search term exists
+                    const titleElement = collegamento.querySelector('.collegamento-title');
+                    if (titleElement) {
+                        if (shouldShow && searchTerm) {
+                            titleElement.innerHTML = highlightText(collegamento.originalData.title, searchTerm);
+                        } else {
+                            titleElement.textContent = collegamento.originalData.title;
+                        }
+                    }
+                } else if (filterType === 'argomento') {
+                    // Filter by argument titles
+                    const argomenti = collegamento.getAttribute('data-argomenti');
+                    shouldShow = argomenti.includes(searchTerm);
+                    
+                    // Highlight endpoints if showing and search term exists
+                    const endpointsElement = collegamento.querySelector('.collegamento-endpoints');
+                    if (endpointsElement) {
+                        if (shouldShow && searchTerm) {
+                            endpointsElement.innerHTML = highlightText(collegamento.originalData.endpoints, searchTerm);
+                        } else {
+                            endpointsElement.textContent = collegamento.originalData.endpoints;
+                        }
+                    }
+                }
+                
+                collegamento.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        // Helper function for text highlighting
+        function highlightText(text, query) {
+            if (!query || !text) return text;
+            
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function showSidebarCollegamentoModal(id) {
+            fetch('/api/collegamenti')
+                .then(r => r.json())
+                .then(collegamenti => {
+                    const c = collegamenti.find(x => x.id === id);
+                    if (!c) return;
+                    let html = `
+                        <div class='mini-collegamento-card'>
+                            <div class='collegamento-header'><h4>${c.titolo}</h4></div>
+                            <div class='collegamento-argomenti'>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia1_colore}'>
+                                    <a href='/argomento/${c.id_argomento1}'>${c.argomento1_titolo}</a>
+                                    <span class='materia-name'>${c.materia1_nome}</span>
+                                </div>
+                                <div class='collegamento-arrow'>⟷</div>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia2_colore}'>
+                                    <a href='/argomento/${c.id_argomento2}'>${c.argomento2_titolo}</a>
+                                    <span class='materia-name'>${c.materia2_nome}</span>
+                                </div>
+                            </div>
+                            <div class='collegamento-footer'>
+                                <span class='etichetta-qualita ${c.etichetta_qualita.replace(/ /g,'-').toLowerCase()}'>${c.etichetta_qualita}</span>
+                            </div>
+                            <div class='collegamento-dettagli' style='margin-top:1em;'>
+                                ${marked.parse(c.dettagli||'')}
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('sidebar-collegamento-body').innerHTML = html;
+                    document.getElementById('sidebar-collegamento-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error loading connection details:', error));
+        }
+
+        function closeSidebarCollegamentoModal() {
+            document.getElementById('sidebar-collegamento-modal').style.display = 'none';
+        }
+
+        // Load sidebar connections on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarConnections();        });
+    </script>
+    </div> <!-- End main-content -->
+</body>
+</html>

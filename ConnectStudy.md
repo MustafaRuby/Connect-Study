@@ -51,6 +51,8 @@ Ogni collegamento dentro il filo è dotato di un numero d'ordine all'interno del
 
 Il card del collegamento non è grande come nella pagina di collegamenti, è più ridotta, i dettagli riguardo il collegamento però si vedono con un bottone come con il card nella pagina collegamenti.
 
+E' presente una ricerca dinamica, come nella pagina di collegamenti, per ogni filo di collegamenti. Si cerca il titolo del collegamento, i dettagli e gli argomenti coinvolti, con un bottone che pulisce i filtri
+
 ## Dettagli tecnici
 
 Quando inserisci una materia, argomento o collegamento, le sezioni apposite vengono aggiornati tramite un polling automaticamente, in modo tale da non causare il refresh della pagina ogni volta e di avere i dati sempre aggiornati.

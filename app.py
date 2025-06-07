@@ -13,6 +13,20 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
+# Filtri personalizzati per Jinja2
+@app.template_filter('format_datetime')
+def format_datetime(date_string):
+    """Formatta una stringa di data in formato italiano"""
+    if not date_string:
+        return 'Data non disponibile'
+    try:
+        # Parsing della data dal formato SQLite: '2025-06-07 16:36:16'
+        from datetime import datetime
+        dt = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime('%d/%m/%Y %H:%M')
+    except:
+        return date_string
+
 def convert_docx_to_markdown(file_path):
     """Converte un file .docx in markdown con formattazione avanzata"""
     try:
@@ -691,7 +705,22 @@ def update_collegamento(id):
         dettagli = request.form.get('dettagli', '')
         etichetta_qualita = request.form.get('etichetta_qualita', 'collegamento media qualità')
         
-        db_manager.update_collegamento(id, titolo, dettagli, etichetta_qualita)
+        # Raccoglie anche gli argomenti se forniti
+        id_argomento1 = request.form.get('id_argomento1')
+        id_argomento2 = request.form.get('id_argomento2')
+        
+        # Verifica che gli argomenti siano diversi se entrambi sono forniti
+        if id_argomento1 and id_argomento2 and id_argomento1 == id_argomento2:
+            return jsonify({'success': False, 'error': 'Non puoi collegare un argomento a se stesso'})
+        
+        # Se entrambi gli argomenti sono forniti, aggiorna tutto
+        if id_argomento1 and id_argomento2:
+            db_manager.update_collegamento(id, titolo, dettagli, etichetta_qualita, 
+                                         int(id_argomento1), int(id_argomento2))
+        else:
+            # Altrimenti aggiorna solo titolo, dettagli ed etichetta
+            db_manager.update_collegamento(id, titolo, dettagli, etichetta_qualita)
+        
         socketio.emit('update_collegamenti')
         return jsonify({'success': True, 'message': 'Collegamento aggiornato con successo'})
     except Exception as e:
@@ -732,6 +761,269 @@ def api_search_collegamenti():
     
     collegamenti = db_manager.search_collegamenti(query_titolo, query_dettagli, etichetta_qualita)
     return jsonify([dict(c) for c in collegamenti])
+
+# === SIMULAZIONI ROUTES ===
+
+@app.route('/simulazioni')
+def simulazioni():
+    """Pagina delle simulazioni"""
+    simulazioni = db_manager.get_all_simulazioni()
+    return render_template('simulazioni.html', simulazioni=simulazioni)
+
+@app.route('/add_simulazione', methods=['POST'])
+def add_simulazione():
+    """Aggiunge una nuova simulazione"""
+    try:
+        spunto_testo = request.form.get('spunto_testo', '')
+        spunto_immagine = None
+        
+        # Gestione upload immagine
+        if 'spunto_immagine' in request.files:
+            file = request.files['spunto_immagine']
+            if file and file.filename:
+                # Crea la cartella se non esiste
+                upload_folder = os.path.join('static', 'simulazioni')
+                os.makedirs(upload_folder, exist_ok=True)
+                  # Nome univoco per il file
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                unique_id = str(uuid.uuid4().hex[:8])
+                filename = f"spunto_{timestamp}_{unique_id}.{file.filename.rsplit('.', 1)[1].lower()}"
+                # Usa '/' per URL web invece di os.path.join che usa '\' su Windows
+                spunto_immagine = f"simulazioni/{filename}"
+                
+                file.save(os.path.join('static', spunto_immagine))
+        
+        # Verifica che almeno uno dei due sia presente
+        if not spunto_testo and not spunto_immagine:
+            return jsonify({'success': False, 'error': 'Inserisci almeno un testo o un\'immagine come spunto'})
+        
+        db_manager.add_simulazione(spunto_testo, spunto_immagine)
+        socketio.emit('update_simulazioni')
+        return jsonify({'success': True, 'message': 'Simulazione creata con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/simulazione/<int:id>')
+def simulazione_detail(id):
+    """Pagina dettaglio di una simulazione"""
+    simulazione = db_manager.get_simulazione_by_id(id)
+    if not simulazione:
+        return "Simulazione non trovata", 404
+    
+    fili = db_manager.get_fili_by_simulazione(id)
+    materie = db_manager.get_all_materie()
+    return render_template('simulazione_detail.html', simulazione=simulazione, fili=fili, materie=materie)
+
+@app.route('/delete_simulazione/<int:id>', methods=['DELETE'])
+def delete_simulazione(id):
+    """Elimina una simulazione"""
+    try:
+        # Rimuovi anche il file immagine se presente
+        simulazione = db_manager.get_simulazione_by_id(id)
+        if simulazione and simulazione['spunto_immagine']:
+            image_path = os.path.join('static', simulazione['spunto_immagine'])
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
+        db_manager.delete_simulazione(id)
+        socketio.emit('update_simulazioni')
+        return ('', 204)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# === FILI COLLEGAMENTO ROUTES ===
+
+@app.route('/add_filo_simulazione', methods=['POST'])
+def add_filo_simulazione():
+    """Aggiunge un nuovo filo di collegamento a una simulazione"""
+    try:
+        id_simulazione = request.form['id_simulazione']
+        db_manager.add_filo_collegamento(id_simulazione)
+        socketio.emit('update_fili', {'id_simulazione': id_simulazione})
+        return jsonify({'success': True, 'message': 'Filo creato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/delete_filo/<int:id>', methods=['DELETE'])
+def delete_filo(id):
+    """Elimina un filo di collegamento e tutti i suoi collegamenti"""
+    try:
+        filo = db_manager.get_filo_by_id(id)
+        
+        if filo:
+            # Ottieni l'ID della simulazione dal filo - converti in dict per accesso sicuro
+            filo_dict = dict(filo)
+            id_simulazione = filo_dict.get('id_simulazione')
+            
+            db_manager.delete_filo_collegamento(id)
+            
+            if id_simulazione:
+                socketio.emit('update_fili', {'id_simulazione': id_simulazione})
+        else:
+            return jsonify({'success': False, 'error': 'Filo non trovato'}), 404
+        
+        return ('', 204)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# === COLLEGAMENTI SIMULAZIONE ROUTES ===
+
+@app.route('/add_collegamento_simulazione', methods=['POST'])
+def add_collegamento_simulazione():
+    """Aggiunge un nuovo collegamento di simulazione"""
+    try:
+        id_filo = request.form['id_filo']
+        titolo = request.form['titolo']
+        id_argomento2 = request.form['id_argomento2']
+        id_argomento1 = request.form.get('id_argomento1') or None
+        dettagli = request.form.get('dettagli', '')
+        etichetta_qualita = request.form.get('etichetta_qualita', 'collegamento media qualità')
+        
+        # Verifica che gli argomenti siano diversi se entrambi sono forniti
+        if id_argomento1 and id_argomento1 == id_argomento2:
+            return jsonify({'success': False, 'error': 'Non puoi collegare un argomento a se stesso'})
+        
+        db_manager.add_collegamento_simulazione(id_filo, titolo, id_argomento2, id_argomento1, dettagli, etichetta_qualita)
+        socketio.emit('update_collegamenti_simulazione', {'id_filo': id_filo})
+        return jsonify({'success': True, 'message': 'Collegamento creato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/import_collegamento_to_simulazione', methods=['POST'])
+def import_collegamento_to_simulazione():
+    """Importa un collegamento esistente in un filo di simulazione"""
+    try:
+        collegamento_id = request.form['collegamento_id']
+        id_filo = request.form['id_filo']
+        
+        db_manager.copy_collegamento_to_simulazione(collegamento_id, id_filo)
+        socketio.emit('update_collegamenti_simulazione', {'id_filo': id_filo})
+        return jsonify({'success': True, 'message': 'Collegamento importato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+# === API ROUTES PER SIMULAZIONI ===
+
+@app.route('/api/collegamenti_simulazione/filo/<int:id_filo>')
+def api_collegamenti_simulazione_filo(id_filo):
+    """API per ottenere i collegamenti di simulazione di un filo"""
+    collegamenti = db_manager.get_collegamenti_simulazione_by_filo(id_filo)
+    return jsonify([dict(c) for c in collegamenti])
+
+@app.route('/api/collegamenti_simulazione/<int:collegamento_id>')
+def api_collegamento_simulazione_detail(collegamento_id):
+    """API per ottenere i dettagli di un singolo collegamento di simulazione"""
+    collegamento = db_manager.get_collegamento_simulazione_by_id(collegamento_id)
+    if collegamento:
+        return jsonify(dict(collegamento))
+    else:
+        return jsonify({'error': 'Collegamento non trovato'}), 404
+
+@app.route('/api/collegamento_simulazione/<int:id>', methods=['GET'])
+def get_collegamento_simulazione(id):
+    """Ottiene i dati di un collegamento di simulazione"""
+    try:
+        collegamento = db_manager.get_collegamento_simulazione_by_id(id)
+        if collegamento:
+            return jsonify(collegamento)
+        else:
+            return jsonify({'error': 'Collegamento non trovato'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/update_collegamento_simulazione/<int:id>', methods=['POST'])
+def update_collegamento_simulazione(id):
+    """Aggiorna un collegamento di simulazione esistente"""
+    try:
+        titolo = request.form['titolo']
+        dettagli = request.form.get('dettagli', '')
+        etichetta_qualita = request.form.get('etichetta_qualita', 'collegamento media qualità')
+          # Raccoglie anche gli argomenti se forniti
+        id_argomento1 = request.form.get('id_argomento1')
+        id_argomento2 = request.form.get('id_argomento2')
+        
+        # Converte valori vuoti in None
+        id_argomento1 = int(id_argomento1) if id_argomento1 and id_argomento1.strip() else None
+        id_argomento2 = int(id_argomento2) if id_argomento2 and id_argomento2.strip() else None
+        
+        # Verifica che almeno un argomento sia fornito
+        if not id_argomento2:
+            return jsonify({'success': False, 'error': 'Il secondo argomento è obbligatorio'})
+        
+        # Verifica che gli argomenti siano diversi se entrambi sono forniti
+        if id_argomento1 and id_argomento2 and id_argomento1 == id_argomento2:
+            return jsonify({'success': False, 'error': 'Non puoi collegare un argomento a se stesso'})
+          # Aggiorna sempre tutti i campi, inclusi gli argomenti
+        db_manager.update_collegamento_simulazione(id, titolo, dettagli, etichetta_qualita, 
+                                     id_argomento1, id_argomento2)
+        
+        # Get the filo_id to emit the correct event
+        collegamento = db_manager.get_collegamento_simulazione_by_id(id)
+        if collegamento:
+            socketio.emit('update_collegamenti_simulazione', {'id_filo': collegamento['id_filo']})
+        
+        return jsonify({'success': True, 'message': 'Collegamento aggiornato con successo'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/delete_collegamento_simulazione/<int:id>', methods=['DELETE'])
+def delete_collegamento_simulazione(id):
+    """Elimina un collegamento di simulazione"""
+    try:
+        # Get the filo_id before deleting to emit the correct event
+        collegamento = db_manager.get_collegamento_simulazione_by_id(id)
+        if collegamento:
+            id_filo = collegamento['id_filo']
+            db_manager.delete_collegamento_simulazione(id)
+            socketio.emit('update_collegamenti_simulazione', {'id_filo': id_filo})
+            return ('', 204)
+        else:
+            return jsonify({'error': 'Collegamento non trovato'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/reorder_collegamento_simulazione/<int:id>', methods=['POST'])
+def reorder_collegamento_simulazione(id):
+    """Cambia l'ordine di un collegamento di simulazione"""
+    try:
+        new_order = int(request.form.get('new_order', 0))
+        if new_order <= 0:
+            return jsonify({'success': False, 'error': 'Numero d\'ordine non valido'})
+        
+        # Get the collegamento before reordering to get filo info
+        collegamento = db_manager.get_collegamento_simulazione_by_id(id)
+        if not collegamento:
+            return jsonify({'success': False, 'error': 'Collegamento non trovato'})
+        
+        id_filo = collegamento['id_filo']
+        max_order = db_manager.get_max_order_in_filo(id_filo)
+        
+        # Verifica che il nuovo ordine sia valido
+        if new_order > max_order:
+            return jsonify({'success': False, 'error': f'Ordine massimo consentito: {max_order}'})
+        
+        success = db_manager.reorder_collegamento_simulazione(id, new_order)
+        
+        if success:
+            socketio.emit('update_collegamenti_simulazione', {'id_filo': id_filo})
+            return jsonify({'success': True, 'message': 'Ordine aggiornato con successo'})
+        else:
+            return jsonify({'success': False, 'error': 'Errore durante il riordino'})
+            
+    except ValueError:
+        return jsonify({'success': False, 'error': 'Numero d\'ordine non valido'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/search_argomenti')
+def api_search_argomenti():
+    """API per cercare argomenti"""
+    query = request.args.get('q', '')
+    if len(query) < 2:
+        return jsonify([])
+    
+    argomenti = db_manager.search_argomenti(query)
+    return jsonify([dict(a) for a in argomenti])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

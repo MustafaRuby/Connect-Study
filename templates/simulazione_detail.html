@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulazione - ConnectStudy</title>
+    <!-- Modular CSS imports -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <link rel="stylesheet" href="/static/css/buttons.css">
+    <link rel="stylesheet" href="/static/css/cards.css">
+    <link rel="stylesheet" href="/static/css/modals.css">
+    <link rel="stylesheet" href="/static/css/forms.css">    <link rel="stylesheet" href="/static/css/context-menu.css">    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/search.css">
+    <link rel="stylesheet" href="/static/css/collegamenti-page.css">
+    <link rel="stylesheet" href="/static/css/button-icons.css">
+    
+    <!-- Local libraries -->
+    <script src="/static/libs/socketio/socket.io.min.js"></script>
+    <script src="/static/libs/marked/marked.min.js"></script>
+      <style>
+        .simulazione-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+        
+        .simulazione-spunto {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .spunto-immagine {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fili-section {
+            margin-top: 2rem;
+        }
+          .filo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .filo-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }        .filo-card.collapsed .collegamenti-list {
+            max-height: 0px; /* Completamente collassato */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .filo-card.expanded .collegamenti-list {
+            max-height: 2000px; /* Altezza sufficiente per espansione */
+            overflow: visible;
+            transition: max-height 0.3s ease-in;
+        }.filo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            gap: 1rem;
+        }
+        
+        .filo-title-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .filo-nome {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+          .collegamenti-list {
+            margin-top: 1rem;
+            transition: max-height 0.3s ease;
+        }
+          .collegamento-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .collegamento-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+        
+        .collegamento-ordine {
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+          .collegamento-reorder-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            opacity: 1;
+            margin-left: 0.5rem;
+        }
+        
+        .reorder-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .reorder-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+        
+        .reorder-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .reorder-btn.up {
+            margin-bottom: 1px;
+        }
+        
+        .reorder-btn.down {
+            margin-top: 1px;
+        }
+
+        /* ...existing code... */
+        
+        .add-filo-btn, .add-collegamento-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+          .add-filo-btn:hover, .add-collegamento-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 184, 148, 0.3);
+        }
+        
+        .filo-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filo-actions .btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .filo-actions .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .filo-actions .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+        
+        .filo-actions .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .filo-actions .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .filo-actions .add-collegamento-btn {
+            margin-right: 0;
+            margin-bottom: 0;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .back-btn {
+            background: #74b9ff;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+          .back-btn:hover {
+            background: #0984e3;
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .filo-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filo-actions .btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .filo-actions .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .filo-actions .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+        
+        .filo-actions .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .filo-actions .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .filo-actions .add-collegamento-btn {
+            margin-right: 0;
+            margin-bottom: 0;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .spunto-immagine {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .spunto-immagine:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Image popup modal styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }        .image-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            text-align: center;
+            overflow: hidden;
+            cursor: default;
+        }
+          .image-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            cursor: default;
+            transition: none; /* Rimuoviamo la transizione per più fluidità */
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+          .image-modal img.zoomed {
+            cursor: grab;
+            /* Rimuoviamo le limitazioni per evitare comportamenti strani */
+        }
+        
+        .image-modal img:active {
+            cursor: grabbing;
+        }
+        
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }        .image-modal-close:hover {
+            color: #ccc;
+        }
+        
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 15px;
+            left: 25px;
+            display: flex;
+            gap: 5px;
+            z-index: 1001;
+        }
+        
+        .zoom-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+          .zoom-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+        
+        .zoom-info {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .filo-actions .btn-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+        
+        .filo-actions .btn-icon.add-icon {
+            filter: brightness(0) invert(1);
+        }
+        
+        .filo-actions .btn-secondary .btn-icon {
+            filter: brightness(0) invert(1);
+        }
+          .filo-actions .btn-danger .btn-icon {
+            filter: brightness(0) invert(1);
+        }
+        
+        /* Scrollbar personalizzato per collegamenti list */
+        .collegamenti-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .collegamenti-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .collegamenti-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #00b894 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .collegamenti-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 50%, #009782 100%);
+        }
+        
+        /* Per Firefox */
+        .collegamenti-list {
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+          .filo-expand-btn {
+            background: #667eea;
+            border: 2px solid #667eea;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .filo-expand-btn:hover {
+            background: #5a67d8;
+            border-color: #5a67d8;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .filo-expand-btn.expanded {
+            transform: rotate(180deg);
+            background: #4c51bf;
+            border-color: #4c51bf;
+        }
+        
+        .filo-expand-btn.expanded:hover {
+            transform: rotate(180deg) scale(1.15);
+            background: #4c51bf;
+        }
+        
+        .filo-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filo-card:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Styles moved to modals.css */
+    </style>
+</head>
+<body>
+    <!-- Left Sidebar for Connections -->
+    <div id="left-sidebar" class="left-sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">📋</span>
+            <span class="toggle-text">Collegamenti</span>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h3>Collegamenti</h3>
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()">
+                    <span class="icon">➕</span>
+                    Nuovo
+                </button>
+            </div>
+            
+            <div class="sidebar-sections">
+                <div id="sidebar-materie" class="sidebar-materie">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="container">
+        <div class="main-content">
+        <a href="/simulazioni" class="back-btn">
+            <span>←</span>
+            Torna alle Simulazioni
+        </a>
+
+        <!-- Header con spunto della simulazione -->
+        <div class="simulazione-header">
+            <h1>Simulazione #{{ simulazione.id }}</h1>
+            <div class="simulazione-spunto">
+                {% if simulazione.spunto_testo %}
+                <div class="spunto-testo">
+                    <h3>Spunto testuale:</h3>
+                    <p>{{ simulazione.spunto_testo }}</p>
+                </div>
+                {% endif %}
+                
+                {% if simulazione.spunto_immagine %}                <div class="spunto-immagine-container">
+                    <h3>Spunto visivo:</h3>
+                    <img src="/static/{{ simulazione.spunto_immagine }}" alt="Spunto visivo" class="spunto-immagine" onclick="openImageModal('/static/{{ simulazione.spunto_immagine }}')">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Controlli per aggiungere fili e collegamenti -->        <div class="controls-section">
+            <button class="add-filo-btn" onclick="addFilo()">
+                <img src="/static/icons/add-icon.svg" alt="Aggiungi" class="btn-icon add-icon">
+                Nuovo Filo di Collegamento
+            </button>
+        </div>
+
+        <!-- Sezione fili di collegamento -->
+        <div class="fili-section">
+            {% if fili %}
+                {% for filo in fili %}                <div class="filo-card collapsed" data-filo-id="{{ filo.id }}" onclick="toggleFiloExpansion({{ filo.id }})">                    <div class="filo-header">
+                        <div class="filo-title-section">
+                            <span class="filo-nome">{{ filo.nome }}</span>
+                            <button class="filo-expand-btn" onclick="event.stopPropagation(); toggleFiloExpansion({{ filo.id }})" title="Espandi/Comprimi">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </button>
+                        </div>                        <div class="filo-actions">
+                            <button class="add-collegamento-btn" onclick="event.stopPropagation(); showAddCollegamentoModal({{ filo.id }})">
+                                <img src="/static/icons/add-icon.svg" alt="Aggiungi" class="btn-icon add-icon">
+                                Aggiungi Collegamento
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); importCollegamenti({{ filo.id }})">
+                                <img src="/static/icons/import-icon.svg" alt="Importa" class="btn-icon">
+                                Importa Esistenti
+                            </button>                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteFilo({{ filo.id }})">
+                                <img src="/static/icons/delete-icon.svg" alt="Elimina" class="btn-icon">
+                                Elimina Filo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="collegamenti-list" id="collegamenti-filo-{{ filo.id }}">
+                        <!-- I collegamenti verranno caricati dinamicamente -->
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="icon">🎯</div>
+                    <h3>Nessun filo di collegamento</h3>
+                    <p>Inizia creando il primo filo di collegamento per strutturare la tua simulazione.</p>
+                </div>
+            {% endif %}        </div>
+    </div>
+
+    <!-- Modal dettagli collegamento da sidebar -->
+    <div id="sidebar-collegamento-modal" class="modal" style="display:none;">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3 id="sidebar-collegamento-title">Dettagli Collegamento</h3>
+                <button class="modal-close" onclick="closeSidebarCollegamentoModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="sidebar-collegamento-body">
+                <!-- Dettagli caricati dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeSidebarCollegamentoModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per aggiungere collegamento -->
+    <div id="addCollegamentoModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Nuovo Collegamento</h3>
+                <button class="modal-close" onclick="closeModal('addCollegamentoModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+            
+            <form id="addCollegamentoForm">
+                <input type="hidden" id="id_filo" name="id_filo">
+                
+                <div class="form-group">
+                    <label for="titolo" class="form-label">Titolo del collegamento *</label>
+                    <input type="text" id="titolo" name="titolo" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dettagli" class="form-label">Dettagli (opzionale)</label>
+                    <textarea id="dettagli" name="dettagli" class="form-textarea" 
+                              placeholder="Descrivi il collegamento in dettaglio..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="etichetta_qualita" class="form-label">Qualità del collegamento</label>
+                    <select id="etichetta_qualita" name="etichetta_qualita" class="form-select">
+                        <option value="collegamento forzato">Collegamento forzato</option>
+                        <option value="collegamento media qualità" selected>Collegamento media qualità</option>
+                        <option value="collegamento buona qualità">Collegamento buona qualità</option>
+                        <option value="collegamento alta qualità">Collegamento alta qualità</option>
+                    </select>
+                </div>                <div class="form-group">
+                    <label>Primo argomento (opzionale):</label>
+                    <div class="argomento-selector">
+                        <div id="argomento1-selected" class="argomento-selected">
+                            <span class="placeholder">Seleziona argomento</span>
+                            <button type="button" class="cancel-btn" onclick="clearArgomento(1)">✕</button>
+                        </div>                        <button type="button" class="add-btn" onclick="selectArgomento(1)">
+                            Scegli Argomento
+                        </button>
+                        <input type="hidden" id="id_argomento1" name="id_argomento1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Secondo argomento *:</label>
+                    <div class="argomento-selector">
+                        <div id="argomento2-selected" class="argomento-selected">
+                            <span class="placeholder">Seleziona argomento</span>
+                            <button type="button" class="cancel-btn" onclick="clearArgomento(2)">✕</button>
+                        </div>                        <button type="button" class="add-btn" onclick="selectArgomento(2)">
+                            Scegli Argomento
+                        </button>
+                        <input type="hidden" id="id_argomento2" name="id_argomento2">
+                    </div>
+                </div><div class="popup-actions">
+                    <button type="submit" class="btn btn-primary">Crea Collegamento</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addCollegamentoModal')">Annulla</button>
+                </div>
+            </form>            </div>
+        </div>    </div>
+
+    <!-- Modal per modificare collegamento -->
+    <div id="editCollegamentoModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Modifica Collegamento</h3>
+                <button class="modal-close" onclick="closeModal('editCollegamentoModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+            
+            <form id="editCollegamentoForm">
+                <input type="hidden" id="edit_collegamento_id" name="collegamento_id">
+                
+                <div class="form-group">
+                    <label for="edit_titolo" class="form-label">Titolo del collegamento *</label>
+                    <input type="text" id="edit_titolo" name="titolo" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_dettagli" class="form-label">Dettagli (opzionale)</label>
+                    <textarea id="edit_dettagli" name="dettagli" class="form-textarea" 
+                              placeholder="Descrivi il collegamento in dettaglio..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_etichetta_qualita" class="form-label">Qualità del collegamento</label>
+                    <select id="edit_etichetta_qualita" name="etichetta_qualita" class="form-select">
+                        <option value="collegamento forzato">Collegamento forzato</option>
+                        <option value="collegamento media qualità">Collegamento media qualità</option>
+                        <option value="collegamento buona qualità">Collegamento buona qualità</option>
+                        <option value="collegamento alta qualità">Collegamento alta qualità</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Primo argomento (opzionale):</label>
+                    <div class="argomento-selector">
+                        <div id="edit_argomento1-selected" class="argomento-selected">
+                            <span class="placeholder">Seleziona argomento</span>
+                            <button type="button" class="cancel-btn" onclick="clearEditArgomento(1)">✕</button>
+                        </div>
+                        <button type="button" class="add-btn" onclick="selectEditArgomento(1)">
+                            Scegli Argomento
+                        </button>
+                        <input type="hidden" id="edit_id_argomento1" name="id_argomento1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Secondo argomento *:</label>
+                    <div class="argomento-selector">
+                        <div id="edit_argomento2-selected" class="argomento-selected">
+                            <span class="placeholder">Seleziona argomento</span>
+                            <button type="button" class="cancel-btn" onclick="clearEditArgomento(2)">✕</button>
+                        </div>
+                        <button type="button" class="add-btn" onclick="selectEditArgomento(2)">
+                            Scegli Argomento
+                        </button>
+                        <input type="hidden" id="edit_id_argomento2" name="id_argomento2">
+                    </div>
+                </div>
+
+                <div class="popup-actions">
+                    <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editCollegamentoModal')">Annulla</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- End main-content -->
+
+    <!-- Modal per importare collegamenti esistenti -->
+    <div id="importCollegamentiModal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Importa Collegamenti Esistenti</h3>
+                <button class="modal-close" onclick="closeModal('importCollegamentiModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+            
+            <div class="import-section">
+                <div class="form-group">
+                    <label class="form-label">Cerca collegamenti da importare</label>
+                    <input type="text" id="search_collegamenti" class="form-input" 
+                           placeholder="Cerca per titolo o dettagli..." 
+                           oninput="searchCollegamenti(this.value)">
+                </div>
+                
+                <div id="collegamenti_esistenti" class="collegamenti-esistenti">
+                    <!-- Collegamenti verranno caricati qui -->
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" class="btn-primary" onclick="importSelectedCollegamenti()">Importa Selezionati</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('importCollegamentiModal')">Annulla</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per selezionare argomento -->
+    <div id="argomento-selector-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Seleziona Argomento</h3>
+                <button class="modal-close" onclick="closeArgomentoSelectorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="argomento-search">
+                    <input type="text" id="argomento-search" placeholder="Cerca argomenti..." class="search-input">
+                </div>
+                <div id="materie-list" class="materie-list">
+                    {% for materia in materie %}
+                    <div class="materia-item" data-id="{{ materia.id }}" style="border-left: 4px solid {{ materia.colore }}">
+                        <h4 class="materia-name" onclick="toggleMateriaArgomenti({{ materia.id }})">
+                            <span class="expand-icon">▶</span>
+                            {{ materia.nome }}
+                        </h4>
+                        <div id="argomenti-{{ materia.id }}" class="argomenti-list" style="display: none;">
+                            <!-- Gli argomenti verranno caricati dinamicamente -->
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="argomenti-list" class="argomenti-list" style="display: none;">
+                    <button class="cancel-btn back-btn" onclick="showMaterieList()">← Torna alle materie</button>
+                    <div id="argomenti-grid" class="argomenti-grid">
+                        <!-- Gli argomenti verranno caricati dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Modal per visualizzare dettagli collegamento -->
+    <div id="dettagli-collegamento-modal" class="modal" style="display: none;">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h3>Dettagli Collegamento</h3>
+                <button class="modal-close" onclick="closeDettagliCollegamentoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dettagli-collegamento-content" class="markdown-content"></div>
+                <div class="modal-buttons" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeDettagliCollegamentoModal()">Chiudi</button>
+                </div>
+            </div>
+        </div>
+    </div><script>
+        console.log('🚀 Script initialized');        const socket = io();
+        let currentIdFilo = null;
+        let selectedCollegamenti = [];
+        let argomentiCache = {};
+        let currentArgomentoSlot = null;
+        let currentEditArgomentoNum = null; // For edit modal argomento selection
+          function closeAllModals() {
+            // Close specific modals instead of all modals generically
+            const modalsToClose = [
+                'addCollegamentoModal',
+                'importCollegamentiModal', 
+                'argomento-selector-modal',
+                'dettagli-collegamento-modal'
+            ];
+            
+            modalsToClose.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+          // Make functions globally available immediately for onclick handlers
+        window.showDettagliCollegamento = function(collegamentoId) {
+            console.log('showDettagliCollegamento called with ID:', collegamentoId);
+            
+            // Close other modals but not all modals
+            document.getElementById('addCollegamentoModal').style.display = 'none';
+            document.getElementById('importCollegamentiModal').style.display = 'none';
+            document.getElementById('argomento-selector-modal').style.display = 'none';
+            
+            fetch(`/api/collegamenti_simulazione/${collegamentoId}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(collegamento => {
+                    console.log('Collegamento data:', collegamento);
+                    if (collegamento && collegamento.dettagli) {
+                        const modalContent = document.getElementById('dettagli-collegamento-content');
+                        const modal = document.getElementById('dettagli-collegamento-modal');
+                        
+                        if (modalContent && modal) {
+                            modalContent.innerHTML = marked.parse(collegamento.dettagli);
+                            modal.style.display = 'flex';
+                            console.log('✅ Modal opened successfully');
+                        } else {
+                            console.error('❌ Modal elements not found:', {
+                                modalContent: !!modalContent,
+                                modal: !!modal
+                            });
+                        }
+                    } else {
+                        console.log('No details found for collegamento');
+                        alert('Nessun dettaglio disponibile per questo collegamento');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading collegamento details:', error);
+                    alert('Errore nel caricamento dei dettagli: ' + error.message);
+                });
+        };
+        
+        window.closeDettagliCollegamentoModal = function() {
+            document.getElementById('dettagli-collegamento-modal').style.display = 'none';
+        };        window.selectArgomento = function(slot) {
+            console.log('selectArgomento called with slot:', slot);
+            currentArgomentoSlot = slot;
+            
+            // Close only unrelated modals, not the main add connection modal
+            document.getElementById('importCollegamentiModal').style.display = 'none';
+            document.getElementById('dettagli-collegamento-modal').style.display = 'none';
+            
+            const modal = document.getElementById('argomento-selector-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                loadAllMaterieArgomenti();
+                console.log('✅ Argomento selector modal opened successfully');
+            } else {
+                console.error('❌ Argomento selector modal not found');
+            }
+        };
+          window.closeArgomentoSelectorModal = function() {
+            document.getElementById('argomento-selector-modal').style.display = 'none';
+            currentArgomentoSlot = null;
+            currentEditArgomentoNum = null; // Reset edit variable too
+        };
+          window.deleteFilo = function(idFilo) {
+            console.log('deleteFilo called with ID:', idFilo);
+            if (!confirm('Sei sicuro di voler eliminare questo filo di collegamento e tutti i suoi collegamenti?')) {
+                return;
+            }
+
+            // Trova e nascondi immediatamente il filo nell'interfaccia
+            const filoElement = document.querySelector(`[data-filo-id="${idFilo}"]`);
+            if (filoElement) {
+                filoElement.style.opacity = '0.5';
+                filoElement.style.pointerEvents = 'none';
+                console.log('Filo nascosto temporaneamente nell\'interfaccia');
+            }
+
+            fetch(`/delete_filo/${idFilo}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                console.log('Delete response status:', response.status);
+                if (response.ok) {
+                    console.log('Filo deleted successfully');
+                    
+                    // Rimuovi immediatamente il filo dal DOM
+                    if (filoElement) {
+                        filoElement.remove();
+                        console.log('Filo rimosso dal DOM');
+                    }
+                    
+                    // Imposta un timeout di fallback se l'evento SocketIO non arriva
+                    setTimeout(() => {
+                        console.log('Fallback reload dopo 2 secondi');
+                        location.reload();
+                    }, 2000);
+                    
+                } else {
+                    // Ripristina l'elemento se c'è stato un errore
+                    if (filoElement) {
+                        filoElement.style.opacity = '1';
+                        filoElement.style.pointerEvents = 'auto';
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting filo:', error);
+                // Ripristina l'elemento in caso di errore
+                if (filoElement) {
+                    filoElement.style.opacity = '1';
+                    filoElement.style.pointerEvents = 'auto';
+                }                alert('Errore nell\'eliminazione: ' + error.message);
+            });
+        };
+          // Edit collegamento simulazione function
+        window.editCollegamentoSimulazione = function(collegamentoId) {
+            console.log('Edit collegamento simulazione called with ID:', collegamentoId);
+            
+            // Fetch collegamento data from the API
+            fetch(`/api/collegamento_simulazione/${collegamentoId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(collegamento => {
+                    // Populate the edit form with current values
+                    document.getElementById('edit_collegamento_id').value = collegamento.id;
+                    document.getElementById('edit_titolo').value = collegamento.titolo || '';
+                    document.getElementById('edit_dettagli').value = collegamento.dettagli || '';
+                    document.getElementById('edit_etichetta_qualita').value = collegamento.etichetta_qualita || 'collegamento media qualità';
+                    
+                    // Set argomenti
+                    if (collegamento.id_argomento1) {
+                        document.getElementById('edit_id_argomento1').value = collegamento.id_argomento1;
+                        document.getElementById('edit_argomento1-selected').innerHTML = `
+                            <span>${collegamento.argomento1_titolo}</span>
+                            <button type="button" class="cancel-btn" onclick="clearEditArgomento(1)">✕</button>
+                        `;
+                        document.getElementById('edit_argomento1-selected').classList.add('has-value');
+                    } else {
+                        clearEditArgomento(1);
+                    }
+                    
+                    if (collegamento.id_argomento2) {
+                        document.getElementById('edit_id_argomento2').value = collegamento.id_argomento2;
+                        document.getElementById('edit_argomento2-selected').innerHTML = `
+                            <span>${collegamento.argomento2_titolo}</span>
+                            <button type="button" class="cancel-btn" onclick="clearEditArgomento(2)">✕</button>
+                        `;
+                        document.getElementById('edit_argomento2-selected').classList.add('has-value');
+                    } else {
+                        clearEditArgomento(2);
+                    }
+                    
+                    // Show the modal
+                    document.getElementById('editCollegamentoModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error fetching collegamento data:', error);
+                    alert('Errore nel caricamento dei dati del collegamento');
+                });
+        };
+        
+        // Helper functions for edit modal
+        window.clearEditArgomento = function(num) {
+            document.getElementById(`edit_id_argomento${num}`).value = '';
+            const selectedDiv = document.getElementById(`edit_argomento${num}-selected`);
+            selectedDiv.innerHTML = `
+                <span class="placeholder">Seleziona argomento</span>
+                <button type="button" class="cancel-btn" onclick="clearEditArgomento(${num})">✕</button>
+            `;
+            selectedDiv.classList.remove('has-value');
+        };        window.selectEditArgomento = function(num) {
+            currentEditArgomentoNum = num;
+            currentArgomentoSlot = null; // Clear the regular slot
+            document.getElementById('argomento-selector-modal').style.display = 'flex';
+            loadAllMaterieArgomenti();
+        };
+        
+        // Handle edit form submission
+        document.getElementById('editCollegamentoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const collegamentoId = formData.get('collegamento_id');
+            
+            fetch(`/api/update_collegamento_simulazione/${collegamentoId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    closeModal('editCollegamentoModal');
+                    // The page will be updated via socket event
+                } else {
+                    alert('Errore nella modifica: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error updating collegamento:', error);
+                alert('Errore nella modifica del collegamento');
+            });
+        });
+        
+        // Delete collegamento simulazione function  
+        window.deleteCollegamentoSimulazione = function(collegamentoId) {
+            console.log('Delete collegamento simulazione called with ID:', collegamentoId);
+            
+            if (!confirm('Sei sicuro di voler eliminare questo collegamento dalla simulazione?')) {
+                return;
+            }
+            
+            // Find and temporarily hide the collegamento in the UI
+            const collegamentoElement = document.querySelector(`[data-collegamento-id="${collegamentoId}"]`);
+            if (collegamentoElement) {
+                collegamentoElement.style.opacity = '0.5';
+                collegamentoElement.style.pointerEvents = 'none';
+            }
+            
+            fetch(`/api/delete_collegamento_simulazione/${collegamentoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                console.log('Delete collegamento response status:', response.status);
+                if (response.ok) {
+                    console.log('Collegamento deleted successfully');
+                    
+                    // Remove immediately from DOM
+                    if (collegamentoElement) {
+                        collegamentoElement.remove();
+                        console.log('Collegamento removed from DOM');
+                    } else {
+                        // If we can't find the specific element, reload the filo
+                        location.reload();
+                    }
+                    
+                } else {
+                    // Restore element if there was an error
+                    if (collegamentoElement) {
+                        collegamentoElement.style.opacity = '1';
+                        collegamentoElement.style.pointerEvents = 'auto';
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting collegamento:', error);
+                // Restore element on error
+                if (collegamentoElement) {
+                    collegamentoElement.style.opacity = '1';
+                    collegamentoElement.style.pointerEvents = 'auto';
+                }
+                alert('Errore nell\'eliminazione: ' + error.message);
+            });
+        };
+        
+        window.toggleMateriaArgomenti = function(materiaId) {
+            const argomentiDiv = document.getElementById(`argomenti-${materiaId}`);
+            const icon = document.querySelector(`[onclick="toggleMateriaArgomenti(${materiaId})"] .expand-icon`);
+            
+            if (argomentiDiv.style.display === 'none') {
+                argomentiDiv.style.display = 'block';
+                if (icon) icon.classList.add('expanded');
+                loadMateriaArgomenti(materiaId);
+            } else {
+                argomentiDiv.style.display = 'none';
+                if (icon) icon.classList.remove('expanded');
+            }
+        };
+          window.showAddCollegamentoModal = function(idFilo) {
+            currentIdFilo = idFilo;
+            document.getElementById('id_filo').value = idFilo;
+            document.getElementById('addCollegamentoModal').style.display = 'flex';
+            document.getElementById('addCollegamentoForm').reset();
+            document.getElementById('id_filo').value = idFilo;
+            clearArgomento(1);
+            clearArgomento(2);
+        };
+          window.importCollegamenti = function(idFilo) {
+            currentIdFilo = idFilo;
+            selectedCollegamenti = [];
+            document.getElementById('importCollegamentiModal').style.display = 'flex';
+            searchCollegamenti(''); // fix: era loadAvailableCollegamenti()
+        };
+          console.log('✅ All functions made globally available immediately');
+        
+        // Argomento selection functions (remaining local functions)
+
+        function clearArgomento(slot) {
+            resetArgomentoSelector(slot);
+        }
+
+        // Alternative function to clear selected argomento (for backward compatibility)
+        function clearSelectedArgomento(fieldName) {
+            if (fieldName === 'argomento1') {
+                clearArgomento(1);
+            } else if (fieldName === 'argomento2') {
+                clearArgomento(2);
+            }
+        }
+
+        function resetArgomentoSelector(slot) {
+            const selectedDiv = document.getElementById(`argomento${slot}-selected`);
+            selectedDiv.className = 'argomento-selected';
+            selectedDiv.innerHTML = '<span class="placeholder">Seleziona argomento</span><button type="button" class="cancel-btn" onclick="clearArgomento(' + slot + ')">&times;</button>';
+            document.getElementById(`id_argomento${slot}`).value = '';
+        }
+
+        function setSelectedArgomento(slot, id, titolo, materia) {
+            const selectedDiv = document.getElementById(`argomento${slot}-selected`);
+            selectedDiv.className = 'argomento-selected has-selection';
+            selectedDiv.innerHTML = `
+                <div class="selected-info">
+                    <div class="selected-title">${titolo}</div>
+                    <div class="selected-materia">${materia}</div>
+                </div>
+                <button type="button" class="cancel-btn" onclick="clearArgomento(${slot})">&times;</button>
+            `;
+            document.getElementById(`id_argomento${slot}`).value = id;
+        }        function toggleMateriaArgomenti(materiaId) {
+            const argomentiDiv = document.getElementById(`argomenti-${materiaId}`);
+            const icon = document.querySelector(`[onclick="toggleMateriaArgomenti(${materiaId})"] .expand-icon`);
+            
+            if (argomentiDiv.style.display === 'none') {
+                argomentiDiv.style.display = 'block';
+                if (icon) icon.classList.add('expanded');
+                loadMateriaArgomenti(materiaId);
+            } else {
+                argomentiDiv.style.display = 'none';
+                if (icon) icon.classList.remove('expanded');
+            }
+        }        function loadMateriaArgomenti(materiaId) {
+            fetch(`/api/argomenti/${materiaId}`)
+                .then(response => response.json())
+                .then(argomenti => {
+                    const argomentiDiv = document.getElementById(`argomenti-${materiaId}`);
+                    argomentiDiv.innerHTML = argomenti.map(argomento => `
+                        <div class="argomento-item" onclick="selectArgomentoFromList(${argomento.id}, '${escapeHtml(argomento.titolo)}', '${argomento.id_materia}')">
+                            <div class="argomento-item-title">${escapeHtml(argomento.titolo)}</div>
+                            <span class="argomento-item-preparazione preparazione-${argomento.etichetta_preparazione.split(' ')[0]}">
+                                ${argomento.etichetta_preparazione}
+                            </span>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading argomenti for materia:', materiaId, error);
+                });
+        }
+
+        function loadAllMaterieArgomenti() {
+            console.log('loadAllMaterieArgomenti called');
+            // Load all argomenti for search functionality
+            fetch('/api/materie')
+                .then(response => response.json())
+                .then(materie => {
+                    console.log('Materie loaded:', materie);
+                    materie.forEach(materia => {
+                        const argomentiDiv = document.getElementById(`argomenti-${materia.id}`);
+                        if (argomentiDiv && argomentiDiv.style.display === 'block') {
+                            loadMateriaArgomenti(materia.id);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading materie:', error);
+                });
+        }        function selectArgomentoFromList(id, titolo, materiaId) {
+            if (currentArgomentoSlot) {
+                // Get materia name
+                fetch('/api/materie')
+                    .then(response => response.json())
+                    .then(materie => {
+                        const materia = materie.find(m => m.id == materiaId);
+                        setSelectedArgomento(currentArgomentoSlot, id, titolo, materia.nome);
+                        closeArgomentoSelectorModal();
+                    });
+            } else if (currentEditArgomentoNum) {
+                // Handle edit modal argomento selection
+                fetch('/api/materie')
+                    .then(response => response.json())
+                    .then(materie => {
+                        const materia = materie.find(m => m.id == materiaId);
+                        setSelectedEditArgomento(currentEditArgomentoNum, id, titolo, materia.nome);
+                        closeArgomentoSelectorModal();
+                    });
+            }
+        }
+        
+        function setSelectedEditArgomento(num, id, titolo, materiaNome) {
+            document.getElementById(`edit_id_argomento${num}`).value = id;
+            const selectedDiv = document.getElementById(`edit_argomento${num}-selected`);
+            selectedDiv.innerHTML = `
+                <span>${titolo} <small>(${materiaNome})</small></span>
+                <button type="button" class="cancel-btn" onclick="clearEditArgomento(${num})">✕</button>
+            `;
+            selectedDiv.classList.add('has-value');
+        }
+
+        function showMaterieList() {
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        // Utility function per escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }        // Socket events
+        socket.on('update_simulazioni', () => {
+            console.log('📡 Ricevuto evento update_simulazioni');
+            location.reload();
+        });
+
+        socket.on('update_fili', (data) => {
+            console.log('📡 Ricevuto evento update_fili:', data);
+            if (data.id_simulazione == {{ simulazione.id }}) {
+                console.log('📡 ID simulazione corrisponde, ricarico la pagina...');
+                location.reload();
+            } else {
+                console.log('📡 ID simulazione non corrisponde, ignorato');
+            }
+        });        socket.on('update_collegamenti_simulazione', (data) => {
+            console.log('📡 Ricevuto evento update_collegamenti_simulazione:', data);
+            if (data && data.id_filo) {
+                loadCollegamentiForFilo(data.id_filo);
+            } else {
+                console.log('📡 Ricarico la pagina perché id_filo non è disponibile');
+                location.reload();
+            }
+        });
+
+        // Carica collegamenti per tutti i fili al caricamento della pagina          
+        document.addEventListener('DOMContentLoaded', () => {
+            {% for filo in fili %}
+                loadCollegamentiForFilo({{ filo.id }});
+            {% endfor %}
+        });
+
+        function addFilo() {
+            fetch('/add_filo_simulazione', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id_simulazione={{ simulazione.id }}`
+            })
+            .then(response => response.json())
+            .then( data => {
+                if (data.success) {
+                    // Il reload verrà fatto tramite socket
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nella creazione del filo');        
+            });
+        }        function showAddCollegamentoModal(idFilo) {
+            currentIdFilo = idFilo;
+            document.getElementById('id_filo').value = idFilo;
+            document.getElementById('addCollegamentoModal').style.display = 'flex';
+            
+            // Reset form
+            document.getElementById('addCollegamentoForm').reset();
+            document.getElementById('id_filo').value = idFilo;
+            clearArgomento(1);
+            clearArgomento(2);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Gestione form aggiunta collegamento
+        document.getElementById('addCollegamentoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            // Verifica che almeno l'argomento di destinazione sia selezionato
+            if (!formData.get('id_argomento2')) {
+                alert('Seleziona almeno l\'argomento di destinazione');
+                return;
+            }
+            
+            fetch('/add_collegamento_simulazione', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal('addCollegamentoModal');
+                    // Il reload verrà fatto tramite socket
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nella creazione del collegamento');
+            });
+        });
+
+        function loadCollegamentiForFilo(idFilo) {
+            fetch(`/api/collegamenti_simulazione/filo/${idFilo}`)
+                .then(response => response.json())
+                .then(collegamenti => {
+                    const container = document.getElementById(`collegamenti-filo-${idFilo}`);
+                    if (!container) return;
+                    
+                    if (collegamenti.length === 0) {
+                        container.innerHTML = '<p class="text-muted">Nessun collegamento in questo filo</p>';
+                        return;
+                    }                    container.innerHTML = collegamenti.map((c, index) => `
+                        <div class="collegamento-item" data-collegamento-id="${c.id}" data-order="${c.numero_ordine}">
+                            <div class="collegamento-ordine">${c.numero_ordine}</div>
+                            <div class="collegamento-content">
+                                <div class="collegamento-header">
+                                    <div class="collegamento-titolo">${c.titolo}</div>
+                                    <div class="collegamento-reorder-controls">
+                                        <button class="reorder-btn up" onclick="event.stopPropagation(); reorderCollegamento(${c.id}, ${c.numero_ordine - 1})" 
+                                                title="Sposta su" ${c.numero_ordine === 1 ? 'disabled' : ''}>
+                                            ↑
+                                        </button>
+                                        <button class="reorder-btn down" onclick="event.stopPropagation(); reorderCollegamento(${c.id}, ${c.numero_ordine + 1})" 
+                                                title="Sposta giù" ${c.numero_ordine === collegamenti.length ? 'disabled' : ''}>
+                                            ↓
+                                        </button>
+                                    </div>
+                                    <div class="collegamento-actions">
+                                        <button class="btn-icon" onclick="event.stopPropagation(); editCollegamentoSimulazione(${c.id})" title="Modifica">
+                                            <img src="/static/icons/modify-icon.svg" alt="Modifica">
+                                        </button>
+                                        <button class="btn-icon btn-danger" onclick="event.stopPropagation(); deleteCollegamentoSimulazione(${c.id})" title="Elimina">
+                                            <img src="/static/icons/delete-icon.svg" alt="Elimina">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="collegamento-argomenti">
+                                    ${c.argomento1_titolo ? c.argomento1_titolo + ' → ' : 'Spunto → '}
+                                    ${c.argomento2_titolo}
+                                </div>
+                                ${c.dettagli ? `
+                                <div class="collegamento-dettagli">
+                                    <button class="btn btn-link dettagli-toggle" onclick="event.stopPropagation(); showDettagliCollegamento(${c.id})">
+                                        <span class="icon">🔎</span> Visualizza dettagli
+                                    </button>
+                                </div>` : ''}
+                                <span class="qualita-badge qualita-${c.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${c.etichetta_qualita}</span>
+                            </div>
+                        </div>
+                    `).join('');})
+                .catch(error => {
+                    console.error('Error loading collegamenti:', error);
+                });
+        }
+
+        function importCollegamenti(idFilo) {
+            currentIdFilo = idFilo;
+            selectedCollegamenti = [];
+            document.getElementById('importCollegamentiModal').style.display = 'flex';
+            searchCollegamenti('');
+        }
+
+        function searchCollegamenti(query) {
+            const url = query ? `/api/collegamenti?search=${encodeURIComponent(query)}` : '/api/collegamenti';
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(collegamenti =>{ 
+                    const container = document.getElementById('collegamenti_esistenti');
+                    
+                    if (collegamenti.length === 0) {
+                        container.innerHTML = '<p class="text-muted">Nessun collegamento trovato</p>';
+                        return;
+                    }
+                      container.innerHTML = collegamenti.map (c => `
+                        <div class="collegamento-esistente" data-id="${c.id}">
+                            <div class="collegamento-titolo">${c.titolo}</div>
+                            <div class="collegamento-argomenti">${c.argomento1_titolo} ↔ ${c.argomento2_titolo}</div>
+                            ${c.dettagli ? `<div class="collegamento-dettagli">${c.dettagli}</div>` : ''}
+                            <span class="qualita-badge qualita-${c.etichetta_qualita.replace(/\s+/g, '-').replace('collegamento-', '')}">${c.etichetta_qualita}</span>
+                        </div>
+                    `).join('');
+                      // Aggiungi event listeners ai collegamenti esistenti
+                    container.querySelectorAll('.collegamento-esistente').forEach(element => {
+                        element.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            const id = parseInt(element.getAttribute('data-id'));
+                            toggleCollegamentoSelection(id, element);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error searching collegamenti:', error);
+                });
+        }
+
+        function toggleCollegamentoSelection(id, element) {
+            const index = selectedCollegamenti.indexOf(id);
+            
+            if (index > -1) {
+                selectedCollegamenti.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                selectedCollegamenti.push(id);
+                element.classList.add('selected');
+            }
+        }
+
+        function importSelectedCollegamenti() {
+            if (selectedCollegamenti.length === 0) {
+                alert('Seleziona almeno un collegamento da importare');
+                return;
+            }
+            
+            const promises = selectedCollegamenti.map(collegamentoId => 
+                fetch('/import_collegamento_to_simulazione', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `collegamento_id=${collegamentoId}&id_filo=${currentIdFilo}`
+                })
+            );
+            
+            Promise.all(promises)
+                .then(responses => Promise.all(responses.map(r => r.json())))
+                .then(results => {
+                    const failed = results.filter(r => !r.success);
+                    
+                    if (failed.length === 0) {
+                        closeModal('importCollegamentiModal');
+                        // Il reload verrà fatto tramite socket
+                    } else {
+                        alert(`Alcuni collegamenti non sono stati importati: ${failed.map(f => f.error).join(', ')}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error importing collegamenti:', error);
+                    alert('Errore nell\'importazione dei collegamenti');
+                });
+        }
+
+        // Chiudi modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal('addCollegamentoModal');
+                closeModal('importCollegamentiModal');
+            }
+        });        // Chiudi risultati di ricerca quando si clicca fuori
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.argomenti-search')) {
+                document.querySelectorAll('.search-results').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+        });
+        
+        // === DEBUG FUNCTIONS ===
+        window.testShowDettagliCollegamento = function() {
+            console.log('🧪 Testing showDettagliCollegamento function...');
+            showDettagliCollegamento(1); // Test with ID 1
+        };
+
+        window.testSelectArgomento = function() {
+            console.log('🧪 Testing selectArgomento function...');
+            selectArgomento(1); // Test with slot 1
+        };
+
+        window.testDeleteFilo = function() {
+            console.log('🧪 Testing deleteFilo function...');
+            deleteFilo(1); // Test with ID 1
+        };        // Test function existence on page load
+        console.log('🔍 Function checks:');
+        console.log('- showDettagliCollegamento:', typeof showDettagliCollegamento);
+        console.log('- selectArgomento:', typeof selectArgomento);
+        console.log('- deleteFilo:', typeof deleteFilo);
+        console.log('- loadAllMaterieArgomenti:', typeof loadAllMaterieArgomenti);
+        
+        // Immediate availability check after all functions are defined        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM loaded');
+            console.log('✅ showDettagliCollegamento available:', typeof showDettagliCollegamento);
+            console.log('✅ selectArgomento available:', typeof selectArgomento);
+            console.log('✅ deleteFilo available:', typeof deleteFilo);
+            
+            // Test modal elements exist
+            const dettagliModal = document.getElementById('dettagli-collegamento-modal');
+            const argomentoModal = document.getElementById('argomento-selector-modal');
+            
+            console.log('✅ dettagli-collegamento-modal exists:', !!dettagliModal);
+            console.log('✅ argomento-selector-modal exists:', !!argomentoModal);
+            
+            if (dettagliModal) {
+                console.log('✅ dettagli modal display style:', dettagliModal.style.display);
+                console.log('✅ dettagli modal computed display:', window.getComputedStyle(dettagliModal).display);
+            }
+            
+            if (argomentoModal) {
+                console.log('✅ argomento modal display style:', argomentoModal.style.display);
+                console.log('✅ argomento modal computed display:', window.getComputedStyle(argomentoModal).display);
+            }
+            
+            // Make functions globally available for debugging
+            window.showDettagliCollegamento = showDettagliCollegamento;
+            window.selectArgomento = selectArgomento;
+            window.deleteFilo = deleteFilo;
+            window.closeDettagliCollegamentoModal = closeDettagliCollegamentoModal;
+            window.closeArgomentoSelectorModal = closeArgomentoSelectorModal;
+            
+            console.log('✅ All functions are now globally available');
+        });
+          // Make test functions available globally for immediate testing
+        window.testShowDettagliCollegamento = () => showDettagliCollegamento(1);
+        window.testSelectArgomento = () => selectArgomento('argomento1');
+        window.testDeleteFilo = () => deleteFilo(1);
+        
+        // Manual test function that can be called from console
+        window.manualTest = function() {
+            console.log('🧪 Starting manual tests...');
+            
+            // Test 1: Connection details modal
+            console.log('🔗 Testing connection details modal...');
+            try {
+                showDettagliCollegamento(1);
+                console.log('✅ showDettagliCollegamento(1) called successfully');
+            } catch (error) {
+                console.error('❌ Error with showDettagliCollegamento:', error);
+            }
+            
+            // Test 2: Argument selector modal
+            console.log('📚 Testing argument selector modal...');
+            try {
+                selectArgomento('argomento1');
+                console.log('✅ selectArgomento(argomento1) called successfully');
+            } catch (error) {
+                console.error('❌ Error with selectArgomento:', error);
+            }
+            
+            // Test 3: Delete thread function
+            console.log('🗑️ Testing delete thread function...');
+            try {
+                // Just test the function existence, don't actually delete
+                console.log('deleteFilo function type:', typeof deleteFilo);
+                console.log('✅ deleteFilo function exists');
+            } catch (error) {
+                console.error('❌ Error with deleteFilo:', error);
+            }
+            
+            console.log('🧪 Manual tests completed. Check above for any errors.');        };
+        
+        console.log('🔧 Added window.manualTest() - call this from console to test functions');
+        console.log('🔧 You can also call: window.testShowDettagliCollegamento(), window.testSelectArgomento(), window.testDeleteFilo()');
+        
+        // === LEFT SIDEBAR FUNCTIONALITY ===
+        function toggleSidebar() {
+            const sidebar = document.getElementById('left-sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const toggleIcon = document.querySelector('.toggle-icon');
+            
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('sidebar-open');
+            
+            // Change icon based on sidebar state
+            if (sidebar.classList.contains('open')) {
+                toggleIcon.textContent = '✖️';
+                loadSidebarConnections();
+            } else {
+                toggleIcon.textContent = '📋';
+            }
+        }
+
+        function showCollegamentoModalEmpty() {
+            window.location.href = '/collegamenti';
+        }
+
+        function loadSidebarConnections() {
+            console.log('Loading sidebar connections...');
+            fetch('/api/collegamenti')
+                .then(response => response.json())
+                .then(collegamenti => {
+                    console.log('Collegamenti loaded:', collegamenti.length);
+                    updateSidebarConnections(collegamenti);
+                })
+                .catch(error => {
+                    console.error('Error loading sidebar connections:', error);
+                });
+        }
+
+        function updateSidebarConnections(collegamenti) {
+            const container = document.getElementById('sidebar-materie');
+            
+            if (!collegamenti || collegamenti.length === 0) {
+                container.innerHTML = '<div class="sidebar-empty">Nessun collegamento disponibile</div>';
+                return;
+            }
+            
+            // Group connections by materia
+            const materieMap = new Map();
+            
+            collegamenti.forEach(conn => {
+                const materiaNome = conn.materia1_nome || 'Senza materia';
+                const materiaColore = conn.materia1_colore || '#ccc';
+                
+                if (!materieMap.has(materiaNome)) {
+                    materieMap.set(materiaNome, {
+                        nome: materiaNome,
+                        colore: materiaColore,
+                        collegamenti: []
+                    });
+                }
+                
+                materieMap.get(materiaNome).collegamenti.push({
+                    id: conn.id,
+                    titolo: conn.titolo,
+                    argomento1_titolo: conn.argomento1_titolo || 'Spunto',
+                    argomento2_titolo: conn.argomento2_titolo || 'Destinazione'
+                });
+            });
+            
+            // Generate HTML
+            container.innerHTML = '';
+            
+            if (materieMap.size === 0) {
+                container.innerHTML = '<div class="sidebar-empty">Nessun collegamento disponibile</div>';
+                return;
+            }
+            
+            materieMap.forEach((materiaData, materiaNome) => {
+                const materiaDiv = document.createElement('div');
+                materiaDiv.className = 'sidebar-materia';
+                materiaDiv.innerHTML = `
+                    <div class="sidebar-materia-header" onclick="toggleMateriaConnections(this)">
+                        <div class="sidebar-materia-title">
+                            <span class="sidebar-materia-badge" style="background-color: ${materiaData.colore}"></span>
+                            ${materiaNome}
+                        </div>
+                        <span class="sidebar-materia-toggle">▶</span>
+                    </div>
+                    <div class="sidebar-search-group">
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca collegamento..." oninput="filterCollegamenti(this, 'collegamento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                        <div class="sidebar-search">
+                            <input type="text" class="sidebar-search-input" placeholder="Cerca argomento..." oninput="filterCollegamenti(this, 'argomento')">
+                            <img src="/static/icons/search-icon.svg" class="sidebar-search-icon" width="16" height="16">
+                        </div>
+                    </div>
+                    <div class="sidebar-collegamenti">
+                        ${materiaData.collegamenti.map(conn => `
+                            <div class="sidebar-collegamento" data-titolo="${conn.titolo.toLowerCase()}" data-argomenti="${conn.argomento1_titolo.toLowerCase()} ${conn.argomento2_titolo.toLowerCase()}" onclick="showSidebarCollegamentoModal(${conn.id})">
+                                <div class="collegamento-title">${conn.titolo}</div>
+                                <div class="collegamento-endpoints">
+                                    ${conn.argomento1_titolo} ↔ ${conn.argomento2_titolo}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(materiaDiv);
+            });
+        }
+
+        function toggleMateriaConnections(header) {
+            const materia = header.parentElement;
+            const searchGroup = materia.querySelector('.sidebar-search-group');
+            const collegamenti = materia.querySelector('.sidebar-collegamenti');
+            const toggle = header.querySelector('.sidebar-materia-toggle');
+            
+            const isExpanded = searchGroup.style.display === 'block';
+            
+            if (isExpanded) {
+                searchGroup.style.display = 'none';
+                collegamenti.style.display = 'none';
+                toggle.textContent = '▶';
+            } else {
+                searchGroup.style.display = 'block';
+                collegamenti.style.display = 'block';
+                toggle.textContent = '▼';
+                
+                // Clear search inputs when opening
+                materia.querySelectorAll('.sidebar-search-input').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Reset all connections visibility
+                materia.querySelectorAll('.sidebar-collegamento').forEach(conn => {
+                    conn.style.display = 'block';
+                    // Remove any previous highlighting
+                    const title = conn.querySelector('.collegamento-title');
+                    const endpoints = conn.querySelector('.collegamento-endpoints');
+                    if (title) title.innerHTML = title.textContent;
+                    if (endpoints) endpoints.innerHTML = endpoints.textContent;
+                });
+            }
+        }
+
+        function filterCollegamenti(input, type) {
+            const searchTerm = input.value.toLowerCase().trim();
+            const materia = input.closest('.sidebar-materia');
+            const collegamenti = materia.querySelectorAll('.sidebar-collegamento');
+            
+            collegamenti.forEach(collegamento => {
+                let shouldShow = false;
+                const title = collegamento.querySelector('.collegamento-title');
+                const endpoints = collegamento.querySelector('.collegamento-endpoints');
+                
+                // Reset highlighting
+                if (title) {
+                    if (!title.originalText) title.originalText = title.textContent;
+                    title.innerHTML = title.originalText;
+                }
+                if (endpoints) {
+                    if (!endpoints.originalText) endpoints.originalText = endpoints.textContent;
+                    endpoints.innerHTML = endpoints.originalText;
+                }
+                
+                if (!searchTerm) {
+                    shouldShow = true;
+                } else {
+                    if (type === 'collegamento') {
+                        // Search in connection title
+                        shouldShow = collegamento.dataset.titolo.includes(searchTerm);
+                        if (shouldShow && title) {
+                            title.innerHTML = highlightText(title.originalText, searchTerm);
+                        }
+                    } else if (type === 'argomento') {
+                        // Search in arguments
+                        shouldShow = collegamento.dataset.argomenti.includes(searchTerm);
+                        if (shouldShow && endpoints) {
+                            endpoints.innerHTML = highlightText(endpoints.originalText, searchTerm);
+                        }
+                    }
+                }
+                
+                collegamento.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        // Helper function for text highlighting
+        function highlightText(text, query) {
+            if (!query || !text) return text;
+            
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function showSidebarCollegamentoModal(id) {
+            fetch('/api/collegamenti')
+                .then(r => r.json())
+                .then(collegamenti => {
+                    const c = collegamenti.find(x => x.id === id);
+                    if (!c) return;
+                    let html = `
+                        <div class='mini-collegamento-card'>
+                            <div class='collegamento-header'><h4>${c.titolo}</h4></div>
+                            <div class='collegamento-argomenti'>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia1_colore}'>
+                                    <a href='/argomento/${c.id_argomento1}'>${c.argomento1_titolo}</a>
+                                    <span class='materia-name'>${c.materia1_nome}</span>
+                                </div>
+                                <div class='collegamento-arrow'>⟷</div>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia2_colore}'>
+                                    <a href='/argomento/${c.id_argomento2}'>${c.argomento2_titolo}</a>
+                                    <span class='materia-name'>${c.materia2_nome}</span>
+                                </div>
+                            </div>
+                            <div class='collegamento-footer'>
+                                <span class='etichetta-qualita ${c.etichetta_qualita.replace(/ /g,'-').toLowerCase()}'>${c.etichetta_qualita}</span>
+                            </div>
+                            <div class='collegamento-dettagli' style='margin-top:1em;'>
+                                ${marked.parse(c.dettagli||'')}
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('sidebar-collegamento-body').innerHTML = html;
+                    document.getElementById('sidebar-collegamento-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error loading connection details:', error));
+        }
+
+        function closeSidebarCollegamentoModal() {
+            document.getElementById('sidebar-collegamento-modal').style.display = 'none';
+        }
+
+        // Load sidebar connections on page load
+        document.addEventListener('DOMContentLoaded', function() {        loadSidebarConnections();
+        });
+    </script>
+      <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>        <!-- Zoom Controls -->
+        <div class="zoom-controls" onclick="event.stopPropagation()">
+            <button class="zoom-btn" onclick="zoomIn()" title="Zoom In (+)">+</button>
+            <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out (-)">−</button>
+            <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom (0)">⌂</button>
+            <div class="zoom-info" id="zoomInfo">100%</div>
+        </div>
+        
+        <div class="image-modal-content" id="imageModalContent" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="Spunto visivo">
+        </div>
+    </div>      <script>        
+        // Image modal zoom and drag functionality
+        let currentZoom = 1;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let imgStartX = 0;
+        let imgStartY = 0;
+        let currentTranslateX = 0;
+        let currentTranslateY = 0;
+        
+        function openImageModal(imageSrc) {
+            console.log('🖼️ Opening image modal with src:', imageSrc);
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            
+            if (!modal) {
+                console.error('❌ Image modal not found');
+                return;
+            }
+            
+            // Reset zoom and position
+            resetZoom();
+            
+            // Add error handling for image loading
+            modalImage.onerror = function() {
+                console.error('❌ Failed to load image:', imageSrc);
+                alert('Errore nel caricamento dell\'immagine. Percorso: ' + imageSrc);
+            };
+            
+            modalImage.onload = function() {
+                console.log('✅ Image loaded successfully:', imageSrc);
+                setupImageEventListeners();
+            };
+            
+            modalImage.src = imageSrc;
+            modal.style.display = 'block';
+            console.log('✅ Image modal opened successfully');
+        }
+        
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+                resetZoom();
+                console.log('✅ Image modal closed');
+            }
+        }        function zoomIn() {
+            currentZoom = Math.min(currentZoom * 1.1, 8); // Ridotto da 1.2 a 1.1 per incrementi più piccoli
+            updateImageTransform();
+        }
+        
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom / 1.1, 0.3); // Ridotto da 1.2 a 1.1 per decrements più piccoli
+            updateImageTransform();
+        }
+        
+        function resetZoom() {
+            currentZoom = 1;
+            currentTranslateX = 0;
+            currentTranslateY = 0;
+            updateImageTransform();
+        }        function updateImageTransform() {
+            const modalImage = document.getElementById('modalImage');
+            const zoomInfo = document.getElementById('zoomInfo');
+            if (modalImage) {
+                modalImage.style.transform = `scale(${currentZoom}) translate(${currentTranslateX}px, ${currentTranslateY}px)`;
+                modalImage.style.transition = isDragging ? 'none' : 'transform 0.05s ease-out'; // Transizione più veloce
+                modalImage.classList.toggle('zoomed', currentZoom > 1.01); // Soglia più precisa
+            }
+            if (zoomInfo) {
+                zoomInfo.textContent = Math.round(currentZoom * 100) + '%';
+            }
+        }
+        
+        function setupImageEventListeners() {
+            const modalImage = document.getElementById('modalImage');
+            const modalContent = document.getElementById('imageModalContent');
+            
+            if (!modalImage || !modalContent) return;            // Mouse wheel zoom - molto più fluido e graduale
+            modalContent.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const zoomSpeed = 0.05; // Ridotto da 0.1 a 0.05 per zoom più graduale
+                
+                const oldZoom = currentZoom;
+                if (e.deltaY < 0) {
+                    // Zoom in - incremento più piccolo
+                    currentZoom = Math.min(currentZoom * (1 + zoomSpeed), 8);
+                } else {
+                    // Zoom out - decremento più piccolo
+                    currentZoom = Math.max(currentZoom * (1 - zoomSpeed), 0.3);
+                }
+                
+                updateImageTransform();
+            });
+            
+            // Double click to reset zoom
+            modalImage.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                resetZoom();
+            });
+            
+            // Mouse drag functionality
+            modalImage.addEventListener('mousedown', function(e) {
+                if (currentZoom > 1) {
+                    isDragging = true;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                    imgStartX = currentTranslateX;
+                    imgStartY = currentTranslateY;
+                    modalImage.style.cursor = 'grabbing';
+                    e.preventDefault();
+                }
+            });
+              document.addEventListener('mousemove', function(e) {
+                if (isDragging && currentZoom > 1) {
+                    // Movimento più responsive - senza divisione per currentZoom
+                    const deltaX = e.clientX - dragStartX;
+                    const deltaY = e.clientY - dragStartY;
+                    
+                    currentTranslateX = imgStartX + deltaX / currentZoom;
+                    currentTranslateY = imgStartY + deltaY / currentZoom;
+                    
+                    updateImageTransform();
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    const modalImage = document.getElementById('modalImage');
+                    if (modalImage) {
+                        modalImage.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+                    }
+                }
+            });
+            
+            // Touch events for mobile
+            let touchStartDistance = 0;
+            let touchStartZoom = 1;
+            let touch1StartX = 0;
+            let touch1StartY = 0;
+            
+            modalImage.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    // Single touch - start drag
+                    if (currentZoom > 1) {
+                        isDragging = true;
+                        dragStartX = e.touches[0].clientX;
+                        dragStartY = e.touches[0].clientY;
+                        imgStartX = currentTranslateX;
+                        imgStartY = currentTranslateY;
+                    }
+                } else if (e.touches.length === 2) {
+                    // Two fingers - start pinch zoom
+                    isDragging = false;
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    touchStartDistance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                    touchStartZoom = currentZoom;
+                    touch1StartX = touch1.clientX;
+                    touch1StartY = touch1.clientY;
+                }
+                e.preventDefault();
+            });
+              modalImage.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 1 && isDragging && currentZoom > 1) {
+                    // Single touch drag - più responsive
+                    const deltaX = e.touches[0].clientX - dragStartX;
+                    const deltaY = e.touches[0].clientY - dragStartY;
+                    
+                    currentTranslateX = imgStartX + deltaX / currentZoom;
+                    currentTranslateY = imgStartY + deltaY / currentZoom;
+                    
+                    updateImageTransform();
+                } else if (e.touches.length === 2) {
+                    // Two finger pinch zoom - più fluido
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const currentDistance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                    
+                    if (touchStartDistance > 0) {
+                        const zoomFactor = currentDistance / touchStartDistance;
+                        currentZoom = Math.max(0.3, Math.min(8, touchStartZoom * zoomFactor));
+                        updateImageTransform();
+                    }
+                }
+                e.preventDefault();
+            });
+            
+            modalImage.addEventListener('touchend', function(e) {
+                isDragging = false;
+                e.preventDefault();
+            });
+        }
+        
+        // Close modal when clicking outside the image - using specific event listener
+        document.getElementById('imageModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeImageModal();
+            }
+        });          // Close modal with escape key and add zoom shortcuts
+        document.addEventListener('keydown', function(event) {
+            const modal = document.getElementById('imageModal');
+            if (modal && modal.style.display === 'block') {
+                if (event.key === 'Escape') {
+                    closeImageModal();
+                } else if (event.key === '+' || event.key === '=') {
+                    event.preventDefault();
+                    zoomIn();
+                } else if (event.key === '-') {
+                    event.preventDefault();
+                    zoomOut();
+                } else if (event.key === '0') {
+                    event.preventDefault();
+                    resetZoom();
+                }
+            }        });        // Reorder collegamento function
+        window.reorderCollegamento = function(collegamentoId, newOrder) {
+            console.log('Reordering collegamento:', collegamentoId, 'to order:', newOrder);
+            
+            // Optimistic UI update - disable buttons temporarily
+            const collegamentoElement = document.querySelector(`[data-collegamento-id="${collegamentoId}"]`);
+            if (collegamentoElement) {
+                const reorderControls = collegamentoElement.querySelector('.collegamento-reorder-controls');
+                if (reorderControls) {
+                    reorderControls.style.pointerEvents = 'none';
+                    reorderControls.style.opacity = '0.5';
+                }
+            }
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('new_order', newOrder.toString());
+            
+            fetch(`/api/reorder_collegamento_simulazione/${collegamentoId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ Reorder successful');
+                    // The page will be updated via socket event automatically
+                } else {
+                    console.error('❌ Reorder failed:', data.error);
+                    alert('Errore nel riordino: ' + (data.error || 'Errore sconosciuto'));
+                    // Restore controls on error
+                    if (collegamentoElement) {
+                        const reorderControls = collegamentoElement.querySelector('.collegamento-reorder-controls');
+                        if (reorderControls) {
+                            reorderControls.style.pointerEvents = 'auto';
+                            reorderControls.style.opacity = '1';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error in reorderCollegamento:', error);
+                alert('Errore nella richiesta di riordino: ' + error.message);
+                // Restore controls on error
+                if (collegamentoElement) {
+                    const reorderControls = collegamentoElement.querySelector('.collegamento-reorder-controls');
+                    if (reorderControls) {
+                        reorderControls.style.pointerEvents = 'auto';
+                        reorderControls.style.opacity = '1';
+                    }
+                }
+            });
+        };
+
+        // Toggle filo expansion
+        function toggleFiloExpansion(filoId) {
+            const filoCard = document.querySelector(`[data-filo-id="${filoId}"]`);
+            const expandBtn = filoCard.querySelector('.filo-expand-btn');
+            
+            if (filoCard.classList.contains('collapsed')) {
+                // Expand
+                filoCard.classList.remove('collapsed');
+                filoCard.classList.add('expanded');
+                expandBtn.classList.add('expanded');
+                expandBtn.title = 'Comprimi';
+            } else {
+                // Collapse
+                filoCard.classList.remove('expanded');
+                filoCard.classList.add('collapsed');
+                expandBtn.classList.remove('expanded');
+                expandBtn.title = 'Espandi';
+            }
+        }
+    </script>
+    </div>
+    </div>
+</body>
+</html>
