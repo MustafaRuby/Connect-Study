@@ -615,28 +615,8 @@ h1 {
     display: none;
 }
 
-/* Fix: elimina gap verticale tra main-content e argomento-wrapper in argomento.html */
-.argomento-page .main-content {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-}
-.argomento-page .argomento-wrapper {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-.argomento-page .argomento-container {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* Elimina gap verticale tra main-content e argomento-wrapper: padding solo orizzontale */
-.argomento-page .argomento-wrapper {
-    padding: 0 2em !important;
-}
-
-/* Elimina ogni margin-bottom dai figli diretti di main-content in argomento.html */
-.argomento-page .main-content > * {
-    margin-bottom: 0 !important;
+.argomento-wrapper{
+    transition: margin-left 0.3s ease;
 }
 
 /* Editor fullscreen toggle button */

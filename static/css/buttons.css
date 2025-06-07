@@ -19,6 +19,7 @@
     background: linear-gradient(135deg, #4f8cff 0%, #6edb8f 100%);
     color: #fff;
     box-shadow: 0 4px 15px rgba(79, 140, 255, 0.3);
+    margin: 10px;
 }
 
 .add-btn:hover {
