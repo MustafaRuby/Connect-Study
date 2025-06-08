@@ -148,14 +148,37 @@
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    /* Scroll personalizzato con gradient blu-verde */
+    max-height: 780px; /* Altezza per circa 2 card */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* Collegamenti grid */
-.collegamenti-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+/* Scrollbar personalizzata con gradient blu-verde per il contenuto collegamenti */
+.content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff 0%, #6edb8f 100%);
+    border-radius: 10px;
+    border: 1px solid #e8f2ff;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #3a7ae4 0%, #5bc479 100%);
+    border-color: #4f8cff;
+}
+
+/* Per Firefox */
+.content {
+    scrollbar-width: thin;
+    scrollbar-color: #4f8cff #f1f1f1;
 }
 
 /* Collegamenti grid */

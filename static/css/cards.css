@@ -54,9 +54,11 @@
 }
 
 .materia-card.dragging {
-    opacity: 0.6;
+    opacity: 0.8;
     box-shadow: 0 8px 32px rgba(79, 140, 255, 0.4);
     transform: scale(1.05) rotate(2deg);
+    cursor: grabbing;
+    z-index: 1000;
 }
 
 .materia-card span {
@@ -274,4 +276,67 @@
     height: 2px;
     background: linear-gradient(90deg, #4f8cff 0%, #6edb8f 100%);
     border-radius: 10px 10px 0 0;
+}
+
+/* Enhanced drag and drop styles */
+.materia-card.dragging {
+    opacity: 0.8;
+    box-shadow: 0 8px 32px rgba(79, 140, 255, 0.4);
+    transform: scale(1.05) rotate(2deg);
+    cursor: grabbing;
+    z-index: 1000;
+}
+
+.materia-link.placeholder .materia-card {
+    background: #f8f9fa !important;
+    border: 2px dashed #007bff !important;
+    color: transparent !important;
+    box-shadow: none !important;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        border-color: #007bff;
+        opacity: 0.6;
+    }
+    50% {
+        border-color: #0056b3;
+        opacity: 0.8;
+    }
+    100% {
+        border-color: #007bff;
+        opacity: 0.6;
+    }
+}
+
+.materie-list.drag-active {
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(40, 167, 69, 0.05) 100%);
+    border-radius: 12px;
+    transition: background 0.3s ease;
+}
+
+.materia-card:active {
+    cursor: grabbing;
+}
+
+/* New wrapper-based layout for drag and drop */
+.materia-wrapper {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.materia-wrapper.placeholder {
+    opacity: 0.5;
+}
+
+.materia-wrapper.placeholder .materia-card {
+    background: #f8f9fa !important;
+    border: 2px dashed #007bff !important;
+    color: #6c757d !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+    animation: pulse 1.5s ease-in-out infinite;
 }

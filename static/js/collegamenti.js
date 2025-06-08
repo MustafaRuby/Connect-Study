@@ -1,6 +1,7 @@
- const socket = io();
+const socket = io();
     let currentArgomentoSlot = null;
     let editingCollegamentoId = null;
+    let allArgomentiData = []; // Store all loaded argomenti for search
 
     // Socket events
     socket.on('update_collegamenti', function() {
@@ -392,30 +393,44 @@
         // Load all argomenti for search functionality
         fetch('/api/materie')
             .then(response => response.json())
-            .then(materie => {
-                materie.forEach(materia => {
+            .then(materie => {                materie.forEach(materia => {
                     const argomentiDiv = document.getElementById(`argomenti-${materia.id}`);
                     if (argomentiDiv && argomentiDiv.style.display === 'block') {
                         loadMateriaArgomenti(materia.id);
                     }
                 });
             });
-    }    function loadMaterie() {
+    }
+
+    function loadMaterie() {
+        const materieList = document.getElementById('materie-list');
+        if (!materieList) {
+            console.error('❌ materie-list element not found');
+            return;
+        }
+        
+        // Add loading state
+        materieList.className = 'materie-list loading';
+        materieList.innerHTML = '';
+        
         fetch('/api/materie')
             .then(response => response.json())
             .then(materie => {
-                const materieList = document.getElementById('materie-list');
-                if (!materieList) {
-                    console.error('❌ materie-list element not found');
+                // Remove loading state
+                materieList.className = 'materie-list';
+                materieList.innerHTML = '';
+                
+                if (materie.length === 0) {
+                    materieList.className = 'materie-list empty';
+                    materieList.innerHTML = '<p>Nessuna materia trovata</p>';
                     return;
                 }
-                
-                materieList.innerHTML = '';
                 
                 materie.forEach(materia => {
                     const materiaCard = document.createElement('div');
                     materiaCard.className = 'materia-card';
-                    materiaCard.style.backgroundColor = materia.colore;
+                    // Set CSS custom property for border color
+                    materiaCard.style.setProperty('--materia-color', materia.colore);
                     materiaCard.innerHTML = `
                         <h3>${materia.nome}</h3>
                     `;
@@ -423,11 +438,18 @@
                     materieList.appendChild(materiaCard);
                 });
             })
-            .catch(error => console.error('Error loading materie:', error));
+            .catch(error => {
+                console.error('Error loading materie:', error);
+                materieList.className = 'materie-list empty';
+                materieList.innerHTML = '<p>Errore nel caricamento delle materie</p>';
+            });
     }    function loadArgomenti(materiaId, materiaNome, materiaColore) {
         fetch(`/api/argomenti/materia/${materiaId}`)
             .then(response => response.json())
             .then(argomenti => {
+                // Store argomenti data for search functionality
+                allArgomentiData = argomenti;
+                
                 const argomentiGrid = document.getElementById('argomenti-grid');
                 if (!argomentiGrid) {
                     console.error('❌ argomenti-grid element not found');
@@ -439,6 +461,10 @@
                 argomenti.forEach(argomento => {
                     const argomentoCard = document.createElement('div');
                     argomentoCard.className = 'argomento-card';
+                    
+                    // Set CSS custom property for materia color
+                    argomentoCard.style.setProperty('--materia-color', materiaColore);
+                    
                     argomentoCard.innerHTML = `
                         <div class="argomento-header">
                             <h4>${argomento.titolo}</h4>
@@ -454,6 +480,15 @@
                 const argomentiList = document.getElementById('argomenti-list');
                 if (materieList) materieList.style.display = 'none';
                 if (argomentiList) argomentiList.style.display = 'block';
+                
+                // Clear search inputs when switching materia
+                const argomentiSearch = document.getElementById('argomenti-search');
+                const contentSearch = document.getElementById('content-search');
+                if (argomentiSearch) argomentiSearch.value = '';
+                if (contentSearch) contentSearch.value = '';
+                
+                // Setup search functionality after loading argomenti
+                setupArgomentiModalSearch();
             })
             .catch(error => console.error('Error loading argomenti:', error));
     }
@@ -532,8 +567,7 @@
         });
     });// Make functions globally available
     window.showCollegamentoModal = showCollegamentoModal;
-    window.closeCollegamentoModal = closeCollegamentoModal;
-    window.editCollegamento = editCollegamento;
+    window.closeCollegamentoModal = closeCollegamentoModal;    window.editCollegamento = editCollegamento;
     window.deleteCollegamento = deleteCollegamento;
     window.toggleDettagli = toggleDettagli;    window.closeDettagliModal = closeDettagliModal;    window.selectArgomento = selectArgomento;
     window.closeMaterieSelector = closeMaterieSelector;
@@ -543,6 +577,9 @@
     window.showMaterieList = showMaterieList;
     window.loadMaterie = loadMaterie;
     window.loadArgomenti = loadArgomenti;
+    window.setupArgomentiModalSearch = setupArgomentiModalSearch;
+    window.filterArgomentiInModal = filterArgomentiInModal;
+    window.highlightText = highlightText;
     
     // Clear all filters function
     function clearFilters() {
@@ -554,4 +591,120 @@
         // Trigger search to reset results
         const searchEvent = new Event('input');
         document.getElementById('search-titolo').dispatchEvent(searchEvent);
+    }
+
+    // === SEARCH FUNCTIONALITY FOR ARGOMENTI MODAL ===
+    function setupArgomentiModalSearch() {
+        const argomentiSearch = document.getElementById('argomenti-search');
+        const contentSearch = document.getElementById('content-search');
+        
+        if (argomentiSearch) {
+            // Remove existing listeners to avoid duplicates
+            argomentiSearch.removeEventListener('input', handleArgomentiSearch);
+            argomentiSearch.addEventListener('input', handleArgomentiSearch);
+        }
+        
+        if (contentSearch) {
+            // Remove existing listeners to avoid duplicates
+            contentSearch.removeEventListener('input', handleContentSearch);
+            contentSearch.addEventListener('input', handleContentSearch);
+        }
+    }
+    
+    function handleArgomentiSearch(event) {
+        filterArgomentiInModal(event.target.value, 'title');
+    }
+    
+    function handleContentSearch(event) {
+        filterArgomentiInModal(event.target.value, 'content');
+    }
+
+    function filterArgomentiInModal(searchTerm, searchType) {
+        const argomentiGrid = document.getElementById('argomenti-grid');
+        if (!argomentiGrid) return;
+        
+        const argomentoCards = argomentiGrid.querySelectorAll('.argomento-card');
+        
+        searchTerm = searchTerm.toLowerCase().trim();
+          argomentoCards.forEach((card, index) => {
+            let shouldShow = false;
+            
+            if (!searchTerm) {
+                shouldShow = true;
+                // Reset highlighting
+                const titleElement = card.querySelector('.argomento-header h4');
+                const previewElement = card.querySelector('.argomento-preview');
+                if (titleElement && titleElement.originalText) {
+                    titleElement.innerHTML = titleElement.originalText;
+                }
+                if (previewElement && previewElement.originalText) {
+                    previewElement.innerHTML = previewElement.originalText;
+                }
+            } else {
+                // Store original text if not already stored
+                const titleElement = card.querySelector('.argomento-header h4');
+                const previewElement = card.querySelector('.argomento-preview');
+                
+                if (!titleElement.originalText) {
+                    titleElement.originalText = titleElement.textContent;
+                }
+                if (!previewElement.originalText) {
+                    previewElement.originalText = previewElement.textContent;
+                }
+
+                // Get the corresponding argomento data
+                const argomentoData = allArgomentiData[index];
+                
+                if (searchType === 'title') {
+                    // Search only in argomento titles
+                    const title = titleElement.originalText.toLowerCase();
+                    
+                    if (title.includes(searchTerm)) {
+                        shouldShow = true;
+                        titleElement.innerHTML = highlightText(titleElement.originalText, searchTerm);
+                        previewElement.innerHTML = previewElement.originalText;
+                    }
+                } else if (searchType === 'content') {
+                    // Search in the full content, not just the preview
+                    const fullContent = (argomentoData?.contenuto_md || '').toLowerCase();
+                    
+                    if (fullContent.includes(searchTerm)) {
+                        shouldShow = true;
+                        titleElement.innerHTML = titleElement.originalText;
+                        
+                        // Find the matching portion in the full content for highlighting
+                        const searchIndex = fullContent.indexOf(searchTerm);
+                        if (searchIndex !== -1) {
+                            // Extract a snippet around the match for display
+                            const start = Math.max(0, searchIndex - 50);
+                            const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
+                            let snippet = argomentoData.contenuto_md.substring(start, end);
+                            
+                            // Add ellipsis if needed
+                            if (start > 0) snippet = '...' + snippet;
+                            if (end < fullContent.length) snippet = snippet + '...';
+                            
+                            // Update preview with highlighted snippet
+                            previewElement.innerHTML = highlightText(snippet, searchTerm);
+                        } else {
+                            // Fallback to original preview with highlighting if match was in processed content
+                            previewElement.innerHTML = highlightText(previewElement.originalText, searchTerm);
+                        }
+                    }
+                }
+            }
+            
+            card.style.display = shouldShow ? 'block' : 'none';
+        });
+    }
+
+    function highlightText(text, query) {
+        if (!query || !text) return text;
+        
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+        return text.replace(regex, '<mark class="argomenti-modal-highlight">$1</mark>');
+    }
+    
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }

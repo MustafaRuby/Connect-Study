@@ -764,3 +764,303 @@
 #argomento-selector-modal.modal {
     z-index: 9999 !important;
 }
+
+/* Materie list in modal - ensure consistent grid layout */
+#materie-selector-modal .materie-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: 1rem !important;
+    padding: 1rem 0 !important;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Enhanced materia cards styling for modal - inspired by argomento cards */
+#materie-selector-modal .materie-list .materia-card {
+    background: #fff !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    min-height: 100px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.15) !important;
+    border: 2px solid #e8f2ff !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Add colored border based on materia color */
+#materie-selector-modal .materie-list .materia-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: var(--materia-color, #4f8cff) !important;
+}
+
+/* Add subtle background gradient */
+#materie-selector-modal .materie-list .materia-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+
+#materie-selector-modal .materie-list .materia-card h3 {
+    margin: 0 !important;
+    font-size: 1.2em !important;
+    font-weight: 600 !important;
+    color: #2a3a5c !important;
+    text-shadow: none !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.3rem !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Add argomenti count indicator */
+#materie-selector-modal .materie-list .materia-card .argomenti-count {
+    font-size: 0.85em !important;
+    color: #666 !important;
+    font-weight: normal !important;
+    margin-top: 0.3rem !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+#materie-selector-modal .materie-list .materia-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 24px rgba(79, 140, 255, 0.2) !important;
+    border-color: var(--materia-color, #4f8cff) !important;
+}
+
+#materie-selector-modal .materie-list .materia-card:hover::before {
+    height: 6px !important;
+}
+
+#materie-selector-modal .materie-list .materia-card:active {
+    transform: translateY(-1px) !important;
+}
+
+/* Custom scrollbar for materie-list in modal */
+#materie-selector-modal .materie-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#materie-selector-modal .materie-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#materie-selector-modal .materie-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+#materie-selector-modal .materie-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+/* Firefox scrollbar styling */
+#materie-selector-modal .materie-list {
+    scrollbar-width: thin;
+    scrollbar-color: #4f8cff #f1f1f1;
+}
+
+/* Loading state for materie list */
+#materie-selector-modal .materie-list.loading {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 200px !important;
+}
+
+#materie-selector-modal .materie-list.loading::before {
+    content: "Caricamento materie..." !important;
+    color: #666 !important;
+    font-size: 1.1em !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Empty state for materie list */
+#materie-selector-modal .materie-list.empty {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 200px !important;
+    color: #999 !important;
+    font-style: italic !important;
+}
+
+/* Enhanced argomento cards styling for modal - modern design matching materie cards */
+#materie-selector-modal .argomenti-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 1.2rem !important;
+    padding: 1rem 0 !important;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card {
+    background: #fff !important;
+    padding: 1.8rem !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    min-height: 140px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.08) !important;
+    border: 2px solid #f0f4ff !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Add subtle top border indicator using materia color */
+#materie-selector-modal .argomenti-grid .argomento-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: var(--materia-color, #4f8cff) !important;
+    z-index: 1 !important;
+}
+
+/* Subtle background gradient overlay */
+#materie-selector-modal .argomenti-grid .argomento-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(248,250,255,0.1) 100%) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card .argomento-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card .argomento-header h4 {
+    margin: 0 !important;
+    font-size: 1.1em !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    color: #2a3a5c !important;
+    flex: 1 !important;
+    word-wrap: break-word !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card .materia-badge {
+    padding: 0.3rem 0.8rem !important;
+    border-radius: 16px !important;
+    font-size: 0.75em !important;
+    font-weight: 600 !important;
+    color: white !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card .argomento-preview {
+    color: #5a6c7d !important;
+    font-size: 0.9em !important;
+    line-height: 1.5 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    line-clamp: 3 !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    position: relative !important;
+    z-index: 2 !important;
+    margin-top: auto !important;
+}
+
+/* Enhanced hover effects */
+#materie-selector-modal .argomenti-grid .argomento-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 32px rgba(79, 140, 255, 0.15) !important;
+    border-color: #c8d9ff !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card:hover::before {
+    height: 6px !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card:hover .materia-badge {
+    transform: scale(1.05) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card:active {
+    transform: translateY(-2px) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* Loading state for argomento cards */
+#materie-selector-modal .argomenti-grid .argomento-card.loading {
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+}
+
+#materie-selector-modal .argomenti-grid .argomento-card.loading::after {
+    background: linear-gradient(90deg, transparent, rgba(79, 140, 255, 0.1), transparent) !important;
+    animation: shimmer 1.5s infinite !important;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Custom scrollbar for argomenti-grid in modal */
+#materie-selector-modal .argomenti-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+#materie-selector-modal .argomenti-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#materie-selector-modal .argomenti-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 4px;
+}
+
+#materie-selector-modal .argomenti-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+/* Firefox scrollbar styling */
+#materie-selector-modal .argomenti-grid {
+    scrollbar-width: thin;
+    scrollbar-color: #4f8cff #f1f1f1;
+}
