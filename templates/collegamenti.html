@@ -271,33 +271,22 @@
                 </form>
             </div>
         </div>
-    </div>    <!-- Modal per selezionare argomento -->
-    <div id="argomento-selector-modal" class="modal" style="display: none;">
+    </div>    <!-- Modal per selezionare materie e argomenti -->
+    <div id="materie-selector-modal" class="modal" style="display: none;">
         <div class="modal-content large">
             <div class="modal-header">
                 <h3>Seleziona Argomento</h3>
-                <button class="modal-close" onclick="closeArgomentoSelectorModal()">&times;</button>
+                <button class="modal-close" onclick="closeMaterieSelector()">&times;</button>
             </div>
-            <div class="modal-body">
+              <div class="modal-body">
                 <div id="materie-list" class="materie-list">
-                    {% for materia in materie %}
-                    <div class="materia-item" data-id="{{ materia.id }}" style="border-left: 4px solid {{ materia.colore }}">
-                        <h4 class="materia-name" onclick="toggleMateriaArgomenti({{ materia.id }})">
-                            <span class="expand-icon">▶</span>
-                            {{ materia.nome }}
-                        </h4>
-                        <div id="argomenti-{{ materia.id }}" class="argomenti-list" style="display: none;">
-                            <!-- Gli argomenti verranno caricati dinamicamente -->
-                        </div>
-                    </div>
-                    {% endfor %}
+                    <!-- Le materie saranno caricate dinamicamente -->
                 </div>
                 
                 <div id="argomenti-list" class="argomenti-list" style="display: none;">
-                    <button class="cancel-btn back-btn" onclick="showMaterieList()">← Torna alle materie</button>
+                    <button class="btn btn-secondary back-btn" onclick="showMaterieList()">← Torna alle materie</button>
                     
-                    <div class="search-container">
-                        <div class="search-group">
+                    <div class="search-container">                        <div class="search-group">
                             <input type="text" id="argomenti-search" placeholder="Cerca nei titoli degli argomenti..." class="search-input">
                         </div>
                         <div class="search-group">
@@ -306,17 +295,111 @@
                     </div>
                     
                     <div id="argomenti-grid" class="argomenti-grid">
-                        <!-- Gli argomenti verranno caricati dinamicamente -->
+                        <!-- Gli argomenti saranno caricati dinamicamente -->
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <script>
-        // === ENHANCED ARGOMENTI MODAL SEARCH FUNCTIONALITY ===
+    </div>    <script>
+        // === MODAL FUNCTIONALITY FROM ARGOMENTO.HTML ===
         let allArgomentiData = []; // Store all loaded argomenti for search
-        
+        let selectedEndpoint = null;
+        let selectedArgomento1 = null;
+        let selectedArgomento2 = null;
+
+        function openMaterieSelector(endpoint) {
+            selectedEndpoint = endpoint;
+            document.getElementById('materie-selector-modal').style.display = 'flex';
+            loadMaterie();
+            setupArgomentiModalSearch();
+        }
+
+        function closeMaterieSelector() {
+            document.getElementById('materie-selector-modal').style.display = 'none';
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        function loadMaterie() {
+            fetch('/api/materie')
+                .then(response => response.json())
+                .then(materie => {
+                    const materieList = document.getElementById('materie-list');
+                    materieList.innerHTML = '';
+                    
+                    materie.forEach(materia => {
+                        const materiaCard = document.createElement('div');
+                        materiaCard.className = 'materia-card';
+                        materiaCard.style.backgroundColor = materia.colore;
+                        materiaCard.innerHTML = `
+                            <h3>${materia.nome}</h3>
+                        `;
+                        materiaCard.onclick = () => loadArgomenti(materia.id, materia.nome, materia.colore);
+                        materieList.appendChild(materiaCard);
+                    });
+                })
+                .catch(error => console.error('Error loading materie:', error));
+        }
+
+        function loadArgomenti(materiaId, materiaNome, materiaColore) {
+            fetch(`/api/argomenti/materia/${materiaId}`)
+                .then(response => response.json())
+                .then(argomenti => {
+                    allArgomentiData = argomenti; // Store for search
+                    const argomentiGrid = document.getElementById('argomenti-grid');
+                    argomentiGrid.innerHTML = '';
+                    
+                    argomenti.forEach(argomento => {
+                        const argomentoCard = document.createElement('div');
+                        argomentoCard.className = 'argomento-card';
+                        argomentoCard.innerHTML = `
+                            <div class="argomento-header">
+                                <h4>${argomento.titolo}</h4>
+                                <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
+                            </div>
+                            <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
+                        `;
+                        argomentoCard.onclick = () => selectArgomento(argomento.id, argomento.titolo, materiaNome, materiaColore);
+                        argomentiGrid.appendChild(argomentoCard);
+                    });
+                    
+                    document.getElementById('materie-list').style.display = 'none';
+                    document.getElementById('argomenti-list').style.display = 'block';
+                      // Clear search inputs when switching materia
+                    document.getElementById('argomenti-search').value = '';
+                    document.getElementById('content-search').value = '';
+                })
+                .catch(error => console.error('Error loading argomenti:', error));
+        }
+
+        function showMaterieList() {
+            document.getElementById('materie-list').style.display = 'block';
+            document.getElementById('argomenti-list').style.display = 'none';
+        }
+
+        function selectArgomento(id, titolo, materia, colore) {
+            if (selectedEndpoint === 1) {
+                selectedArgomento1 = { id, titolo, materia, colore };
+                updateSelectedArgomento(1, titolo, materia, colore);
+            } else {
+                selectedArgomento2 = { id, titolo, materia, colore };
+                updateSelectedArgomento(2, titolo, materia, colore);
+            }
+            closeMaterieSelector();
+        }
+
+        function updateSelectedArgomento(endpoint, titolo, materia, colore) {
+            const container = document.getElementById(`selected-argomento-${endpoint}`);
+            const noSelection = document.getElementById(`no-selection-${endpoint}`);
+            
+            container.querySelector('.materia-badge').textContent = materia;
+            container.querySelector('.materia-badge').style.backgroundColor = colore;
+            container.querySelector('.argomento-title').textContent = titolo;
+            
+            container.style.display = 'flex';
+            if (noSelection) noSelection.style.display = 'none';
+        }
+
         function setupArgomentiModalSearch() {
             const argomentiSearch = document.getElementById('argomenti-search');
             const contentSearch = document.getElementById('content-search');
@@ -339,8 +422,7 @@
             const argomentoCards = argomentiGrid.querySelectorAll('.argomento-card');
             
             searchTerm = searchTerm.toLowerCase().trim();
-            
-            argomentoCards.forEach((card, index) => {
+              argomentoCards.forEach((card, index) => {
                 let shouldShow = false;
                 
                 if (!searchTerm) {
@@ -412,45 +494,6 @@
             });
         }
 
-        // Enhanced loadArgomenti function that stores data for search
-        function loadArgomenti(materiaId, materiaNome, materiaColore) {
-            fetch(`/api/argomenti/materia/${materiaId}`)
-                .then(response => response.json())
-                .then(argomenti => {
-                    allArgomentiData = argomenti; // Store for search
-                    const argomentiGrid = document.getElementById('argomenti-grid');
-                    argomentiGrid.innerHTML = '';
-                    
-                    argomenti.forEach(argomento => {
-                        const argomentoCard = document.createElement('div');
-                        argomentoCard.className = 'argomento-card';
-                        argomentoCard.innerHTML = `
-                            <div class="argomento-header">
-                                <h4>${argomento.titolo}</h4>
-                                <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
-                            </div>
-                            <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
-                        `;
-                        argomentoCard.onclick = () => selectArgomentoFromList(argomento.id, argomento.titolo, materiaId);
-                        argomentiGrid.appendChild(argomentoCard);
-                    });
-                    
-                    document.getElementById('materie-list').style.display = 'none';
-                    document.getElementById('argomenti-list').style.display = 'block';
-                    
-                    // Clear search inputs when switching materia
-                    document.getElementById('argomenti-search').value = '';
-                    document.getElementById('content-search').value = '';
-                })
-                .catch(error => console.error('Error loading argomenti:', error));
-        }
-
-        function showMaterieList() {
-            document.getElementById('materie-list').style.display = 'block';
-            document.getElementById('argomenti-list').style.display = 'none';
-        }
-
-        // Helper function for text highlighting
         function highlightText(text, query) {
             if (!query || !text) return text;
             
@@ -462,7 +505,7 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        // Initialize enhanced search when page loads
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             setupArgomentiModalSearch();
         });
