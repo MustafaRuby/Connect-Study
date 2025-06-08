@@ -319,17 +319,20 @@
 
     function closeDettagliModal() {
         document.getElementById('dettagli-modal').style.display = 'none';
-    }
-
-    // Argomento selection
+    }    // Argomento selection
     function selectArgomento(slot) {
         currentArgomentoSlot = slot;
-        document.getElementById('argomento-selector-modal').style.display = 'flex';
-        loadAllMaterieArgomenti();
-    }
-
-    function closeArgomentoSelectorModal() {
-        document.getElementById('argomento-selector-modal').style.display = 'none';
+        document.getElementById('materie-selector-modal').style.display = 'flex';
+        loadMaterie();
+    }    function closeMaterieSelector() {
+        document.getElementById('materie-selector-modal').style.display = 'none';
+        
+        // Reset modal views
+        const materieList = document.getElementById('materie-list');
+        const argomentiList = document.getElementById('argomenti-list');
+        if (materieList) materieList.style.display = 'block';
+        if (argomentiList) argomentiList.style.display = 'none';
+        
         currentArgomentoSlot = null;
     }
 
@@ -385,9 +388,7 @@
                     </div>
                 `).join('');
             });
-    }
-
-    function loadAllMaterieArgomenti() {
+    }    function loadAllMaterieArgomenti() {
         // Load all argomenti for search functionality
         fetch('/api/materie')
             .then(response => response.json())
@@ -399,17 +400,85 @@
                     }
                 });
             });
+    }    function loadMaterie() {
+        fetch('/api/materie')
+            .then(response => response.json())
+            .then(materie => {
+                const materieList = document.getElementById('materie-list');
+                if (!materieList) {
+                    console.error('❌ materie-list element not found');
+                    return;
+                }
+                
+                materieList.innerHTML = '';
+                
+                materie.forEach(materia => {
+                    const materiaCard = document.createElement('div');
+                    materiaCard.className = 'materia-card';
+                    materiaCard.style.backgroundColor = materia.colore;
+                    materiaCard.innerHTML = `
+                        <h3>${materia.nome}</h3>
+                    `;
+                    materiaCard.onclick = () => loadArgomenti(materia.id, materia.nome, materia.colore);
+                    materieList.appendChild(materiaCard);
+                });
+            })
+            .catch(error => console.error('Error loading materie:', error));
+    }    function loadArgomenti(materiaId, materiaNome, materiaColore) {
+        fetch(`/api/argomenti/materia/${materiaId}`)
+            .then(response => response.json())
+            .then(argomenti => {
+                const argomentiGrid = document.getElementById('argomenti-grid');
+                if (!argomentiGrid) {
+                    console.error('❌ argomenti-grid element not found');
+                    return;
+                }
+                
+                argomentiGrid.innerHTML = '';
+                
+                argomenti.forEach(argomento => {
+                    const argomentoCard = document.createElement('div');
+                    argomentoCard.className = 'argomento-card';
+                    argomentoCard.innerHTML = `
+                        <div class="argomento-header">
+                            <h4>${argomento.titolo}</h4>
+                            <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
+                        </div>
+                        <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
+                    `;
+                    argomentoCard.onclick = () => selectArgomentoFromList(argomento.id, argomento.titolo, argomento.id_materia);
+                    argomentiGrid.appendChild(argomentoCard);
+                });
+                  // Switch views
+                const materieList = document.getElementById('materie-list');
+                const argomentiList = document.getElementById('argomenti-list');
+                if (materieList) materieList.style.display = 'none';
+                if (argomentiList) argomentiList.style.display = 'block';
+            })
+            .catch(error => console.error('Error loading argomenti:', error));
+    }
+
+    function showMaterieList() {
+        const materieList = document.getElementById('materie-list');
+        const argomentiList = document.getElementById('argomenti-list');
+        
+        if (materieList) {
+            materieList.style.display = 'block';
+        }
+        
+        if (argomentiList) {
+            argomentiList.style.display = 'none';
+        }
     }
 
     function selectArgomentoFromList(id, titolo, materiaId) {
         if (currentArgomentoSlot) {
             // Get materia name
             fetch('/api/materie')
-                .then(response => response.json())
-                .then(materie => {
+                .then(response => response.json())                .then(materie => {
                     const materia = materie.find(m => m.id == materiaId);
                     setSelectedArgomento(currentArgomentoSlot, id, titolo, materia.nome);
-                    closeArgomentoSelectorModal();
+                    closeMaterieSelector();
                 });
         }
     }
@@ -450,11 +519,10 @@
         
         // Setup clear filters button
         document.getElementById('clear-filters').addEventListener('click', clearFilters);
-        
-        // Make sure modals are initially hidden with display: none
+          // Make sure modals are initially hidden with display: none
         document.getElementById('dettagli-modal').style.display = 'none';
         document.getElementById('collegamento-modal').style.display = 'none';
-        document.getElementById('argomento-selector-modal').style.display = 'none';
+        document.getElementById('materie-selector-modal').style.display = 'none';
         
         // Close modals when clicking outside
         window.addEventListener('click', function(e) {
@@ -467,12 +535,14 @@
     window.closeCollegamentoModal = closeCollegamentoModal;
     window.editCollegamento = editCollegamento;
     window.deleteCollegamento = deleteCollegamento;
-    window.toggleDettagli = toggleDettagli;
-    window.closeDettagliModal = closeDettagliModal;
-    window.selectArgomento = selectArgomento;
-    window.closeArgomentoSelectorModal = closeArgomentoSelectorModal;
-    window.clearArgomento = clearArgomento;    window.toggleMateriaArgomenti = toggleMateriaArgomenti;
+    window.toggleDettagli = toggleDettagli;    window.closeDettagliModal = closeDettagliModal;    window.selectArgomento = selectArgomento;
+    window.closeMaterieSelector = closeMaterieSelector;
+    window.clearArgomento = clearArgomento;
+    window.toggleMateriaArgomenti = toggleMateriaArgomenti;
     window.selectArgomentoFromList = selectArgomentoFromList;
+    window.showMaterieList = showMaterieList;
+    window.loadMaterie = loadMaterie;
+    window.loadArgomenti = loadArgomenti;
     
     // Clear all filters function
     function clearFilters() {
