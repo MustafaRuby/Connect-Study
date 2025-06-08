@@ -512,11 +512,42 @@ def update_collegamento_simulazione(id, titolo, dettagli, etichetta_qualita, id_
     conn.close()
 
 def delete_collegamento_simulazione(id):
-    """Elimina un collegamento di simulazione"""
+    """Elimina un collegamento di simulazione e riordina automaticamente i rimanenti"""
     conn = get_db_connection()
-    conn.execute('DELETE FROM collegamenti_simulazione WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
+    
+    try:
+        # Prima otteniamo i dati del collegamento da eliminare
+        collegamento_info = conn.execute(
+            'SELECT id_filo, numero_ordine FROM collegamenti_simulazione WHERE id = ?', 
+            (id,)
+        ).fetchone()
+        
+        if not collegamento_info:
+            conn.close()
+            return False
+            
+        id_filo = collegamento_info['id_filo']
+        numero_ordine_eliminato = collegamento_info['numero_ordine']
+        
+        # Elimina il collegamento
+        conn.execute('DELETE FROM collegamenti_simulazione WHERE id = ?', (id,))
+        
+        # Riordina tutti i collegamenti con numero d'ordine superiore al collegamento eliminato
+        # decrementando il loro numero_ordine di 1 per riempire il vuoto
+        conn.execute('''
+            UPDATE collegamenti_simulazione 
+            SET numero_ordine = numero_ordine - 1 
+            WHERE id_filo = ? AND numero_ordine > ?
+        ''', (id_filo, numero_ordine_eliminato))
+        
+        conn.commit()
+        conn.close()
+        return True
+        
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise e
 
 def reorder_collegamento_simulazione(collegamento_id, new_order):
     """Cambia l'ordine di un collegamento di simulazione scambiando con quello che ha il nuovo ordine"""

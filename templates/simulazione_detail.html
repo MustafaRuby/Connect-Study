@@ -34,14 +34,58 @@
             z-index: 1000 !important;
             position: relative !important;
         }
-        
-        .simulazione-header {
+          .simulazione-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 2rem;
             border-radius: 12px;
             margin-bottom: 2rem;
             box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+        
+        .simulazione-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .simulazione-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .action-btn.modify:hover {
+            background: rgba(45, 148, 244, 0.3);
+            border-color: #2d94f4;
+        }
+        
+        .action-btn.delete:hover {
+            background: rgba(220, 53, 69, 0.3);
+            border-color: #dc3545;
         }
         
         .simulazione-spunto {
@@ -569,11 +613,21 @@
         <a href="/simulazioni" class="back-btn">
             <span>←</span>
             Torna alle Simulazioni
-        </a>
-
-        <!-- Header con spunto della simulazione -->
+        </a>        <!-- Header con spunto della simulazione -->
         <div class="simulazione-header">
-            <h1>Simulazione #{{ simulazione.id }}</h1>
+            <div class="simulazione-header-top">
+                <h1>Simulazione #{{ simulazione.id }}</h1>
+                <div class="simulazione-actions">
+                    <button class="action-btn modify" onclick="editSimulazioneSpuntoModal({{ simulazione.id }})" title="Modifica spunto">
+                        <img src="/static/icons/modify-icon.svg" alt="Modifica" width="20" height="20">
+                        Modifica Spunto
+                    </button>
+                    <button class="action-btn delete" onclick="showDeleteSimulazioneModal({{ simulazione.id }})" title="Elimina simulazione">
+                        <img src="/static/icons/delete-icon.svg" alt="Elimina" width="20" height="20">
+                        Elimina
+                    </button>
+                </div>
+            </div>
             <div class="simulazione-spunto">
                 {% if simulazione.spunto_testo %}
                 <div class="spunto-testo">
@@ -781,6 +835,77 @@
                     <button type="button" class="btn btn-secondary" onclick="closeModal('editCollegamentoModal')">Annulla</button>
                 </div>
             </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per modificare simulazione -->
+    <div id="edit-simulazione-modal" class="modal" style="display:none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Modifica Simulazione</h3>
+                <button class="modal-close" onclick="closeEditSimulazioneModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-simulazione-form">
+                    <input type="hidden" id="edit_simulazione_id" name="simulazione_id">
+                    
+                    <div class="form-group">
+                        <label for="edit_spunto_testo">Spunto Testuale</label>
+                        <textarea id="edit_spunto_testo" name="spunto_testo" placeholder="Inserisci qui il testo dello spunto (citazione, frase, concetto...)"></textarea>
+                        <div class="form-note">Opzionale: inserisci un testo che servirà come spunto per la simulazione</div>
+                    </div>
+
+                    <div class="form-divider">
+                        <span>OPPURE</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_spunto_immagine">Spunto Visivo</label>
+                        <div class="current-image" id="current-image-preview" style="display: none;">
+                            <img id="current-image-display" src="" alt="Immagine corrente" style="max-width: 200px; max-height: 150px; border-radius: 6px; margin-bottom: 1rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="changeImage()">Cambia immagine</button>
+                        </div>
+                        <div class="file-input-wrapper" id="edit-file-input-wrapper">
+                            <input type="file" id="edit_spunto_immagine" name="spunto_immagine" accept="image/*" class="file-input-hidden">
+                            <div class="file-input-display" id="edit_file_display_spunto">
+                                <span class="file-icon">🖼️</span>
+                                <span class="file-text">Scegli immagine o trascina qui</span>
+                                <span class="file-subtext">Clicca per selezionare un'immagine dal tuo computer</span>
+                            </div>
+                        </div>
+                        <div class="form-note">Opzionale: carica un'immagine che servirà come spunto visivo</div>
+                    </div>
+
+                    <div class="form-note" style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 4px;">
+                        <strong>Nota:</strong> Devi inserire almeno un testo o un'immagine come spunto per la simulazione.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">  
+                <div class="popup-actions">
+                    <button type="button" class="btn btn-primary" onclick="updateSimulazione()">Aggiorna Simulazione</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditSimulazioneModal()">Annulla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal di conferma eliminazione simulazione -->
+    <div id="confirm-delete-simulazione-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Elimina simulazione</h3>
+                <button class="modal-close" onclick="closeDeleteSimulazioneModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Per eliminare la simulazione, scrivi <b id="delete-simulazione-id-text"></b> qui sotto e conferma:</p>
+                <p><small>Questa azione eliminerà la simulazione e tutti i suoi collegamenti e non può essere annullata.</small></p>
+                <input type="text" id="delete-simulazione-input" placeholder="">
+                <div class="modal-buttons">
+                    <button id="confirm-delete-simulazione-btn" class="btn btn-danger">Elimina</button>
+                    <button id="cancel-delete-simulazione-btn" class="btn btn-secondary">Annulla</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2411,10 +2536,242 @@
                 // Collapse
                 filoCard.classList.remove('expanded');
                 filoCard.classList.add('collapsed');
-                expandBtn.classList.remove('expanded');
-                expandBtn.title = 'Espandi';
+                expandBtn.classList.remove('expanded');                expandBtn.title = 'Espandi';
             }
         }
+
+        // === EDIT AND DELETE SIMULATION FUNCTIONS ===
+        
+        window.editSimulazioneSpuntoModal = function(id) {
+            console.log('Edit simulation modal called with ID:', id);
+            
+            // Fetch current simulation data
+            fetch(`/api/simulazione/${id}`)
+                .then(response => response.json())
+                .then(simulazione => {
+                    // Populate edit form
+                    document.getElementById('edit_simulazione_id').value = simulazione.id;
+                    document.getElementById('edit_spunto_testo').value = simulazione.spunto_testo || '';
+                    
+                    // Handle image preview
+                    const currentImagePreview = document.getElementById('current-image-preview');
+                    const currentImageDisplay = document.getElementById('current-image-display');
+                    const fileInputWrapper = document.getElementById('edit-file-input-wrapper');
+                    
+                    if (simulazione.spunto_immagine) {
+                        currentImageDisplay.src = `/static/${simulazione.spunto_immagine}`;
+                        currentImagePreview.style.display = 'block';
+                        fileInputWrapper.style.display = 'none';
+                    } else {
+                        currentImagePreview.style.display = 'none';
+                        fileInputWrapper.style.display = 'block';
+                    }
+                    
+                    // Show modal
+                    document.getElementById('edit-simulazione-modal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error loading simulation data:', error);
+                    alert('Errore nel caricamento dei dati della simulazione');
+                });
+        };
+
+        window.updateSimulazione = function() {
+            const form = document.getElementById('edit-simulazione-form');
+            const formData = new FormData(form);
+            const simulazioneId = formData.get('simulazione_id');
+            
+            const spuntoTesto = formData.get('spunto_testo').trim();
+            const spuntoImmagine = formData.get('edit_spunto_immagine');
+            
+            // Check if at least one spunto is provided (only if no existing image)
+            const hasCurrentImage = document.getElementById('current-image-preview').style.display !== 'none';
+            if (!spuntoTesto && !spuntoImmagine && !hasCurrentImage) {
+                alert('Inserisci almeno un testo o un\'immagine come spunto');
+                return;
+            }
+
+            fetch(`/update_simulazione/${simulazioneId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeEditSimulazioneModal();
+                    // Reload will be done via socket
+                    location.reload();
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nell\'aggiornamento della simulazione');
+            });
+        };
+
+        window.showDeleteSimulazioneModal = function(id) {
+            console.log('Delete simulation modal called with ID:', id);
+            
+            const modal = document.getElementById('confirm-delete-simulazione-modal');
+            const input = document.getElementById('delete-simulazione-input');
+            const idText = document.getElementById('delete-simulazione-id-text');
+            const confirmBtn = document.getElementById('confirm-delete-simulazione-btn');
+            const cancelBtn = document.getElementById('cancel-delete-simulazione-btn');
+            
+            // Set up the modal
+            idText.textContent = `ID: ${id}`;
+            input.placeholder = `ID: ${id}`;
+            input.value = '';
+            
+            // Set up event handlers
+            confirmBtn.onclick = function() {
+                if (input.value.trim() === `ID: ${id}`) {
+                    closeDeleteSimulazioneModal();
+                    deleteSimulazione(id);
+                } else {
+                    alert('Testo di conferma non corretto. Scrivi esattamente: ID: ' + id);
+                }
+            };
+            
+            cancelBtn.onclick = closeDeleteSimulazioneModal;
+            
+            modal.style.display = 'flex';
+            input.focus();
+        };
+
+        window.deleteSimulazione = function(id) {
+            console.log('Deleting simulation with ID:', id);
+            
+            fetch(`/delete_simulazione/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Redirect back to simulations page after successful deletion
+                    window.location.href = '/simulazioni';
+                } else {
+                    alert('Errore nell\'eliminazione della simulazione');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nell\'eliminazione della simulazione');
+            });
+        };
+
+        window.closeEditSimulazioneModal = function() {
+            document.getElementById('edit-simulazione-modal').style.display = 'none';
+            document.getElementById('edit-simulazione-form').reset();
+            
+            // Reset image preview
+            const currentImagePreview = document.getElementById('current-image-preview');
+            const fileInputWrapper = document.getElementById('edit-file-input-wrapper');
+            
+            if (currentImagePreview) {
+                currentImagePreview.style.display = 'none';
+            }
+            if (fileInputWrapper) {
+                fileInputWrapper.style.display = 'block';
+            }
+        };
+
+        window.closeDeleteSimulazioneModal = function() {
+            document.getElementById('confirm-delete-simulazione-modal').style.display = 'none';
+        };
+
+        window.changeImage = function() {
+            const currentImagePreview = document.getElementById('current-image-preview');
+            const fileInputWrapper = document.getElementById('edit-file-input-wrapper');
+            
+            currentImagePreview.style.display = 'none';
+            fileInputWrapper.style.display = 'block';
+        };
+
+        // Event listeners for modals
+        document.addEventListener('DOMContentLoaded', function() {
+            // File input setup for edit modal
+            const editFileInput = document.getElementById('edit_spunto_immagine');
+            const editFileDisplay = document.getElementById('edit_file_display_spunto');
+            
+            if (editFileInput && editFileDisplay) {
+                const editWrapper = editFileDisplay.parentElement;
+
+                editFileDisplay.addEventListener('click', function() {
+                    editFileInput.click();
+                });
+
+                editFileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        editWrapper.classList.add('has-file');
+                        const fileName = file.name;
+                        editFileDisplay.querySelector('.file-text').textContent = fileName;
+                        editFileDisplay.querySelector('.file-subtext').textContent = 'File selezionato';
+                    } else {
+                        editWrapper.classList.remove('has-file');
+                        editFileDisplay.querySelector('.file-text').textContent = 'Scegli immagine o trascina qui';
+                        editFileDisplay.querySelector('.file-subtext').textContent = 'Clicca per selezionare un\'immagine dal tuo computer';
+                    }
+                });
+
+                // Drag and drop for edit modal
+                editFileDisplay.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    editWrapper.classList.add('drag-over');
+                });
+
+                editFileDisplay.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    editWrapper.classList.remove('drag-over');
+                });
+
+                editFileDisplay.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    editWrapper.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0 && files[0].type.startsWith('image/')) {
+                        editFileInput.files = files;
+                        editFileInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            // Modal event listeners
+            const editModal = document.getElementById('edit-simulazione-modal');
+            const deleteModal = document.getElementById('confirm-delete-simulazione-modal');
+
+            // Close modals when clicking outside
+            if (editModal) {
+                editModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeEditSimulazioneModal();
+                    }
+                });
+            }
+
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDeleteSimulazioneModal();
+                    }
+                });
+            }
+
+            // ESC key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (editModal && editModal.style.display === 'flex') {
+                        closeEditSimulazioneModal();
+                    }
+                    if (deleteModal && deleteModal.style.display === 'flex') {
+                        closeDeleteSimulazioneModal();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

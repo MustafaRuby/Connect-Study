@@ -68,15 +68,35 @@ def convert_docx_to_markdown(file_path):
             if formatted_text.strip():
                 markdown_content.append(formatted_text)
                 markdown_content.append('')
-        
-        # Gestione delle tabelle
+          # Gestione delle tabelle
         for table in doc.tables:
             markdown_content.append(convert_table_to_markdown(table))
             markdown_content.append('')
         
         return '\n'.join(markdown_content).strip()
     except Exception as e:
-        return f"Errore nella conversione del file Word: {str(e)}"
+        # Logging dell'errore completo per debugging
+        print(f"Errore dettagliato nella conversione Word: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # Prova a fare una conversione di base se quella avanzata fallisce
+        try:
+            doc = Document(file_path)
+            basic_content = []
+            basic_content.append("# Documento convertito (modalità semplificata)")
+            basic_content.append("")
+            
+            for paragraph in doc.paragraphs:
+                text = paragraph.text.strip()
+                if text:
+                    # Solo testo semplice, senza formattazione
+                    basic_content.append(text)
+                    basic_content.append("")
+            
+            return '\n'.join(basic_content).strip()
+        except Exception as fallback_error:
+            return f"Errore nella conversione del file Word: {str(e)}\n\nErrore anche nella conversione semplificata: {str(fallback_error)}"
 
 def analyze_font_sizes(doc):
     """Analizza tutte le dimensioni dei font nel documento per creare una mappa dei livelli"""
@@ -84,8 +104,12 @@ def analyze_font_sizes(doc):
     
     for paragraph in doc.paragraphs:
         for run in paragraph.runs:
-            if run.font.size and run.font.size.pt:
-                font_sizes.add(run.font.size.pt)
+            try:
+                if run.font.size and run.font.size.pt:
+                    font_sizes.add(run.font.size.pt)
+            except (AttributeError, TypeError):
+                # Ignora run senza informazioni di font valide
+                continue
     
     # Ordina le dimensioni in ordine decrescente
     sorted_sizes = sorted(font_sizes, reverse=True)
@@ -141,10 +165,14 @@ def process_paragraph_formatting(paragraph, font_sizes_map):
         text = run.text
         if not text:
             continue
-            
-        # Applica formattazione basata sulle proprietà del run
-        formatted_text = apply_run_formatting(run, text, font_sizes_map, paragraph_has_heading)
-        result.append(formatted_text)
+              # Applica formattazione basata sulle proprietà del run con gestione errori
+        try:
+            formatted_text = apply_run_formatting(run, text, font_sizes_map, paragraph_has_heading)
+            result.append(formatted_text)
+        except Exception as format_error:
+            # Se la formattazione fallisce, usa il testo semplice
+            print(f"Errore nella formattazione del run: {format_error}")
+            result.append(text)
     
     return ''.join(result)
 
@@ -152,15 +180,17 @@ def is_numbered_title(text, font_sizes_map, paragraph):
     """Determina se un paragrafo è un titolo numerato"""
     # Controlla se inizia con un numero seguito da punto e spazio
     import re
-    
-    # Pattern per titoli numerati: "1. ", "2. ", "3.1 ", etc.
+      # Pattern per titoli numerati: "1. ", "2. ", "3.1 ", etc.
     numbered_pattern = r'^\d+(\.\d+)*\.\s+'
     
     if re.match(numbered_pattern, text):
         # Controlla se ha una dimensione di font che indica un titolo
         for run in paragraph.runs:
-            if run.font.size and run.font.size.pt in font_sizes_map:
-                return True
+            try:
+                if run.font.size and run.font.size.pt in font_sizes_map:
+                    return True
+            except (AttributeError, TypeError):
+                continue
         
         # Anche se non ha font size specifico, se il testo è corto e sembra un titolo
         remaining_text = re.sub(numbered_pattern, '', text).strip()
@@ -179,52 +209,88 @@ def apply_run_formatting(run, text, font_sizes_map, is_heading_paragraph):
     # Non applicare formattazione di titolo se siamo già in un paragrafo di titolo
     # o se la dimensione del font non è significativamente diversa
     apply_font_size_formatting = not is_heading_paragraph
-    
-    # Grassetto
-    if run.bold:
-        formatted = f"**{formatted}**"
+      # Grassetto - gestione sicura delle proprietà
+    try:
+        if getattr(run, 'bold', False):
+            formatted = f"**{formatted}**"
+    except (AttributeError, TypeError):
+        pass
     
     # Corsivo
-    if run.italic:
-        formatted = f"*{formatted}*"
+    try:
+        if getattr(run, 'italic', False):
+            formatted = f"*{formatted}*"
+    except (AttributeError, TypeError):
+        pass
     
     # Sottolineato (usando HTML per compatibilità)
-    if run.underline:
-        formatted = f"<u>{formatted}</u>"
+    try:
+        if getattr(run, 'underline', False):
+            formatted = f"<u>{formatted}</u>"
+    except (AttributeError, TypeError):
+        pass
     
     # Barrato
-    if getattr(run.font, 'strike', False):
-        formatted = f"~~{formatted}~~"
-    
-    # Apice (superscript)
-    if run.font.superscript:
-        formatted = f"<sup>{formatted}</sup>"
+    try:
+        if getattr(run.font, 'strike', False):
+            formatted = f"~~{formatted}~~"
+    except (AttributeError, TypeError):
+        pass
+      # Apice (superscript)
+    try:
+        if getattr(run.font, 'superscript', False):
+            formatted = f"<sup>{formatted}</sup>"
+    except (AttributeError, TypeError):
+        pass
     
     # Pedice (subscript)
-    if run.font.subscript:
-        formatted = f"<sub>{formatted}</sub>"
-    
-    # Colore del testo (se diverso dal nero)
-    if run.font.color.rgb and run.font.color.rgb != (0, 0, 0):
-        rgb = run.font.color.rgb
-        color_hex = f"#{rgb.red:02x}{rgb.green:02x}{rgb.blue:02x}"
-        formatted = f'<span style="color: {color_hex};">{formatted}</span>'
-    
-    # Dimensione del font - ora gestita in modo intelligente
-    if apply_font_size_formatting and run.font.size and run.font.size.pt:
-        size = run.font.size.pt
-        # Solo per testo molto piccolo, usa <small>
-        if size < 9:
-            formatted = f"<small>{formatted}</small>"
+    try:
+        if getattr(run.font, 'subscript', False):
+            formatted = f"<sub>{formatted}</sub>"
+    except (AttributeError, TypeError):
+        pass
+      # Colore del testo (se diverso dal nero)
+    try:
+        if run.font.color.rgb:
+            rgb = run.font.color.rgb
+            # python-docx RGBColor ha attributi r, g, b (non red, green, blue)
+            if hasattr(rgb, 'r') and hasattr(rgb, 'g') and hasattr(rgb, 'b'):
+                # Controlla se il colore è diverso dal nero
+                if (rgb.r, rgb.g, rgb.b) != (0, 0, 0):
+                    color_hex = f"#{rgb.r:02x}{rgb.g:02x}{rgb.b:02x}"
+                    formatted = f'<span style="color: {color_hex};">{formatted}</span>'
+            elif hasattr(rgb, '__iter__') and len(rgb) >= 3:
+                # Fallback per tuple/list RGB
+                r, g, b = rgb[0], rgb[1], rgb[2]
+                if (r, g, b) != (0, 0, 0):
+                    color_hex = f"#{r:02x}{g:02x}{b:02x}"
+                    formatted = f'<span style="color: {color_hex};">{formatted}</span>'
+    except (AttributeError, TypeError) as e:
+        # Ignora errori di colore per non bloccare la conversione
+        pass
+      # Dimensione del font - ora gestita in modo intelligente
+    try:
+        if apply_font_size_formatting and run.font.size and run.font.size.pt:
+            size = run.font.size.pt
+            # Solo per testo molto piccolo, usa <small>
+            if size < 9:
+                formatted = f"<small>{formatted}</small>"
+    except (AttributeError, TypeError):
+        pass
         # Non applicare più automaticamente ### per dimensioni medie
-    
-    # Evidenziazione (highlight)
-    if run.font.highlight_color and run.font.highlight_color != 0:
-        formatted = f"=={formatted}=="
-    
-    # Font famiglia (se diversa dalla standard)
-    if run.font.name and run.font.name.lower() in ['courier new', 'consolas', 'monaco', 'monospace']:
-        formatted = f"`{formatted}`"
+      # Evidenziazione (highlight)
+    try:
+        if run.font.highlight_color and run.font.highlight_color != 0:
+            formatted = f"=={formatted}=="
+    except (AttributeError, TypeError):
+        # Ignora errori di highlight per non bloccare la conversione
+        pass
+      # Font famiglia (se diversa dalla standard)
+    try:
+        if run.font.name and run.font.name.lower() in ['courier new', 'consolas', 'monaco', 'monospace']:
+            formatted = f"`{formatted}`"
+    except (AttributeError, TypeError):
+        pass
     
     return formatted
 
@@ -768,7 +834,8 @@ def api_search_collegamenti():
 def simulazioni():
     """Pagina delle simulazioni"""
     simulazioni = db_manager.get_all_simulazioni()
-    return render_template('simulazioni.html', simulazioni=simulazioni)
+    edit_id = request.args.get('edit')  # Get edit parameter from URL
+    return render_template('simulazioni.html', simulazioni=simulazioni, edit_id=edit_id)
 
 @app.route('/add_simulazione', methods=['POST'])
 def add_simulazione():
@@ -816,20 +883,79 @@ def simulazione_detail(id):
 
 @app.route('/delete_simulazione/<int:id>', methods=['DELETE'])
 def delete_simulazione(id):
-    """Elimina una simulazione"""
+    """Elimina una simulazione esistente"""
     try:
-        # Rimuovi anche il file immagine se presente
-        simulazione = db_manager.get_simulazione_by_id(id)
-        if simulazione and simulazione['spunto_immagine']:
-            image_path = os.path.join('static', simulazione['spunto_immagine'])
+        # Get current simulation to remove image file
+        current_sim = db_manager.get_simulazione_by_id(id)
+        if current_sim and current_sim['spunto_immagine']:
+            image_path = os.path.join('static', current_sim['spunto_immagine'])
             if os.path.exists(image_path):
                 os.remove(image_path)
         
+        # Delete the simulation
         db_manager.delete_simulazione(id)
         socketio.emit('update_simulazioni')
-        return ('', 204)
+        return jsonify({'success': True, 'message': 'Simulazione eliminata con successo'})
+        
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/simulazione/<int:id>')
+def api_simulazione_by_id(id):
+    """API endpoint per ottenere una simulazione specifica"""
+    try:
+        simulazione = db_manager.get_simulazione_by_id(id)
+        if simulazione:
+            return jsonify(dict(simulazione))
+        else:
+            return jsonify({'error': 'Simulazione non trovata'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/update_simulazione/<int:id>', methods=['POST'])
+def update_simulazione(id):
+    """Aggiorna una simulazione esistente"""
+    try:
+        spunto_testo = request.form.get('spunto_testo', '')
+        current_sim = db_manager.get_simulazione_by_id(id)
+        
+        if not current_sim:
+            return jsonify({'success': False, 'error': 'Simulazione non trovata'})
+        
+        spunto_immagine = current_sim['spunto_immagine']  # Keep current image by default
+        
+        # Handle image upload
+        if 'spunto_immagine' in request.files:
+            file = request.files['spunto_immagine']
+            if file and file.filename:
+                # Remove old image if exists
+                if spunto_immagine:
+                    old_image_path = os.path.join('static', spunto_immagine)
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+                
+                # Save new image
+                upload_folder = os.path.join('static', 'simulazioni')
+                os.makedirs(upload_folder, exist_ok=True)
+                
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                unique_id = str(uuid.uuid4().hex[:8])
+                filename = f"spunto_{timestamp}_{unique_id}.{file.filename.rsplit('.', 1)[1].lower()}"
+                spunto_immagine = f"simulazioni/{filename}"
+                
+                file.save(os.path.join('static', spunto_immagine))
+        
+        # Verify at least one spunto is present
+        if not spunto_testo and not spunto_immagine:
+            return jsonify({'success': False, 'error': 'Inserisci almeno un testo o un\'immagine come spunto'})
+        
+        # Update simulation
+        db_manager.update_simulazione(id, spunto_testo, spunto_immagine)
+        socketio.emit('update_simulazioni')
+        return jsonify({'success': True, 'message': 'Simulazione aggiornata con successo'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 # === FILI COLLEGAMENTO ROUTES ===
 
