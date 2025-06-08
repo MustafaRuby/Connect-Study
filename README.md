@@ -53,10 +53,10 @@ L'orale dell’esame di stato si svolge così:
 ---
 
 ## 📁 Struttura del Progetto
-
+```
 ConnectStudy/
 ├── app.py                 # App Flask principale
-├── db\_manager.py          # Gestione delle query
+├── db\_`manager.py          # Gestione delle query
 ├── db.sql                 # Schema del database SQLite
 ├── requirements.txt       # Librerie necessarie
 ├── static/                # File statici (CSS, JS, immagini)
@@ -66,7 +66,7 @@ ConnectStudy/
 │   └── simulazioni/       # Spunti immagine salvati con nomi univoci
 ├── templates/             # Template HTML (Jinja2)
 └── \[uploads]/             # File allegati dagli utenti
-
+```
 ---
 
 ## ⚙️ Caratteristiche Tecniche Avanzate
