@@ -70,10 +70,10 @@
         </div>
         
         <div class="sidebar-content">            <div class="sidebar-header">
-                <h3>Collegamenti</h3>
-                <button class="btn btn-sm add-btn" onclick="showCollegamentoModalEmpty()">
-                    <span class="icon">➕</span>
-                    Nuovo
+                <h3>Collegamenti</h3>                
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()" style="margin: 5px;">
+                    <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="20" height="20" style="filter: brightness(0) invert(1);">
+                    Collegamenti
                 </button>
             </div>
             
@@ -120,7 +120,7 @@
         <h1 id="materia-title">{{ materia.nome }} - Argomenti</h1>
         <div class="header-buttons">
             <a href="/collegamenti/materia/{{ materia.id }}" class="btn btn-secondary">
-                <span class="icon">🔗</span>
+                <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="16" height="16" style="filter: brightness(0) invert(1);">
                 Collegamenti
             </a>
             <button id="openArgomentoPopup" class="add-btn">Aggiungi argomento</button>

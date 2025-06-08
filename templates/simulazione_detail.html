@@ -590,12 +590,12 @@
             <span class="toggle-text">Collegamenti</span>
         </div>
         
-        <div class="sidebar-content">
+        <div class="sidebar-content">            
             <div class="sidebar-header">
-                <h3>Collegamenti</h3>
-                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()">
-                    <span class="icon">➕</span>
-                    Nuovo
+                <h3>Collegamenti</h3>                
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()" style="margin: 10px;">
+                    <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="20" height="20" style="filter: brightness(0) invert(1);">
+                    Collegamenti
                 </button>
             </div>
             
@@ -1430,15 +1430,28 @@
                 return;
             }
             
+            // Add loading state
+            materieList.className = 'materie-list loading';
+            materieList.innerHTML = '';
+            
             fetch('/api/materie')
                 .then(response => response.json())
                 .then(materie => {
+                    // Remove loading state
+                    materieList.className = 'materie-list';
                     materieList.innerHTML = '';
+                    
+                    if (materie.length === 0) {
+                        materieList.className = 'materie-list empty';
+                        materieList.innerHTML = '<p>Nessuna materia trovata</p>';
+                        return;
+                    }
                     
                     materie.forEach(materia => {
                         const materiaCard = document.createElement('div');
                         materiaCard.className = 'materia-card';
-                        materiaCard.style.backgroundColor = materia.colore;
+                        // Set CSS custom property for border color
+                        materiaCard.style.setProperty('--materia-color', materia.colore);
                         materiaCard.innerHTML = `
                             <h3>${materia.nome}</h3>
                         `;
@@ -1446,8 +1459,12 @@
                         materieList.appendChild(materiaCard);
                     });
                 })
-                .catch(error => console.error('Error loading materie:', error));
-        }        function loadArgomenti(materiaId, materiaNome, materiaColore) {
+                .catch(error => {
+                    console.error('Error loading materie:', error);
+                    materieList.className = 'materie-list empty';
+                    materieList.innerHTML = '<p>Errore nel caricamento delle materie</p>';
+                });
+        }function loadArgomenti(materiaId, materiaNome, materiaColore) {
             fetch(`/api/argomenti/materia/${materiaId}`)
                 .then(response => response.json())
                 .then(argomenti => {
@@ -1463,6 +1480,10 @@
                     argomenti.forEach(argomento => {
                         const argomentoCard = document.createElement('div');
                         argomentoCard.className = 'argomento-card';
+                        
+                        // Set CSS custom property for materia color
+                        argomentoCard.style.setProperty('--materia-color', materiaColore);
+                        
                         argomentoCard.innerHTML = `
                             <div class="argomento-header">
                                 <h4>${argomento.titolo}</h4>
@@ -1472,11 +1493,13 @@
                         `;                        argomentoCard.onclick = () => selectArgomentoFromList(argomento.id, argomento.titolo, materiaId);
                         argomentiGrid.appendChild(argomentoCard);
                     });
-                    
-                    const materieList = document.getElementById('materie-list');
+                      const materieList = document.getElementById('materie-list');
                     const argomentiList = document.getElementById('argomenti-list');
                     if (materieList) materieList.style.display = 'none';
                     if (argomentiList) argomentiList.style.display = 'block';
+                    
+                    // Setup search functionality
+                    setupArgomentiModalSearch();
                     
                     // Clear search inputs when switching materia
                     const argomentiSearch = document.getElementById('argomenti-search');
@@ -2771,6 +2794,52 @@
                     }
                 }
             });
+        });
+        function showSidebarCollegamentoModal(id) {
+            fetch('/api/collegamenti')
+                .then(r => r.json())
+                .then(collegamenti => {
+                    const c = collegamenti.find(x => x.id === id);
+                    if (!c) return;
+                    let html = `
+                        <div class='mini-collegamento-card'>
+                            <div class='collegamento-header'><h4>${c.titolo}</h4></div>
+                            <div class='collegamento-argomenti'>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia1_colore}'>
+                                    <a href='/argomento/${c.id_argomento1}'>${c.argomento1_titolo}</a>
+                                    <span class='materia-name'>${c.materia1_nome}</span>
+                                </div>
+                                <div class='collegamento-arrow'>⟷</div>
+                                <div class='argomento-tag' style='border:2.5px solid ${c.materia2_colore}'>
+                                    <a href='/argomento/${c.id_argomento2}'>${c.argomento2_titolo}</a>
+                                    <span class='materia-name'>${c.materia2_nome}</span>
+                                </div>
+                            </div>
+                            <div class='collegamento-footer'>
+                                <span class='etichetta-qualita ${c.etichetta_qualita.replace(/ /g,'-').toLowerCase()}'>${c.etichetta_qualita}</span>
+                            </div>
+                            <div class='collegamento-dettagli' style='margin-top:1em;'>
+                                ${marked.parse(c.dettagli||'')}
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('sidebar-collegamento-body').innerHTML = html;
+                    document.getElementById('sidebar-collegamento-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error loading connection details:', error));
+        }
+
+        function closeSidebarCollegamentoModal() {
+            document.getElementById('sidebar-collegamento-modal').style.display = 'none';
+        }        // Load sidebar connections on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarConnections();
+            
+            // Check if we should open edit modal from URL parameter
+            const editId = '{{ edit_id or "" }}';
+            if (editId) {
+                editSimulazione(parseInt(editId));
+            }
         });
     </script>
 </body>

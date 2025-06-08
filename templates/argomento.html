@@ -87,12 +87,11 @@
             <span class="toggle-text">Collegamenti</span>
         </div>
         
-        <div class="sidebar-content">
-            <div class="sidebar-header">
-                <h3>Collegamenti</h3>
-                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModal({{ argomento.id }})">
-                    <span class="icon">➕</span>
-                    Nuovo
+        <div class="sidebar-content">            <div class="sidebar-header">
+                <h3>Collegamenti</h3>                
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()" style="margin: 10px;">
+                    <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="20" height="20" style="filter: brightness(0) invert(1);">
+                    Collegamenti
                 </button>
             </div>
             
@@ -1475,16 +1474,34 @@
                 document.getElementById('no-selection-2').style.display = 'block';
             }
         }        function loadMaterie() {
+            const materieList = document.getElementById('materie-list');
+            if (!materieList) {
+                console.error('❌ materie-list element not found');
+                return;
+            }
+            
+            // Add loading state
+            materieList.className = 'materie-list loading';
+            materieList.innerHTML = '';
+            
             fetch('/api/materie')
                 .then(response => response.json())
                 .then(materie => {
-                    const materieList = document.getElementById('materie-list');
+                    // Remove loading state
+                    materieList.className = 'materie-list';
                     materieList.innerHTML = '';
+                    
+                    if (materie.length === 0) {
+                        materieList.className = 'materie-list empty';
+                        materieList.innerHTML = '<p>Nessuna materia trovata</p>';
+                        return;
+                    }
                     
                     materie.forEach(materia => {
                         const materiaCard = document.createElement('div');
                         materiaCard.className = 'materia-card';
-                        materiaCard.style.backgroundColor = materia.colore;
+                        // Set CSS custom property for border color
+                        materiaCard.style.setProperty('--materia-color', materia.colore);
                         materiaCard.innerHTML = `
                             <h3>${materia.nome}</h3>
                         `;
@@ -1492,10 +1509,12 @@
                         materieList.appendChild(materiaCard);
                     });
                 })
-                .catch(error => console.error('Error loading materie:', error));
-        }
-
-        function loadArgomenti(materiaId, materiaNome, materiaColore) {
+                .catch(error => {
+                    console.error('Error loading materie:', error);
+                    materieList.className = 'materie-list empty';
+                    materieList.innerHTML = '<p>Errore nel caricamento delle materie</p>';
+                });
+        }function loadArgomenti(materiaId, materiaNome, materiaColore) {
             fetch(`/api/argomenti/materia/${materiaId}`)
                 .then(response => response.json())
                 .then(argomenti => {
@@ -1506,6 +1525,10 @@
                     argomenti.forEach(argomento => {
                         const argomentoCard = document.createElement('div');
                         argomentoCard.className = 'argomento-card';
+                        
+                        // Set CSS custom property for materia color
+                        argomentoCard.style.setProperty('--materia-color', materiaColore);
+                        
                         argomentoCard.innerHTML = `
                             <div class="argomento-header">
                                 <h4>${argomento.titolo}</h4>
@@ -1516,10 +1539,13 @@
                         argomentoCard.onclick = () => selectArgomento(argomento.id, argomento.titolo, materiaNome, materiaColore);
                         argomentiGrid.appendChild(argomentoCard);
                     });
-                    
-                    document.getElementById('materie-list').style.display = 'none';
+                      document.getElementById('materie-list').style.display = 'none';
                     document.getElementById('argomenti-list').style.display = 'block';
-                      // Clear search inputs when switching materia
+                    
+                    // Setup search functionality
+                    setupArgomentiModalSearch();
+                    
+                    // Clear search inputs when switching materia
                     document.getElementById('argomenti-search').value = '';
                     document.getElementById('content-search').value = '';
                 })

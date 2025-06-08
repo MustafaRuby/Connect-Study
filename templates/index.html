@@ -21,12 +21,11 @@
             <span class="toggle-text">Collegamenti</span>
         </div>
         
-        <div class="sidebar-content">
-            <div class="sidebar-header">
-                <h3>Collegamenti</h3>
-                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()">
-                    <span class="icon">➕</span>
-                    Nuovo
+        <div class="sidebar-content">            <div class="sidebar-header">
+                <h3>Collegamenti</h3>                
+                <button class="btn btn-sm btn-primary" onclick="showCollegamentoModalEmpty()" style="margin: 5px;"> <!--Do this for all other buttons-->
+                    <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="20" height="20" style="filter: brightness(0) invert(1);"> <!--This too-->
+                    Collegamenti
                 </button>
             </div>
             
@@ -39,22 +38,19 @@
     </div>    <!-- Main content wrapper -->
     <div class="main-content">
         <div class="header">
-        <h1>Materie</h1>
-        <div class="header-actions">
+        <h1>Materie</h1>        <div class="header-actions">            
+            <a href="/collegamenti" class="btn btn-secondary" style="margin: 10px;">
+                <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="16" height="16">
+                Collegamenti
+            </a>
             <a href="/simulazioni" class="btn btn-secondary">
                 <span class="icon">🎯</span>
                 Simulazioni
             </a>
             <button id="openMateriaPopup" class="add-btn">Aggiungi materia</button>
         </div>
-    </div><div id="materie-list" class="materie-list">
-        {% for materia in materie %}
-        <a href="/materia/{{ materia.id }}" class="materia-link">
-            <div class="materia-card" data-id="{{ materia.id }}" style="background: {{ materia.colore }}">
-                <span>{{ materia.nome }}</span>
-            </div>
-        </a>
-        {% endfor %}
+    </div>    <div id="materie-list" class="materie-list">
+        <!-- Materie will be loaded dynamically via JavaScript -->
     </div>
     <!-- Popup inserimento materia -->
     <div id="materiaPopup" class="popup-bg" style="display:none;">
@@ -82,8 +78,7 @@
           <button type="button" class="btn btn-secondary" onclick="closeSidebarCollegamentoModal()">Chiudi</button>
         </div>
       </div>
-    </div>    
-    <script src="/static/drag.js"></script>
+    </div>      <script src="/static/drag.js"></script>
     <script src="/static/js/materia.js"></script>
     </div> <!-- End main-content -->
 </body>

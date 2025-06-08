@@ -55,7 +55,7 @@
             <div class="header-content">
                 <div class="header-left">
                     <h1 class="page-title">
-                        <span class="icon">🔗</span>
+                        <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="16" height="16">
                         Collegamenti
                         {% if materia_selezionata %}
                             <span class="subtitle" style="color: {{ materia_selezionata.colore }}">{{ materia_selezionata.nome }}</span>
@@ -63,7 +63,7 @@
                     </h1>
                 </div>
                 <div class="header-right">
-                    <button class="btn btn-primary" onclick="showCollegamentoModal()">
+                    <button class="btn btn-primary" onclick="showCollegamentoModal()" style="margin-left: 15px;">
                         <span class="icon">➕</span>
                         Nuovo Collegamento
                     </button>
@@ -177,7 +177,7 @@
 
             {% if not collegamenti %}
             <div class="empty-state">
-                <div class="empty-icon">🔗</div>
+                <img src="/static/icons/link-icon.svg" alt="Collegamenti" class="btn-icon" width="16" height="16">
                 <h3>Nessun collegamento trovato</h3>
                 <p>{% if materia_selezionata %}
                     Non ci sono ancora collegamenti per la materia "{{ materia_selezionata.nome }}".
@@ -301,8 +301,7 @@
             </div>
         </div>
     </div>    <script>
-        // === MODAL FUNCTIONALITY FROM ARGOMENTO.HTML ===
-        let allArgomentiData = []; // Store all loaded argomenti for search
+        // === MODAL FUNCTIONALITY ===
         let selectedEndpoint = null;
         let selectedArgomento1 = null;
         let selectedArgomento2 = null;
@@ -311,7 +310,6 @@
             selectedEndpoint = endpoint;
             document.getElementById('materie-selector-modal').style.display = 'flex';
             loadMaterie();
-            setupArgomentiModalSearch();
         }
 
         function closeMaterieSelector() {
@@ -320,195 +318,19 @@
             document.getElementById('argomenti-list').style.display = 'none';
         }
 
-        function loadMaterie() {
-            fetch('/api/materie')
-                .then(response => response.json())
-                .then(materie => {
-                    const materieList = document.getElementById('materie-list');
-                    materieList.innerHTML = '';
-                    
-                    materie.forEach(materia => {
-                        const materiaCard = document.createElement('div');
-                        materiaCard.className = 'materia-card';
-                        materiaCard.style.backgroundColor = materia.colore;
-                        materiaCard.innerHTML = `
-                            <h3>${materia.nome}</h3>
-                        `;
-                        materiaCard.onclick = () => loadArgomenti(materia.id, materia.nome, materia.colore);
-                        materieList.appendChild(materiaCard);
-                    });
-                })
-                .catch(error => console.error('Error loading materie:', error));
-        }
-
-        function loadArgomenti(materiaId, materiaNome, materiaColore) {
-            fetch(`/api/argomenti/materia/${materiaId}`)
-                .then(response => response.json())
-                .then(argomenti => {
-                    allArgomentiData = argomenti; // Store for search
-                    const argomentiGrid = document.getElementById('argomenti-grid');
-                    argomentiGrid.innerHTML = '';
-                    
-                    argomenti.forEach(argomento => {
-                        const argomentoCard = document.createElement('div');
-                        argomentoCard.className = 'argomento-card';
-                        argomentoCard.innerHTML = `
-                            <div class="argomento-header">
-                                <h4>${argomento.titolo}</h4>
-                                <span class="materia-badge" style="background-color: ${materiaColore}">${materiaNome}</span>
-                            </div>
-                            <div class="argomento-preview">${argomento.contenuto_md ? argomento.contenuto_md.substring(0, 100) + '...' : 'Nessun contenuto'}</div>
-                        `;
-                        argomentoCard.onclick = () => selectArgomento(argomento.id, argomento.titolo, materiaNome, materiaColore);
-                        argomentiGrid.appendChild(argomentoCard);
-                    });
-                    
-                    document.getElementById('materie-list').style.display = 'none';
-                    document.getElementById('argomenti-list').style.display = 'block';
-                      // Clear search inputs when switching materia
-                    document.getElementById('argomenti-search').value = '';
-                    document.getElementById('content-search').value = '';
-                })
-                .catch(error => console.error('Error loading argomenti:', error));
-        }
-
-        function showMaterieList() {
+        function clearArgomento(endpoint) {
+            if (endpoint === 1) {
+                selectedArgomento1 = null;
+                document.getElementById('selected-argomento-1').style.display = 'none';
+            } else {
+                selectedArgomento2 = null;
+                document.getElementById('selected-argomento-2').style.display = 'none';
+                document.getElementById('no-selection-2').style.display = 'block';
+            }
+        }        function showMaterieList() {
             document.getElementById('materie-list').style.display = 'block';
             document.getElementById('argomenti-list').style.display = 'none';
         }
-
-        function selectArgomento(id, titolo, materia, colore) {
-            if (selectedEndpoint === 1) {
-                selectedArgomento1 = { id, titolo, materia, colore };
-                updateSelectedArgomento(1, titolo, materia, colore);
-            } else {
-                selectedArgomento2 = { id, titolo, materia, colore };
-                updateSelectedArgomento(2, titolo, materia, colore);
-            }
-            closeMaterieSelector();
-        }
-
-        function updateSelectedArgomento(endpoint, titolo, materia, colore) {
-            const container = document.getElementById(`selected-argomento-${endpoint}`);
-            const noSelection = document.getElementById(`no-selection-${endpoint}`);
-            
-            container.querySelector('.materia-badge').textContent = materia;
-            container.querySelector('.materia-badge').style.backgroundColor = colore;
-            container.querySelector('.argomento-title').textContent = titolo;
-            
-            container.style.display = 'flex';
-            if (noSelection) noSelection.style.display = 'none';
-        }
-
-        function setupArgomentiModalSearch() {
-            const argomentiSearch = document.getElementById('argomenti-search');
-            const contentSearch = document.getElementById('content-search');
-            
-            if (argomentiSearch) {
-                argomentiSearch.addEventListener('input', function() {
-                    filterArgomentiInModal(this.value, 'title');
-                });
-            }
-            
-            if (contentSearch) {
-                contentSearch.addEventListener('input', function() {
-                    filterArgomentiInModal(this.value, 'content');
-                });
-            }
-        }
-
-        function filterArgomentiInModal(searchTerm, searchType) {
-            const argomentiGrid = document.getElementById('argomenti-grid');
-            const argomentoCards = argomentiGrid.querySelectorAll('.argomento-card');
-            
-            searchTerm = searchTerm.toLowerCase().trim();
-              argomentoCards.forEach((card, index) => {
-                let shouldShow = false;
-                
-                if (!searchTerm) {
-                    shouldShow = true;
-                    // Reset highlighting
-                    const titleElement = card.querySelector('.argomento-header h4');
-                    const previewElement = card.querySelector('.argomento-preview');
-                    if (titleElement && titleElement.originalText) {
-                        titleElement.innerHTML = titleElement.originalText;
-                    }
-                    if (previewElement && previewElement.originalText) {
-                        previewElement.innerHTML = previewElement.originalText;
-                    }
-                } else {
-                    // Store original text if not already stored
-                    const titleElement = card.querySelector('.argomento-header h4');
-                    const previewElement = card.querySelector('.argomento-preview');
-                    
-                    if (!titleElement.originalText) {
-                        titleElement.originalText = titleElement.textContent;
-                    }
-                    if (!previewElement.originalText) {
-                        previewElement.originalText = previewElement.textContent;
-                    }
-
-                    // Get the corresponding argomento data
-                    const argomentoData = allArgomentiData[index];
-                    
-                    if (searchType === 'title') {
-                        // Search only in argomento titles
-                        const title = titleElement.originalText.toLowerCase();
-                        
-                        if (title.includes(searchTerm)) {
-                            shouldShow = true;
-                            titleElement.innerHTML = highlightText(titleElement.originalText, searchTerm);
-                            previewElement.innerHTML = previewElement.originalText;
-                        }
-                    } else if (searchType === 'content') {
-                        // Search in the full content, not just the preview
-                        const fullContent = (argomentoData?.contenuto_md || '').toLowerCase();
-                        
-                        if (fullContent.includes(searchTerm)) {
-                            shouldShow = true;
-                            titleElement.innerHTML = titleElement.originalText;
-                            
-                            // Find the matching portion in the full content for highlighting
-                            const searchIndex = fullContent.indexOf(searchTerm);
-                            if (searchIndex !== -1) {
-                                // Extract a snippet around the match for display
-                                const start = Math.max(0, searchIndex - 50);
-                                const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
-                                let snippet = argomentoData.contenuto_md.substring(start, end);
-                                
-                                // Add ellipsis if needed
-                                if (start > 0) snippet = '...' + snippet;
-                                if (end < fullContent.length) snippet = snippet + '...';
-                                
-                                // Update preview with highlighted snippet
-                                previewElement.innerHTML = highlightText(snippet, searchTerm);
-                            } else {
-                                // Fallback to original preview with highlighting if match was in processed content
-                                previewElement.innerHTML = highlightText(previewElement.originalText, searchTerm);
-                            }
-                        }
-                    }
-                }
-                
-                card.style.display = shouldShow ? 'block' : 'none';
-            });
-        }
-
-        function highlightText(text, query) {
-            if (!query || !text) return text;
-            
-            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-            return text.replace(regex, '<mark class="argomenti-modal-highlight">$1</mark>');
-        }
-        
-        function escapeRegex(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setupArgomentiModalSearch();
-        });
     </script>
 
     <script src="/static/js/collegamenti.js"></script>
