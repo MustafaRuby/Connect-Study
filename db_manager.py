@@ -107,6 +107,14 @@ def update_argomento_content_and_label(id, contenuto_md, etichetta_preparazione)
     conn.commit()
     conn.close()
 
+def update_argomento_full(id, titolo, colore, contenuto_md, etichetta_preparazione):
+    """Aggiorna tutti i campi di un argomento"""
+    conn = get_db_connection()
+    conn.execute('UPDATE argomenti SET titolo = ?, colore = ?, contenuto_md = ?, etichetta_preparazione = ? WHERE id = ?', 
+                (titolo, colore, contenuto_md, etichetta_preparazione, id))
+    conn.commit()
+    conn.close()
+
 def delete_argomento(id):
     """Elimina un argomento"""
     conn = get_db_connection()
@@ -258,8 +266,8 @@ def delete_collegamento(id):
     conn.commit()
     conn.close()
 
-def search_collegamenti(query_titolo='', query_dettagli='', etichetta_qualita=''):
-    """Cerca collegamenti per titolo, dettagli e/o etichetta qualità"""
+def search_collegamenti(query_titolo='', query_dettagli='', etichetta_qualita='', query_argomenti='', query_materia=''):
+    """Cerca collegamenti per titolo, dettagli, etichetta qualità, argomenti e/o materia"""
     conn = get_db_connection()
     
     where_conditions = []
@@ -276,6 +284,16 @@ def search_collegamenti(query_titolo='', query_dettagli='', etichetta_qualita=''
     if etichetta_qualita:
         where_conditions.append('c.etichetta_qualita = ?')
         params.append(etichetta_qualita)
+    
+    if query_argomenti:
+        where_conditions.append('(a1.titolo LIKE ? OR a2.titolo LIKE ?)')
+        params.append(f'%{query_argomenti}%')
+        params.append(f'%{query_argomenti}%')
+    
+    if query_materia:
+        where_conditions.append('(m1.nome LIKE ? OR m2.nome LIKE ?)')
+        params.append(f'%{query_materia}%')
+        params.append(f'%{query_materia}%')
     
     where_clause = ' AND '.join(where_conditions) if where_conditions else '1=1'
     

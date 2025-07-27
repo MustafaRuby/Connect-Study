@@ -614,6 +614,9 @@ def argomento_dettaglio(id):
 @app.route('/update_argomento/<int:id>', methods=['POST'])
 def update_argomento(id):
     contenuto_md = request.form.get('contenuto_md', '')
+    titolo = request.form.get('titolo')
+    colore = request.form.get('colore')
+    etichetta_preparazione = request.form.get('etichetta_preparazione')
     
     # Gestione file caricato per aggiornamento
     if 'file_content' in request.files:
@@ -637,11 +640,15 @@ def update_argomento(id):
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
     
-    # Aggiorna contenuto e etichetta
-    etichetta_preparazione = request.form.get('etichetta_preparazione')
-    if etichetta_preparazione:
+    # Determina quale funzione usare in base ai campi forniti
+    if titolo and colore:
+        # Aggiornamento completo (titolo, colore, contenuto, etichetta)
+        db_manager.update_argomento_full(id, titolo, colore, contenuto_md, etichetta_preparazione)
+    elif etichetta_preparazione:
+        # Aggiorna contenuto e etichetta
         db_manager.update_argomento_content_and_label(id, contenuto_md, etichetta_preparazione)
     else:
+        # Aggiorna solo contenuto
         db_manager.update_argomento_content(id, contenuto_md)
     
     socketio.emit('update_argomento', {'id': id})
@@ -824,8 +831,10 @@ def api_search_collegamenti():
     query_titolo = request.args.get('titolo', '')
     query_dettagli = request.args.get('dettagli', '')
     etichetta_qualita = request.args.get('etichetta_qualita', '')
+    query_argomenti = request.args.get('argomenti', '')
+    query_materia = request.args.get('materia', '')
     
-    collegamenti = db_manager.search_collegamenti(query_titolo, query_dettagli, etichetta_qualita)
+    collegamenti = db_manager.search_collegamenti(query_titolo, query_dettagli, etichetta_qualita, query_argomenti, query_materia)
     return jsonify([dict(c) for c in collegamenti])
 
 # === SIMULAZIONI ROUTES ===
@@ -1152,4 +1161,5 @@ def api_search_argomenti():
     return jsonify([dict(a) for a in argomenti])
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    # Run on all available network interfaces (LAN access)
+    socketio.run(app, host='0.0.0.0', debug=True)

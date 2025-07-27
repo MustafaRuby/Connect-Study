@@ -20,6 +20,36 @@
     <link rel="stylesheet" href="/static/libs/highlightjs/vs2015.min.css">
     
     <style>
+        /* Stili per il filtering degli argomenti nella modale */
+        .search-hidden {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        .search-visible {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        /* Highlighting specifico per la modale degli argomenti */
+        .argomenti-modal-highlight {
+            background: linear-gradient(120deg, #ffeb3b 0%, #ffc107 100%) !important;
+            color: #333 !important;
+            padding: 2px 4px !important;
+            border-radius: 3px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 1px 3px rgba(255, 193, 7, 0.5) !important;
+            border: 1px solid #ff9800 !important;
+        }
+        
+        /* Assicuriamoci che sia visibile nella modale */
+        .modal .argomenti-modal-highlight {
+            z-index: 1000 !important;
+            position: relative !important;
+        }
+    </style>
+    
+    <style>
         /* Highlighting specifico per la modale degli argomenti */
         .argomenti-modal-highlight {
             background: linear-gradient(120deg, #ffeb3b 0%, #ffc107 100%) !important;

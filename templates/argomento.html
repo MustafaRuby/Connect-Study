@@ -36,6 +36,92 @@
             z-index: 1000 !important;
             position: relative !important;
         }
+        
+        /* Stili per il filtering degli argomenti nella modale */
+        .search-hidden {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        .search-visible {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        /* Stili per la sezione titolo e colore */
+        .titolo-colore-edit-section {
+            margin-bottom: 1.8em;
+        }
+        
+        .titolo-colore-edit-section .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .titolo-colore-edit-section .form-group {
+            margin-bottom: 0;
+        }
+        
+        .titolo-colore-edit-section .form-group:first-child {
+            flex: 1;
+        }
+        
+        .titolo-colore-edit-section .form-group:last-child {
+            flex: 0 0 150px;
+        }
+        
+        .titolo-colore-edit-section label {
+            display: block;
+            margin-bottom: 0.7em;
+            font-weight: 600;
+            color: #2a3a5c;
+            font-size: 1.05em;
+        }
+        
+        .titolo-colore-edit-section .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95em;
+            font-weight: 500;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            min-height: 44px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .titolo-colore-edit-section .form-input:focus {
+            border-color: #4f8cff;
+            box-shadow: 
+                0 0 0 3px rgba(79, 140, 255, 0.15),
+                0 4px 12px rgba(79, 140, 255, 0.1);
+            background: #ffffff;
+            transform: translateY(-1px);
+        }
+        
+        .titolo-colore-edit-section .form-input:hover:not(:focus) {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .titolo-colore-edit-section .color-input {
+            height: 44px;
+            padding: 6px;
+            cursor: pointer;
+        }
+        
+        .titolo-colore-edit-section .color-input::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+        
+        .titolo-colore-edit-section .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
     </style>
     
     <!-- Local libraries JavaScript -->
@@ -211,7 +297,23 @@
                                 <span class="size-icon">⛶</span>
                             </button>
                         </div>
-                    </div>                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
+                    </div>
+
+                    <!-- Sezione modifica titolo e colore -->
+                    <div class="titolo-colore-edit-section">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="argomento_titolo">Titolo dell'argomento:</label>
+                                <input type="text" id="argomento_titolo" value="{{ argomento.titolo }}" placeholder="Inserisci il titolo dell'argomento" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="argomento_colore">Colore:</label>
+                                <input type="color" id="argomento_colore" value="{{ argomento.colore or '#cccccc' }}" class="form-input color-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
                     <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
                 </div>
                 
@@ -441,6 +543,8 @@
         const socket = io();
         const argomentoId = {{ argomento.id }};
         const originalContent = {{ (argomento.contenuto_md or '') | tojson }};
+        const originalTitolo = {{ argomento.titolo | tojson }};
+        const originalColore = {{ (argomento.colore or '#cccccc') | tojson }};
         
         // Inizializzazione della pagina
         document.addEventListener('DOMContentLoaded', function() {
@@ -973,15 +1077,19 @@
         function saveArgomento() {
             const contenutoElement = document.getElementById('contenuto_md');
             const etichettaElement = document.getElementById('etichetta_preparazione');
+            const titoloElement = document.getElementById('argomento_titolo');
+            const coloreElement = document.getElementById('argomento_colore');
             
-            if (!contenutoElement || !etichettaElement) {
-                console.error('Elementi contenuto_md o etichetta_preparazione non trovati nel DOM');
+            if (!contenutoElement || !etichettaElement || !titoloElement || !coloreElement) {
+                console.error('Elementi del form non trovati nel DOM');
                 return;
             }
             
             const formData = new FormData();
             formData.append('contenuto_md', contenutoElement.value);
             formData.append('etichetta_preparazione', etichettaElement.value);
+            formData.append('titolo', titoloElement.value);
+            formData.append('colore', coloreElement.value);
             
             // Gestione file caricato
             const fileInput = document.getElementById('file_content');
@@ -1009,6 +1117,8 @@
         
         function cancelEdit() {
             document.getElementById('contenuto_md').value = originalContent;
+            document.getElementById('argomento_titolo').value = originalTitolo;
+            document.getElementById('argomento_colore').value = originalColore;
             document.getElementById('file_content').value = '';
             document.getElementById('file-mode-section').style.display = 'none';
             toggleEditMode();

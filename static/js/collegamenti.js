@@ -112,15 +112,10 @@ const socket = io();
         const titleQuery = document.getElementById('search-titolo').value.toLowerCase().trim();
         const dettagliQuery = document.getElementById('search-dettagli').value.toLowerCase().trim();
         const argomentiQuery = document.getElementById('search-argomenti') ? document.getElementById('search-argomenti').value.toLowerCase().trim() : '';
-        const materiaFilter = document.getElementById('filter-materia') ? document.getElementById('filter-materia').value.toLowerCase().trim() : '';
+        
+        // Ora tutti i filtri sono gestiti lato server, qui facciamo solo l'highlighting
         let filtered = collegamenti;
-        // Filtro lato client per materia se necessario (in caso l'API non lo gestisca)
-        if (materiaFilter) {
-            filtered = filtered.filter(c =>
-                c.materia1_nome.toLowerCase() === materiaFilter ||
-                c.materia2_nome.toLowerCase() === materiaFilter
-            );
-        }
+        
         grid.innerHTML = filtered.length === 0 ? `
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <div class="empty-icon">🔍</div>
@@ -230,10 +225,12 @@ const socket = io();
         
         const searchTitolo = document.getElementById('search-titolo').value;
         const searchDettagli = document.getElementById('search-dettagli').value;
+        const searchArgomenti = document.getElementById('search-argomenti') ? document.getElementById('search-argomenti').value : '';
         const filterQualita = document.getElementById('filter-qualita').value;
+        const filterMateria = document.getElementById('filter-materia') ? document.getElementById('filter-materia').value : '';
         
         // Only show results info if search/filter is active
-        if (searchTitolo || searchDettagli || filterQualita) {
+        if (searchTitolo || searchDettagli || searchArgomenti || filterQualita || filterMateria) {
             const resultsInfo = document.createElement('div');
             resultsInfo.className = 'search-results-info';
             resultsInfo.innerHTML = `
@@ -580,6 +577,7 @@ const socket = io();
     window.setupArgomentiModalSearch = setupArgomentiModalSearch;
     window.filterArgomentiInModal = filterArgomentiInModal;
     window.highlightText = highlightText;
+    window.highlightTextInModal = highlightTextInModal;
     
     // Clear all filters function
     function clearFilters() {
@@ -626,32 +624,27 @@ const socket = io();
         const argomentoCards = argomentiGrid.querySelectorAll('.argomento-card');
         
         searchTerm = searchTerm.toLowerCase().trim();
-          argomentoCards.forEach((card, index) => {
+        
+        argomentoCards.forEach((card, index) => {
             let shouldShow = false;
             
+            // Store original text if not already stored
+            const titleElement = card.querySelector('.argomento-header h4');
+            const previewElement = card.querySelector('.argomento-preview');
+            
+            if (!titleElement.originalText) {
+                titleElement.originalText = titleElement.textContent;
+            }
+            if (!previewElement.originalText) {
+                previewElement.originalText = previewElement.textContent;
+            }
+            
             if (!searchTerm) {
+                // No search term: show all and reset highlighting
                 shouldShow = true;
-                // Reset highlighting
-                const titleElement = card.querySelector('.argomento-header h4');
-                const previewElement = card.querySelector('.argomento-preview');
-                if (titleElement && titleElement.originalText) {
-                    titleElement.innerHTML = titleElement.originalText;
-                }
-                if (previewElement && previewElement.originalText) {
-                    previewElement.innerHTML = previewElement.originalText;
-                }
+                titleElement.innerHTML = titleElement.originalText;
+                previewElement.innerHTML = previewElement.originalText;
             } else {
-                // Store original text if not already stored
-                const titleElement = card.querySelector('.argomento-header h4');
-                const previewElement = card.querySelector('.argomento-preview');
-                
-                if (!titleElement.originalText) {
-                    titleElement.originalText = titleElement.textContent;
-                }
-                if (!previewElement.originalText) {
-                    previewElement.originalText = previewElement.textContent;
-                }
-
                 // Get the corresponding argomento data
                 const argomentoData = allArgomentiData[index];
                 
@@ -661,7 +654,12 @@ const socket = io();
                     
                     if (title.includes(searchTerm)) {
                         shouldShow = true;
-                        titleElement.innerHTML = highlightText(titleElement.originalText, searchTerm);
+                        titleElement.innerHTML = highlightTextInModal(titleElement.originalText, searchTerm);
+                        previewElement.innerHTML = previewElement.originalText;
+                    } else {
+                        // Reset highlighting for non-matching items
+                        shouldShow = false;
+                        titleElement.innerHTML = titleElement.originalText;
                         previewElement.innerHTML = previewElement.originalText;
                     }
                 } else if (searchType === 'content') {
@@ -685,20 +683,34 @@ const socket = io();
                             if (end < fullContent.length) snippet = snippet + '...';
                             
                             // Update preview with highlighted snippet
-                            previewElement.innerHTML = highlightText(snippet, searchTerm);
+                            previewElement.innerHTML = highlightTextInModal(snippet, searchTerm);
                         } else {
                             // Fallback to original preview with highlighting if match was in processed content
-                            previewElement.innerHTML = highlightText(previewElement.originalText, searchTerm);
+                            previewElement.innerHTML = highlightTextInModal(previewElement.originalText, searchTerm);
                         }
+                    } else {
+                        // Reset highlighting for non-matching items
+                        shouldShow = false;
+                        titleElement.innerHTML = titleElement.originalText;
+                        previewElement.innerHTML = previewElement.originalText;
                     }
                 }
             }
             
-            card.style.display = shouldShow ? 'block' : 'none';
+            // Apply filtering using both CSS display and classes for maximum compatibility
+            if (shouldShow) {
+                card.style.removeProperty('display');
+                card.classList.remove('search-hidden');
+                card.classList.add('search-visible');
+            } else {
+                card.style.setProperty('display', 'none', 'important');
+                card.classList.add('search-hidden');
+                card.classList.remove('search-visible');
+            }
         });
     }
 
-    function highlightText(text, query) {
+    function highlightTextInModal(text, query) {
         if (!query || !text) return text;
         
         const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
