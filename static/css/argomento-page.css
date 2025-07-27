@@ -391,6 +391,18 @@
     position: relative;
 }
 
+/* Quando l'editor è attivo, disabilita lo scroll del container padre */
+.argomento-page .argomento-container:has(#markdown-editor-section[style*="display: block"]) {
+    overflow: hidden !important;
+    max-height: none !important;
+}
+
+/* Alternative per browser che non supportano :has() */
+.argomento-page .argomento-container.editor-active {
+    overflow: hidden !important;
+    max-height: none !important;
+}
+
 .argomento-page .search-in-content {
     /* Barra di ricerca sempre visibile in cima */
     order: -1;
@@ -523,17 +535,23 @@
     text-decoration: underline;
 }
 
-/* === MODALITÀ EDITOR RESPONSIVE === */
+/* === MODALITÀ EDITOR RESPONSIVE - UNIFIED SECTION === */
 .argomento-page #markdown-editor-section {
-    /* Editor section con scroll ottimizzato */
+    /* Editor section con scroll ottimizzato e unificato */
     width: 100%;
-    max-height: none; /* Rimuove limitazioni di altezza per l'editor */
+    max-height: 80vh; /* Altezza controllata per evitare doppia scrollbar */
+    overflow-y: auto; /* Scroll principale dell'editor */
+    overflow-x: hidden;
+    box-sizing: border-box;
+    padding: 1.5rem;
 }
 
 .argomento-page .markdown-editor {
     /* Editor markdown con padding appropriato */
     padding: 0;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .argomento-page .CodeMirror {
@@ -563,6 +581,34 @@
 
 .argomento-page .CodeMirror-scroll::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #6edb8f, #4f8cff);
+}
+
+/* Scrollbar personalizzata per markdown-editor-section */
+.argomento-page #markdown-editor-section::-webkit-scrollbar {
+    width: 12px;
+}
+
+.argomento-page #markdown-editor-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+    margin: 4px;
+}
+
+.argomento-page #markdown-editor-section::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4f8cff, #6edb8f);
+    border-radius: 6px;
+    border: 2px solid #f1f1f1;
+}
+
+.argomento-page #markdown-editor-section::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6edb8f, #4f8cff);
+    border: 2px solid #e0e7ef;
+}
+
+/* Scrollbar per Firefox */
+.argomento-page #markdown-editor-section {
+    scrollbar-width: thin;
+    scrollbar-color: #4f8cff #f1f1f1;
 }
 
 @media (max-width: 768px) {
@@ -793,6 +839,18 @@
         border-radius: 8px;
     }
     
+    /* Editor responsive */
+    .argomento-page #markdown-editor-section {
+        max-height: 70vh;
+        padding: 1rem;
+    }
+    
+    .argomento-page .CodeMirror {
+        font-size: 13px;
+        min-height: 250px;
+        max-height: 400px;
+    }
+    
     .argomento-page #rendered-markdown {
         font-size: 0.95rem;
         line-height: 1.5;
@@ -820,7 +878,8 @@
     }
     
     /* Scrollbar più piccola su tablet */
-    .argomento-page .argomento-container::-webkit-scrollbar {
+    .argomento-page .argomento-container::-webkit-scrollbar,
+    .argomento-page #markdown-editor-section::-webkit-scrollbar {
         width: 8px;
     }
 }
@@ -835,6 +894,18 @@
         box-shadow: 0 1px 8px rgba(79, 140, 255, 0.06);
         min-height: 350px;
         max-height: 50vh; /* Altezza ancora più ridotta su mobile */
+    }
+    
+    /* Editor responsive su mobile */
+    .argomento-page #markdown-editor-section {
+        max-height: 60vh;
+        padding: 0.75rem;
+    }
+    
+    .argomento-page .CodeMirror {
+        font-size: 12px;
+        min-height: 200px;
+        max-height: 300px;
     }
     
     .argomento-page #rendered-markdown {
@@ -893,12 +964,18 @@
     }
     
     /* Scrollbar ancora più piccola su mobile */
-    .argomento-page .argomento-container::-webkit-scrollbar {
+    .argomento-page .argomento-container::-webkit-scrollbar,
+    .argomento-page #markdown-editor-section::-webkit-scrollbar {
         width: 6px;
     }
     
-    .argomento-page .argomento-container::-webkit-scrollbar-thumb {
+    .argomento-page .argomento-container::-webkit-scrollbar-thumb,
+    .argomento-page #markdown-editor-section::-webkit-scrollbar-thumb {
         border: 1px solid #f1f1f1;
+    }
+    
+    .argomento-page .CodeMirror-scroll::-webkit-scrollbar {
+        width: 6px;
     }
 }
 
