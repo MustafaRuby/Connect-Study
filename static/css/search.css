@@ -438,15 +438,14 @@
     to { transform: rotate(360deg); }
 }
 
-/* Search Input Styles for argomento page */
+/* Search Input Styles for argomento page - FIXED LAYOUT */
 .search-in-content {
-    margin: 0 0 10px 0;
+    /* Rimuovo margini problematici e uso layout stabile */
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
-    flex-direction: column;
+    margin-bottom: 2rem;
+    padding: 0;
+    /* Eliminato il display: flex justify-content: center che causava problemi */
 }
 
 .search-input-wrapper {
@@ -454,7 +453,8 @@
     display: flex;
     align-items: center;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px; /* Larghezza massima ragionevole */
+    margin: 0 auto; /* Centramento orizzontale */
 }
 
 .search-icon {
@@ -472,13 +472,16 @@
     font-size: 16px;
     transition: all 0.3s ease;
     box-sizing: border-box;
-    background: transparent;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .search-in-content input:focus {
     outline: none;
     border-color: #4f8cff;
-    box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
+    box-shadow: 
+        0 0 0 3px rgba(79, 140, 255, 0.1),
+        0 4px 12px rgba(79, 140, 255, 0.15);
 }
 
 .search-navigation {
@@ -517,6 +520,19 @@
 .nav-btn:hover {
     background: #e9ecef;
     color: #4f8cff;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.search-results-summary {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    min-height: 1.2em; /* Previene il jump del layout */
 }
 
 .nav-btn:disabled {
@@ -587,5 +603,58 @@
     #clear-filters {
         margin-top: 8px;
         justify-content: center;
+    }
+}
+
+/* === RESPONSIVE RULES FOR SEARCH IN CONTENT === */
+@media (max-width: 768px) {
+    .search-in-content {
+        margin-bottom: 1.5rem;
+    }
+    
+    .search-input-wrapper {
+        max-width: 100%;
+    }
+    
+    .search-in-content input {
+        font-size: 16px; /* Previene zoom su iOS */
+        padding: 12px 120px 12px 40px; /* Riduco padding destro su mobile */
+    }
+    
+    .search-icon {
+        left: 12px;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .search-navigation {
+        right: 6px;
+        padding: 1px 4px;
+    }
+    
+    .search-counter {
+        font-size: 11px;
+        min-width: 25px;
+    }
+    
+    .nav-btn {
+        padding: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-in-content input {
+        padding: 10px 100px 10px 35px;
+        font-size: 16px;
+    }
+    
+    .search-icon {
+        left: 10px;
+        width: 14px;
+        height: 14px;
+    }
+    
+    .search-results-summary {
+        font-size: 13px;
     }
 }

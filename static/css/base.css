@@ -478,6 +478,9 @@ h1 {
 .argomento-page .markdown-content {
     margin: 0 !important;
     padding: 1em !important;
+    /* Assicura che la responsività funzioni */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* Mobile responsive per argomento */

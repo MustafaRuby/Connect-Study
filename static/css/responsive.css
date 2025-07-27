@@ -160,10 +160,6 @@
         gap: 1em;
     }
 
-    .argomento-content {
-        padding: 0 1em;
-    }
-
     .popup, .popup-large {
         max-width: 95vw;
         margin: 0 1em;
@@ -190,10 +186,6 @@
     .argomenti-list {
         padding: 0 0.5em 1.5em 0.5em;
         gap: 0.8em;
-    }
-
-    .argomento-content {
-        padding: 0 0.5em;
     }
 
     .materia-card {
