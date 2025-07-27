@@ -2058,30 +2058,31 @@ function closeSidebarCollegamentoModal() {
               argomentoCards.forEach((card, index) => {
                 let shouldShow = false;
                 
+                // Always reset highlighting first (fix per il problema della sottolineatura persistente)
+                const titleElement = card.querySelector('.argomento-header h4');
+                const previewElement = card.querySelector('.argomento-preview');
+                
+                if (!titleElement || !previewElement) {
+                    console.warn('❌ Title or preview element not found in argomento card');
+                    return;
+                }
+                
+                // Store original text if not already stored
+                if (!titleElement.originalText) {
+                    titleElement.originalText = titleElement.textContent;
+                }
+                if (!previewElement.originalText) {
+                    previewElement.originalText = previewElement.textContent;
+                }
+                
+                // Reset highlighting sempre all'inizio
+                titleElement.innerHTML = titleElement.originalText;
+                previewElement.innerHTML = previewElement.originalText;
+                
                 if (!searchTerm) {
+                    // Se non c'è termine di ricerca, mostra tutto
                     shouldShow = true;
-                    // Reset highlighting
-                    const titleElement = card.querySelector('.argomento-header h4');
-                    const previewElement = card.querySelector('.argomento-preview');
-                    if (titleElement && titleElement.originalText) {
-                        titleElement.innerHTML = titleElement.originalText;
-                    }
-                    if (previewElement && previewElement.originalText) {
-                        previewElement.innerHTML = previewElement.originalText;
-                    }
                 } else {
-                    // Store original text if not already stored
-                    const titleElement = card.querySelector('.argomento-header h4');
-                    const previewElement = card.querySelector('.argomento-preview');
-                    
-                    if (!titleElement.originalText) {
-                        titleElement.originalText = titleElement.textContent;
-                    }
-                    if (!previewElement.originalText) {
-                        previewElement.originalText = previewElement.textContent;
-                    }
-
-                    // Get the corresponding argomento data
                     const argomentoData = allArgomentiData[index];
                     
                     if (searchType === 'title') {
@@ -2123,7 +2124,16 @@ function closeSidebarCollegamentoModal() {
                     }
                 }
                 
-                card.style.display = shouldShow ? 'block' : 'none';
+                // Applica la visibilità in modo più robusto
+                if (shouldShow) {
+                    card.style.display = 'block';
+                    card.style.visibility = 'visible';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.display = 'none';
+                    card.style.visibility = 'hidden';
+                    card.style.opacity = '0';
+                }
             });
         }
 
