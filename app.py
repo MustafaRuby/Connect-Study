@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import os
 import uuid
+import re
+import traceback
 from datetime import datetime
 from docx import Document
 import PyPDF2
-import markdown
 from werkzeug.utils import secure_filename
 import db_manager
 
@@ -26,6 +27,121 @@ def format_datetime(date_string):
         return dt.strftime('%d/%m/%Y %H:%M')
     except:
         return date_string
+
+def is_bullet_point(paragraph):
+    """Determina se un paragrafo è un bullet point basandosi su vari criteri"""
+    
+    # Criterio 1: Nome dello stile contiene 'Bullet'
+    if 'Bullet' in paragraph.style.name:
+        return True
+    
+    # Criterio 2: Il testo inizia con simboli comuni di bullet
+    text = paragraph.text.strip()
+    bullet_symbols = ['•', '●', '○', '◦', '▪', '▫', '■', '□', '‣', '⁃', '-', '*']
+    
+    for symbol in bullet_symbols:
+        if text.startswith(symbol + ' ') or text.startswith(symbol + '\t'):
+            return True
+    
+    # Criterio 3: Controllo delle proprietà di formattazione (numbering)
+    try:
+        # Accesso alle proprietà di numerazione del paragrafo
+        if hasattr(paragraph, '_element'):
+            # Cerca elementi di numerazione
+            numbering = paragraph._element.xpath('.//w:numPr')
+            if numbering:
+                # Se ha proprietà di numerazione, controlla se è bullet
+                for num_pr in numbering:
+                    # Cerca il tipo di numero
+                    num_fmt = num_pr.xpath('.//w:numFmt[@w:val]')
+                    if num_fmt:
+                        # Prova a ottenere il valore senza namespace specifico
+                        val = None
+                        for attr_name in num_fmt[0].attrib:
+                            if attr_name.endswith('val'):
+                                val = num_fmt[0].attrib[attr_name]
+                                break
+                        
+                        # Formati bullet comuni in Word
+                        bullet_formats = ['bullet', 'none', 'symbol']
+                        if val in bullet_formats:
+                            return True
+                    
+                    # Criterio aggiuntivo: Se non ha formato numFmt ma è 'List Paragraph', probabilmente è bullet
+                    if not num_fmt and paragraph.style.name == 'List Paragraph':
+                        return True
+            
+            # Criterio aggiuntivo: Cerca se ha proprietà di tab con allineamento bullet
+            tabs = paragraph._element.xpath('.//w:tabs/w:tab[@w:val="left"]')
+            if tabs and any(symbol in text for symbol in ['•', '●', '○', '◦', '▪', '▫', '■', '□', '‣', '⁃']):
+                return True
+                
+    except (AttributeError, Exception):
+        # Se non riusciamo ad accedere alle proprietà, continuiamo con altri metodi
+        pass
+    
+    # Criterio 4: Lista con stile che contiene termini relativi ai bullet
+    style_name_lower = paragraph.style.name.lower()
+    bullet_keywords = ['bullet', 'point', 'item', 'unordered', 'list paragraph']
+    if any(keyword in style_name_lower for keyword in bullet_keywords):
+        # Per 'List Paragraph', aggiungiamo un controllo più specifico
+        if 'list paragraph' in style_name_lower:
+            # Se è List Paragraph e non inizia con un numero, probabilmente è bullet
+            if not re.match(r'^\d+\.', text.strip()):
+                return True
+        else:
+            return True
+    
+    # Criterio 5: Pattern più aggressivo - se il testo sembra una lista puntata
+    if text:
+        # Controlla se il paragrafo inizia come un tipico elemento di lista
+        list_indicators = [
+            r'^[•●○◦▪▫■□‣⁃]\s+',  # Simboli bullet
+            r'^[-*+]\s+',          # Trattini e asterischi
+            r'^\s*[•●○◦▪▫■□‣⁃]\s+', # Simboli bullet con spazio iniziale
+            r'^\s*[-*+]\s+',       # Trattini con spazio iniziale
+        ]
+        
+        for pattern in list_indicators:
+            if re.match(pattern, text):
+                return True
+        
+        # Criterio aggiuntivo: se il paragrafo è corto e senza punteggiatura finale,
+        # potrebbe essere un elemento di lista non formattato correttamente
+        if (len(text) < 200 and 
+            not text.endswith(('.', '!', '?', ':')) and 
+            len(text.split()) > 2 and
+            paragraph.style.name in ['List Paragraph', 'ListParagraph', 'Normal']):
+            
+            # Se il testo contiene parole chiave tipiche di liste
+            list_words = ['primo', 'secondo', 'terzo', 'inoltre', 'infine', 'anche', 'pure']
+            text_lower = text.lower()
+            if any(word in text_lower for word in list_words):
+                return True
+    
+    return False
+
+def clean_existing_bullets(text):
+    """Rimuove simboli di bullet esistenti dall'inizio del testo"""
+    
+    # Lista di simboli bullet comuni
+    bullet_symbols = ['•', '●', '○', '◦', '▪', '▫', '■', '□', '‣', '⁃', '-', '*']
+    
+    text = text.strip()
+    
+    # Rimuovi bullet symbols all'inizio seguiti da spazio o tab
+    for symbol in bullet_symbols:
+        # Pattern che cerca il simbolo all'inizio seguito da spazio/tab
+        pattern = r'^' + re.escape(symbol) + r'[\s\t]+'
+        text = re.sub(pattern, '', text)
+    
+    # Rimuovi anche bullet symbols all'inizio senza spazio
+    for symbol in bullet_symbols:
+        if text.startswith(symbol):
+            text = text[1:].lstrip()
+            break
+    
+    return text
 
 def convert_docx_to_markdown(file_path):
     """Converte un file .docx in markdown con formattazione avanzata"""
@@ -48,19 +164,31 @@ def convert_docx_to_markdown(file_path):
                 markdown_content.append('#' * level + ' ' + paragraph.text.strip())
                 markdown_content.append('')
                 continue
-              # Gestione delle liste
-            if paragraph.style.name.startswith('List'):
-                if 'Bullet' in paragraph.style.name:
-                    markdown_content.append('- ' + process_paragraph_formatting(paragraph, font_sizes))
+            # Gestione delle liste - Prima controlla se è un bullet point
+            # Questo controllo ora viene prima per tutti i paragrafi che potrebbero essere liste
+            is_bullet = is_bullet_point(paragraph)
+            
+            if paragraph.style.name.startswith('List') or is_bullet:
+                if is_bullet:
+                    # È un bullet point
+                    processed_text = process_paragraph_formatting(paragraph, font_sizes)
+                    # Rimuovi bullet symbol esistenti se presenti
+                    cleaned_text = clean_existing_bullets(processed_text)
+                    markdown_content.append('- ' + cleaned_text)
                 else:
-                    # Per le liste numerate, controlla se è davvero una lista o un titolo
+                    # È una lista ma non un bullet point, quindi lista numerata
                     formatted_text = process_paragraph_formatting(paragraph, font_sizes)
                     if formatted_text.strip().startswith('#'):
                         # È un titolo, non una lista
                         markdown_content.append(formatted_text)
                     else:
-                        # È una vera lista numerata
-                        markdown_content.append('1. ' + formatted_text)
+                        # Controlla se il testo ha già numerazione
+                        if re.match(r'^\d+\.', paragraph.text.strip()):
+                            # Ha già numerazione, mantienila
+                            markdown_content.append(formatted_text)
+                        else:
+                            # È una lista numerata senza numerazione esplicita
+                            markdown_content.append('1. ' + formatted_text)
                 continue
             
             # Gestione dei paragrafi normali con formattazione
@@ -77,7 +205,6 @@ def convert_docx_to_markdown(file_path):
     except Exception as e:
         # Logging dell'errore completo per debugging
         print(f"Errore dettagliato nella conversione Word: {type(e).__name__}: {str(e)}")
-        import traceback
         traceback.print_exc()
         
         # Prova a fare una conversione di base se quella avanzata fallisce
@@ -179,7 +306,6 @@ def process_paragraph_formatting(paragraph, font_sizes_map):
 def is_numbered_title(text, font_sizes_map, paragraph):
     """Determina se un paragrafo è un titolo numerato"""
     # Controlla se inizia con un numero seguito da punto e spazio
-    import re
       # Pattern per titoli numerati: "1. ", "2. ", "3.1 ", etc.
     numbered_pattern = r'^\d+(\.\d+)*\.\s+'
     
@@ -347,7 +473,6 @@ def process_pdf_text(text):
             continue
         
         # Riconosce titoli numerati (es: "1. Introduzione", "2.1 Metodi")
-        import re
         numbered_title_pattern = r'^\d+(\.\d+)*\.\s+\w+'
         if re.match(numbered_title_pattern, line) and len(line) < 100:
             # Determina il livello basandosi sulla numerazione
@@ -469,7 +594,6 @@ def convert_txt_to_markdown(content, filename):
                 markdown_lines.append('')
                 current_paragraph = []
             # Determina il livello dal numero di punti nella numerazione
-            import re
             number_match = re.match(r'^(\d+(\.\d+)*)', line)
             if number_match:
                 number_part = number_match.group(1)
