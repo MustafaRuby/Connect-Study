@@ -244,131 +244,137 @@
             </div>
         </div>
     </div>
-      <!-- Search in content section -->
-    <div class="search-in-content">
-        <div class="search-input-wrapper">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="8" stroke="#999" stroke-width="2"/>
-                <path d="M21 21l-4.35-4.35" stroke="#999" stroke-width="2"/>
-            </svg>
-            <input type="text" id="search-in-content" placeholder="Cerca nel contenuto di questo argomento...">
-            <div class="search-navigation" id="search-navigation" style="display: none;">
-                <span class="search-counter" id="search-counter">0/0</span>
-                <button type="button" class="nav-btn nav-prev" id="search-prev" title="Risultato precedente">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                </button>
-                <button type="button" class="nav-btn nav-next" id="search-next" title="Risultato successivo">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                </button>
-            </div>        </div>
-        <div id="search-results-summary" class="search-results-summary"></div>
-        </div>
-    </div>
     
     <!-- Wrapper dedicato per la gestione della sidebar -->
     <div class="argomento-wrapper">
+        <!-- Search in content section - MOVED INSIDE wrapper -->
+        <div class="search-in-content">
+            <div class="search-input-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="#999" stroke-width="2"/>
+                    <path d="M21 21l-4.35-4.35" stroke="#999" stroke-width="2"/>
+                </svg>
+                <input type="text" id="search-in-content" placeholder="Cerca nel contenuto di questo argomento...">
+                <div class="search-navigation" id="search-navigation" style="display: none;">
+                    <span class="search-counter" id="search-counter">0/0</span>
+                    <button type="button" class="nav-btn nav-prev" id="search-prev" title="Risultato precedente">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="nav-btn nav-next" id="search-next" title="Risultato successivo">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="search-results-summary" class="search-results-summary"></div>
+        </div>
+        
         <div class="argomento-container" id="argomento-container">
             <!-- Contenuto principale -->
-            <div class="argomento-content">
-        <!-- Visualizzazione markdown -->
-        <div id="markdown-view" class="markdown-content">
-            {% if argomento.contenuto_md %}
-            <div id="rendered-markdown"></div>
-            {% else %}
-            <div class="empty-content">
-                <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
+            <!-- Visualizzazione markdown -->
+            <div id="markdown-view" class="markdown-content">
+                {% if argomento.contenuto_md %}
+                <div id="rendered-markdown"></div>
+                {% else %}
+                <div class="empty-content">
+                    <p>Nessun contenuto disponibile. <a href="#" id="add-content-link">Aggiungi contenuto</a></p>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
         
-        <!-- Editor markdown (nascosto di default) -->
-        <div id="markdown-editor-section" class="markdown-editor-section" style="display:none;">
-            <div class="editor-container">
-                <div class="markdown-editor">
-                    <div class="editor-tabs">
-                        <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
-                        <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>                          <!-- Editor size controls -->
-                        <div class="editor-size-controls">
-                            <button type="button" class="size-btn" id="fullscreen-toggle" title="Attiva/Disattiva modalità fullscreen">
-                                <span class="size-icon">⛶</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Sezione modifica titolo e colore -->
-                    <div class="titolo-colore-edit-section">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="argomento_titolo">Titolo dell'argomento:</label>
-                                <input type="text" id="argomento_titolo" value="{{ argomento.titolo }}" placeholder="Inserisci il titolo dell'argomento" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label for="argomento_colore">Colore:</label>
-                                <input type="color" id="argomento_colore" value="{{ argomento.colore or '#cccccc' }}" class="form-input color-input">
+            <!-- Editor markdown (nascosto di default) -->
+            <div id="markdown-editor-section" class="markdown-editor-section" style="display:none;">
+                <div class="editor-container">
+                    <div class="markdown-editor">
+                        <div class="editor-tabs">
+                            <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
+                            <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>                          <!-- Editor size controls -->
+                            <div class="editor-size-controls">
+                                <button type="button" class="size-btn" id="fullscreen-toggle" title="Attiva/Disattiva modalità fullscreen">
+                                    <span class="size-icon">⛶</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
-                    <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
-                </div>
-                
-                <!-- Sezione modifica etichetta -->
-                <div class="etichetta-edit-section">
-                    <label for="etichetta_preparazione">Livello di preparazione:</label>
-                    <select id="etichetta_preparazione" class="filter-select">
-                        <option value="scarsa preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'scarsa preparazione' else '' }}>Scarsa preparazione</option>
-                        <option value="media preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'media preparazione' else '' }}>Media preparazione</option>
-                        <option value="buona preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'buona preparazione' else '' }}>Buona preparazione</option>
-                    </select>
-                </div>
-                  <!-- Sezione caricamento file -->
-                <div class="file-upload-section">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="file_content" accept=".docx,.pdf,.md" class="file-input-hidden">
-                        <div class="file-input-display" id="file_display_editor">
-                            <span class="file-icon">📎</span>
-                            <span class="file-text">Scegli file o trascina qui</span>
-                            <span class="file-subtext">Clicca per selezionare un file dal tuo computer</span>
+                        <!-- Sezione modifica titolo e colore -->
+                        <div class="titolo-colore-edit-section">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="argomento_titolo">Titolo dell'argomento:</label>
+                                    <input type="text" id="argomento_titolo" value="{{ argomento.titolo }}" placeholder="Inserisci il titolo dell'argomento" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="argomento_colore">Colore:</label>
+                                    <input type="color" id="argomento_colore" value="{{ argomento.colore or '#cccccc' }}" class="form-input color-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <textarea id="contenuto_md" placeholder="Inserisci il contenuto in formato Markdown...">{{ argomento.contenuto_md or '' }}</textarea>
+                        <div id="markdown-preview" class="markdown-preview" style="display:none;"></div>
+                    </div>
+                    
+                    <!-- Sezione modifica etichetta -->
+                    <div class="etichetta-edit-section">
+                        <label for="etichetta_preparazione">Livello di preparazione:</label>
+                        <select id="etichetta_preparazione" class="filter-select">
+                            <option value="scarsa preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'scarsa preparazione' else '' }}>Scarsa preparazione</option>
+                            <option value="media preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'media preparazione' else '' }}>Media preparazione</option>
+                            <option value="buona preparazione" {{ 'selected' if argomento.etichetta_preparazione == 'buona preparazione' else '' }}>Buona preparazione</option>
+                        </select>
+                    </div>
+                    <!-- Sezione caricamento file -->
+                    <div class="file-upload-section">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="file_content" accept=".docx,.pdf,.md" class="file-input-hidden">
+                            <div class="file-input-display" id="file_display_editor">
+                                <span class="file-icon">📎</span>
+                                <span class="file-text">Scegli file o trascina qui</span>
+                                <span class="file-subtext">Clicca per selezionare un file dal tuo computer</span>
+                            </div>
+                        </div>
+                        <div class="file-upload-info">
+                            <small>Formati supportati: .docx, .pdf, .md</small>
+                        </div>
+                        <div id="file-mode-section" class="file-mode-section" style="display:none;">
+                            <label>Come inserire il contenuto del file:</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="replace" checked>
+                                    <span>Sostituisci tutto il contenuto</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="prepend">
+                                    <span>Inserisci all'inizio</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="file_mode" value="append">
+                                    <span>Inserisci alla fine</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div class="file-upload-info">
-                        <small>Formati supportati: .docx, .pdf, .md</small>
+                    
+                    <!-- Azioni editor -->
+                    <div class="editor-actions">
+                        <button id="saveBtn" class="add-btn">Salva</button>
+                        <button id="cancelBtn" class="cancel-btn">Annulla</button>
                     </div>
-                    <div id="file-mode-section" class="file-mode-section" style="display:none;">
-                        <label>Come inserire il contenuto del file:</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="file_mode" value="replace" checked>
-                                <span>Sostituisci tutto il contenuto</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="file_mode" value="prepend">
-                                <span>Inserisci all'inizio</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="file_mode" value="append">
-                                <span>Inserisci alla fine</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Azioni editor -->
-                <div class="editor-actions">
-                    <button id="saveBtn" class="add-btn">Salva</button>
-                    <button id="cancelBtn" class="cancel-btn">Annulla</button>
                 </div>
             </div>
-        </div>
         
-        <!-- Allegati -->
+    </div>
+    
+    <!-- Sezione Allegati - SEPARATA dal contenuto principale -->
+    <div class="allegati-section-wrapper">
         <div class="allegati-section">
-            <h3>Allegati</h3>
+            <div class="allegati-header">
+                <h3>📎 Allegati</h3>
+                <span class="allegati-count">{{ allegati|length }} file{% if allegati|length != 1 %}s{% endif %}</span>
+            </div>
             <div id="allegati-list" class="allegati-list">
                 {% for allegato in allegati %}
                 <div class="allegato-card" data-id="{{ allegato.id }}">
@@ -379,10 +385,16 @@
                             <button class="delete-allegato-btn" data-id="{{ allegato.id }}">Elimina</button>
                         </div>
                     </div>
-                </div>                {% endfor %}
+                </div>
+                {% endfor %}
+                {% if allegati|length == 0 %}
+                <div class="no-allegati">
+                    <p>Nessun allegato presente. Usa il pulsante "Aggiungi allegato" per caricare file.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
-        </div>
+    </div>
     </div>
 
     <!-- Popup caricamento allegato -->
@@ -1134,9 +1146,14 @@
                 if (response.ok) {
                     document.getElementById('allegatoPopup').style.display = 'none';
                     this.reset();
+                    // Aggiorna dinamicamente la lista degli allegati
+                    updateAllegatiList();
                 } else {
                     alert('Errore nel caricamento del file');
                 }
+            }).catch(error => {
+                console.error('Errore nel caricamento allegato:', error);
+                alert('Errore nel caricamento del file');
             });
         }
         
@@ -1145,10 +1162,20 @@
                 method: 'DELETE'
             }).then(response => {
                 if (response.ok) {
-                    document.querySelector(`[data-id="${id}"]`).remove();
+                    // Rimuove l'elemento dalla lista
+                    const allegatoCard = document.querySelector(`[data-id="${id}"]`);
+                    if (allegatoCard) {
+                        allegatoCard.remove();
+                    }
+                    // Aggiorna dinamicamente il counter e il fallback
+                    updateAllegatiCounter();
+                    checkAndShowEmptyState();
                 } else {
                     alert('Errore nell\'eliminazione del file');
                 }
+            }).catch(error => {
+                console.error('Errore nell\'eliminazione allegato:', error);
+                alert('Errore nell\'eliminazione del file');
             });
         }
         
@@ -1182,33 +1209,8 @@
         
         socket.on('update_allegati', function(data) {
             if (data.id_argomento == argomentoId) {
-                fetch(`/api/allegati/${argomentoId}`)
-                    .then(response => response.json())
-                    .then(allegati => {
-                        const container = document.getElementById('allegati-list');
-                        container.innerHTML = '';
-                        
-                        allegati.forEach(allegato => {
-                            const card = document.createElement('div');
-                            card.className = 'allegato-card';
-                            card.dataset.id = allegato.id;
-                            
-                            card.innerHTML = `
-                                <div class="allegato-info">
-                                    <span class="allegato-nome">${allegato.nome_file}</span>
-                                    <div class="allegato-actions">
-                                        <button class="view-allegato-btn" data-path="${allegato.percorso}">Visualizza</button>
-                                        <button class="delete-allegato-btn" data-id="${allegato.id}">Elimina</button>
-                                    </div>
-                                </div>
-                            `;
-                            
-                            container.appendChild(card);
-                        });
-                        
-                        // Riassegna event listeners
-                        setupAllegatoListeners();
-                    });
+                // Utilizza la funzione helper per aggiornare la lista
+                updateAllegatiList();
             }
         });
         
@@ -1226,6 +1228,86 @@
                     }
                 });
             });
+        }
+        
+        // Funzioni helper per gestione dinamica allegati
+        function updateAllegatiList() {
+            fetch(`/api/allegati/${argomentoId}`)
+                .then(response => response.json())
+                .then(allegati => {
+                    const allegatoList = document.getElementById('allegati-list');
+                    if (!allegatoList) return;
+                    
+                    // Pulisce la lista corrente
+                    allegatoList.innerHTML = '';
+                    
+                    if (allegati.length === 0) {
+                        // Mostra stato vuoto
+                        allegatoList.innerHTML = `
+                            <div class="no-allegati">
+                                <p>Nessun allegato presente. Usa il pulsante "Aggiungi allegato" per caricare file.</p>
+                            </div>
+                        `;
+                    } else {
+                        // Aggiunge tutti gli allegati
+                        allegati.forEach(allegato => {
+                            const allegatoCard = document.createElement('div');
+                            allegatoCard.className = 'allegato-card';
+                            allegatoCard.setAttribute('data-id', allegato.id);
+                            allegatoCard.innerHTML = `
+                                <div class="allegato-info">
+                                    <span class="allegato-nome">${allegato.nome_file}</span>
+                                    <div class="allegato-actions">
+                                        <button class="view-allegato-btn" data-path="${allegato.percorso}">Visualizza</button>
+                                        <button class="delete-allegato-btn" data-id="${allegato.id}">Elimina</button>
+                                    </div>
+                                </div>
+                            `;
+                            allegatoList.appendChild(allegatoCard);
+                        });
+                        
+                        // Riassegna event listeners
+                        setupAllegatoListeners();
+                    }
+                    
+                    // Aggiorna il counter
+                    updateAllegatiCounter(allegati.length);
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento allegati:', error);
+                });
+        }
+        
+        function updateAllegatiCounter(count) {
+            const counterElement = document.querySelector('.allegati-count');
+            if (counterElement) {
+                if (count === undefined) {
+                    // Conta elementi esistenti se count non è fornito
+                    count = document.querySelectorAll('#allegati-list .allegato-card').length;
+                }
+                
+                const fileText = count === 1 ? 'file' : 'files';
+                counterElement.textContent = `${count} ${fileText}`;
+            }
+        }
+        
+        function checkAndShowEmptyState() {
+            const allegatoList = document.getElementById('allegati-list');
+            const allegatoCards = allegatoList.querySelectorAll('.allegato-card');
+            
+            if (allegatoCards.length === 0) {
+                // Rimuove eventuali stati vuoti esistenti
+                const existingEmpty = allegatoList.querySelector('.no-allegati');
+                if (existingEmpty) {
+                    existingEmpty.remove();
+                }
+                
+                // Aggiunge nuovo stato vuoto
+                const noAllegatiDiv = document.createElement('div');
+                noAllegatiDiv.className = 'no-allegati';
+                noAllegatiDiv.innerHTML = '<p>Nessun allegato presente. Usa il pulsante "Aggiungi allegato" per caricare file.</p>';
+                allegatoList.appendChild(noAllegatiDiv);
+            }
         }
           function parseWithBasicFallback(content) {
             console.log('🔧 Usando fallback básico con syntax highlighting...');
