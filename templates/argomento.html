@@ -1027,14 +1027,19 @@
           function toggleEditMode() {
             const viewSection = document.getElementById('markdown-view');
             const editorSection = document.getElementById('markdown-editor-section');
+            const argomentoContainer = document.getElementById('argomento-container');
             
             if (editorSection.style.display === 'none') {
                 viewSection.style.display = 'none';
                 editorSection.style.display = 'block';
+                // Aggiungi classe per disabilitare scroll del container padre
+                argomentoContainer.classList.add('editor-active');
                 document.getElementById('contenuto_md').focus();
             } else {
                 viewSection.style.display = 'block';
                 editorSection.style.display = 'none';
+                // Rimuovi classe per riabilitare scroll del container padre
+                argomentoContainer.classList.remove('editor-active');
             }
         }
         
