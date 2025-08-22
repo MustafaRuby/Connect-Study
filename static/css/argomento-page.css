@@ -3,12 +3,70 @@
 * ConnectStudy Application
 */
 
+/* Main content wrapper for argomento page */
+.main-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+/* Specific header override for argomento page - HIGHER SPECIFICITY */
+.main-content .header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 1.5em !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1.5em 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Breadcrumb styles */
+.main-content .breadcrumb {
+    font-size: 0.9em;
+    color: #7c8db0;
+    margin-bottom: 0.5em;
+}
+
+.breadcrumb-link {
+    color: #4f8cff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    color: #3a6bd8;
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 0.5em;
+    color: #ccc;
+}
+
+.breadcrumb-current {
+    color: #2a3a5c;
+    font-weight: 500;
+}
+
 /* Header section for single argomento page */
 .argomento-header-section {
     display: flex;
-    flex-direction: column;
+    flex-direction:row;
     gap: 1em;
-    margin-bottom: 1.5em;
+    background: white;
+    padding: 2em;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.08);
+    border: 1px solid rgba(79, 140, 255, 0.1);
+    align-items: center;
 }
 
 .argomento-title-container {
@@ -28,21 +86,159 @@
     padding-left: 0.5em;
 }
 
-/* Actions section for argomento page */
-.argomento-actions-section {
-    background: #fff;
+/* === FLOATING ACTION MENU BUTTON === */
+.actions-menu-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #4f8cff 0%, #6edb8f 100%);
+    border: none;
     border-radius: 12px;
-    padding: 1.5em 2em;
-    margin-bottom: 2em;
-    box-shadow: 0 2px 12px rgba(79, 140, 255, 0.08);
-    border: 1px solid rgba(79, 140, 255, 0.1);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-shadow: 0 4px 16px rgba(79, 140, 255, 0.3);
+    transition: all 0.3s ease;
 }
 
-.argomento-actions {
+/* IMPORTANT: Override any conflicting styles from responsive.css or base.css */
+.main-content .header h1 {
+    font-size: 2em !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    letter-spacing: 0 !important;
+    color: inherit !important;
+}
+
+/* Prevent responsive.css from interfering */
+@media (max-width: 768px) {
+    .main-content .header h1 {
+        font-size: 1.6em !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content .header h1 {
+        font-size: 1.4em !important;
+    }
+    
+    .main-content .header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+}
+
+.actions-menu-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+}
+
+.hamburger-line {
+    width: 20px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.actions-menu-toggle.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.actions-menu-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.actions-menu-toggle.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* === SIDEBAR ACTIONS MENU === */
+.actions-sidebar {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 320px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+.actions-sidebar.open {
+    transform: translateX(-350px);
+}
+
+.actions-sidebar-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5em 2em 1em;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.actions-sidebar-header h3 {
+    margin: 0;
+    color: #2a3a5c;
+    font-size: 1.2em;
+}
+
+.sidebar-close-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5em;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.actions-sidebar-content {
+    padding: 1.5em 2em;
+}
+
+.actions-sidebar .argomento-actions {
+    display: flex;
+    flex-direction: column;
     gap: 1em;
-    flex-wrap: wrap;
+}
+
+.actions-sidebar .action-btn {
+    width: 100%;
     justify-content: flex-start;
+    text-align: left;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Modern action buttons */
@@ -129,6 +325,26 @@
 .danger-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(231, 76, 60, 0.2);
+}
+
+/* Info button (Export functions) */
+.info-btn {
+    background: #fff;
+    color: #17a2b8;
+    border: 2px solid #17a2b8;
+    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.1);
+}
+
+.info-btn:hover {
+    background: #17a2b8;
+    color: white;
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.25);
+    transform: translateY(-1px);
+}
+
+.info-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(23, 162, 184, 0.2);
 }
 
 /* === CONNECTION STYLES === */
@@ -305,9 +521,18 @@
 
 /* Responsive design for argomento page */
 @media (max-width: 768px) {
+    .main-content {
+        padding: 0 0.5rem;
+    }
+    
+    .main-content .header {
+        padding: 1em 0 !important;
+        gap: 1em !important;
+    }
+    
     .argomento-header-section {
+        padding: 1.5em;
         gap: 0.8em;
-        margin-bottom: 1em;
     }
     
     .argomento-title-container h1 {
@@ -318,14 +543,24 @@
         padding-left: 0;
     }
     
-    .argomento-actions-section {
-        padding: 1.2em 1.5em;
-        margin-bottom: 1.5em;
+    .argomento-wrapper {
+        padding: 0 0.5rem;
+        max-width: 100%;
     }
     
-    .argomento-actions {
-        justify-content: center;
-        gap: 0.8em;
+    .actions-menu-toggle {
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .actions-sidebar {
+        width: 280px;
+    }
+    
+    .actions-sidebar.open {
+        transform: translateX(-280px);
     }
     
     .action-btn {
@@ -355,14 +590,49 @@
 }
 
 @media (max-width: 480px) {
-    .argomento-actions {
-        flex-direction: column;
-        align-items: stretch;
+    .main-content {
+        padding: 0 0.25rem;
+    }
+    
+    .main-content .header {
+        padding: 0.8em 0 !important;
+        gap: 0.8em !important;
+    }
+    
+    .argomento-header-section {
+        padding: 1em;
+    }
+    
+    .argomento-wrapper {
+        padding: 0 0.25rem;
+    }
+    
+    .actions-menu-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .hamburger-line {
+        width: 16px;
+    }
+    
+    .actions-sidebar {
+        width: 250px;
+    }
+    
+    .actions-sidebar.open {
+        transform: translateX(-250px);
+    }
+    
+    .actions-sidebar-content {
+        padding: 1em;
     }
     
     .action-btn {
-        width: 100%;
-        justify-content: center;
+        padding: 0.8em 1em;
+        font-size: 0.9em;
     }
 }
 
@@ -374,6 +644,10 @@
     gap: 1.5rem;
     min-height: auto;
     width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .argomento-page .argomento-container {
@@ -977,5 +1251,93 @@
     .argomento-page .CodeMirror-scroll::-webkit-scrollbar {
         width: 6px;
     }
+}
+
+/* === MODALITÀ FULLSCREEN EDITOR === */
+.argomento-page #markdown-editor-section.editor-large {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    z-index: 9999 !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large .editor-container {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large .markdown-editor {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large .editor-tabs {
+    flex-shrink: 0 !important;
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 0 20px !important;
+    margin: 0 !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large #contenuto_md {
+    flex: 1 !important;
+    height: auto !important;
+    min-height: auto !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    resize: none !important;
+    outline: none !important;
+    background: #ffffff !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large .CodeMirror {
+    height: 100% !important;
+    min-height: auto !important;
+    max-height: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large .CodeMirror-scroll {
+    height: 100% !important;
+    min-height: auto !important;
+    max-height: none !important;
+}
+
+.argomento-page #markdown-editor-section.editor-large #markdown-preview {
+    flex: 1 !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+/* Assicurati che il body non abbia scroll quando l'editor è in fullscreen */
+body:has(#markdown-editor-section.editor-large) {
+    overflow: hidden !important;
 }
 

@@ -51,6 +51,11 @@
         /* Stili per la sezione titolo e colore */
         .titolo-colore-edit-section {
             margin-bottom: 1.8em;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         
         .titolo-colore-edit-section .form-row {
@@ -209,8 +214,26 @@
                 </span>
             </div>
         </div>
-          <!-- Action buttons section -->
-        <div class="argomento-actions-section">
+    </div>
+
+    <!-- Floating Action Menu Button -->
+    <button class="actions-menu-toggle" id="actionsMenuToggle" aria-label="Apri menu azioni">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+    </button>
+
+    <!-- Sidebar Actions Menu -->
+    <div class="actions-sidebar" id="actionsSidebar">
+        <div class="actions-sidebar-header">
+            <h3>Azioni</h3>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Chiudi menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="actions-sidebar-content">
             <div class="argomento-actions">
                 <button id="editBtn" class="action-btn primary-btn">
                     <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -232,6 +255,26 @@
                     </svg>
                     Aggiungi allegato
                 </button>
+                <button id="exportMarkdownBtn" class="action-btn info-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="10,9 9,9 8,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Esporta Markdown
+                </button>
+                <button id="exportWordBtn" class="action-btn info-btn">
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="11" cy="15" r="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M13 11.74c.64-.45 1.32-.74 2-.74a3 3 0 0 1 0 6c-.68 0-1.36-.29-2-.74" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 11.74c-.64-.45-1.32-.74-2-.74a3 3 0 0 0 0 6c.68 0 1.36-.29 2-.74" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Esporta Word
+                </button>
                 <button id="deleteBtn" class="action-btn danger-btn">
                     <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -244,6 +287,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Wrapper dedicato per la gestione della sidebar -->
     <div class="argomento-wrapper">
@@ -273,6 +319,20 @@
         </div>
         
         <div class="argomento-container" id="argomento-container">
+            <!-- Sezione modifica titolo e colore - SEMPRE VISIBILE sopra il contenuto -->
+            <div class="titolo-colore-edit-section" id="titolo-colore-section" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="argomento_titolo">Titolo dell'argomento:</label>
+                        <input type="text" id="argomento_titolo" value="{{ argomento.titolo }}" placeholder="Inserisci il titolo dell'argomento" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="argomento_colore">Colore:</label>
+                        <input type="color" id="argomento_colore" value="{{ argomento.colore or '#cccccc' }}" class="form-input color-input">
+                    </div>
+                </div>
+            </div>
+
             <!-- Contenuto principale -->
             <!-- Visualizzazione markdown -->
             <div id="markdown-view" class="markdown-content">
@@ -291,25 +351,12 @@
                     <div class="markdown-editor">
                         <div class="editor-tabs">
                             <button type="button" class="tab-btn active" data-tab="editor">Editor</button>
-                            <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>                          <!-- Editor size controls -->
+                            <button type="button" class="tab-btn" data-tab="preview">Anteprima</button>
+                            <!-- Editor size controls -->
                             <div class="editor-size-controls">
                                 <button type="button" class="size-btn" id="fullscreen-toggle" title="Attiva/Disattiva modalità fullscreen">
                                     <span class="size-icon">⛶</span>
                                 </button>
-                            </div>
-                        </div>
-
-                        <!-- Sezione modifica titolo e colore -->
-                        <div class="titolo-colore-edit-section">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="argomento_titolo">Titolo dell'argomento:</label>
-                                    <input type="text" id="argomento_titolo" value="{{ argomento.titolo }}" placeholder="Inserisci il titolo dell'argomento" class="form-input">
-                                </div>
-                                <div class="form-group">
-                                    <label for="argomento_colore">Colore:</label>
-                                    <input type="color" id="argomento_colore" value="{{ argomento.colore or '#cccccc' }}" class="form-input color-input">
-                                </div>
                             </div>
                         </div>
 
@@ -558,8 +605,57 @@
         const originalTitolo = {{ argomento.titolo | tojson }};
         const originalColore = {{ (argomento.colore or '#cccccc') | tojson }};
         
+        // Initialize sidebar actions menu
+        function initializeSidebarActionsMenu() {
+            const menuToggle = document.getElementById('actionsMenuToggle');
+            const sidebar = document.getElementById('actionsSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('sidebarCloseBtn');
+            
+            if (!menuToggle || !sidebar || !overlay) return;
+            
+            let isOpen = false;
+            
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                menuToggle.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                isOpen = true;
+            }
+            
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+                menuToggle.classList.remove('active');
+                document.body.style.overflow = '';
+                isOpen = false;
+            }
+            
+            menuToggle.addEventListener('click', function() {
+                if (isOpen) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+            
+            overlay.addEventListener('click', closeSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isOpen) {
+                    closeSidebar();
+                }
+            });
+        }
+        
         // Inizializzazione della pagina
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize sidebar actions menu
+            initializeSidebarActionsMenu();
+            
             // Initialize CodeMirror for markdown editing
             let mainEditor;
             let initializationAttempts = 0;
@@ -693,6 +789,16 @@
             // Gestione eliminazione argomento
             document.getElementById('deleteBtn').addEventListener('click', function() {
                 document.getElementById('confirm-delete-argomento-modal').style.display = 'flex';
+            });
+            
+            // Gestione esportazione Markdown
+            document.getElementById('exportMarkdownBtn').addEventListener('click', function() {
+                exportToMarkdown();
+            });
+            
+            // Gestione esportazione Word
+            document.getElementById('exportWordBtn').addEventListener('click', function() {
+                exportToWord();
             });
               document.getElementById('confirm-delete-argomento-btn').addEventListener('click', function() {
                 const argomentoTitle = '{{ argomento.titolo }}';
@@ -1027,17 +1133,20 @@
           function toggleEditMode() {
             const viewSection = document.getElementById('markdown-view');
             const editorSection = document.getElementById('markdown-editor-section');
+            const titoloColoreSection = document.getElementById('titolo-colore-section');
             const argomentoContainer = document.getElementById('argomento-container');
             
             if (editorSection.style.display === 'none') {
                 viewSection.style.display = 'none';
                 editorSection.style.display = 'block';
+                titoloColoreSection.style.display = 'block'; // Mostra sezione titolo e colore
                 // Aggiungi classe per disabilitare scroll del container padre
                 argomentoContainer.classList.add('editor-active');
                 document.getElementById('contenuto_md').focus();
             } else {
                 viewSection.style.display = 'block';
                 editorSection.style.display = 'none';
+                titoloColoreSection.style.display = 'none'; // Nascondi sezione titolo e colore
                 // Rimuovi classe per riabilitare scroll del container padre
                 argomentoContainer.classList.remove('editor-active');
             }
@@ -2062,6 +2171,10 @@ function closeSidebarCollegamentoModal() {
             // Get the fullscreen toggle button
             const toggleBtn = document.getElementById('fullscreen-toggle');
             const editorSection = document.getElementById('markdown-editor-section');
+            const titoloColoreSection = document.getElementById('titolo-colore-section');
+            const etichettaSection = document.querySelector('.etichetta-edit-section');
+            const fileUploadSection = document.querySelector('.file-upload-section');
+            const editorActions = document.querySelector('.editor-actions');
             
             if (!toggleBtn || !editorSection) return;
             
@@ -2073,11 +2186,25 @@ function closeSidebarCollegamentoModal() {
                 if (isFullscreen) {
                     editorSection.classList.add('editor-large');
                     toggleBtn.classList.add('active');
+                    
+                    // Nascondi elementi non necessari in fullscreen
+                    if (titoloColoreSection) titoloColoreSection.style.display = 'none';
+                    if (etichettaSection) etichettaSection.style.display = 'none';
+                    if (fileUploadSection) fileUploadSection.style.display = 'none';
+                    if (editorActions) editorActions.style.display = 'none';
+                    
                     // Add escape key listener
                     addFullscreenEscapeListener();
                 } else {
                     editorSection.classList.remove('editor-large');
                     toggleBtn.classList.remove('active');
+                    
+                    // Ripristina elementi nascosti
+                    if (titoloColoreSection) titoloColoreSection.style.display = 'block';
+                    if (etichettaSection) etichettaSection.style.display = 'block';
+                    if (fileUploadSection) fileUploadSection.style.display = 'block';
+                    if (editorActions) editorActions.style.display = 'block';
+                    
                     // Remove escape key listener
                     removeFullscreenEscapeListener();
                 }
@@ -2231,6 +2358,75 @@ function closeSidebarCollegamentoModal() {
             const title = card.querySelector('.argomento-header h4').originalText || 
                          card.querySelector('.argomento-header h4').textContent;
             return title.toLowerCase().includes(searchTerm);
+        }
+        
+        // === EXPORT FUNCTIONS ===
+        function exportToMarkdown() {
+            const argomentoTitolo = '{{ argomento.titolo }}';
+            const argomentoContenuto = {{ (argomento.contenuto_md or '') | tojson }};
+            const materiaName = '{{ materia.nome }}';
+            
+            // Create the markdown content
+            const markdownContent = `# ${argomentoTitolo}\n\n**Materia:** ${materiaName}\n\n${argomentoContenuto}`;
+            
+            // Create and download the file
+            const blob = new Blob([markdownContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${argomentoTitolo.replace(/[^a-zA-Z0-9]/g, '_')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Markdown exported successfully');
+        }
+        
+        function exportToWord() {
+            const argomentoId = {{ argomento.id }};
+            
+            // Show loading state
+            const wordBtn = document.getElementById('exportWordBtn');
+            const originalText = wordBtn.innerHTML;
+            wordBtn.innerHTML = '<span class="btn-icon">⏳</span> Esportando...';
+            wordBtn.disabled = true;
+            
+            // Send request to backend for Word conversion
+            fetch(`/export_word/${argomentoId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Errore durante l\'esportazione');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `{{ argomento.titolo.replace("'", "\\'") }}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                console.log('✅ Word document exported successfully');
+            })
+            .catch(error => {
+                console.error('❌ Errore esportazione Word:', error);
+                alert('Errore durante l\'esportazione del documento Word');
+            })
+            .finally(() => {
+                // Restore button
+                wordBtn.innerHTML = originalText;
+                wordBtn.disabled = false;
+            });
         }
     </script>
 </body>

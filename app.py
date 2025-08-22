@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from flask_socketio import SocketIO, emit
 import os
 import uuid
@@ -9,6 +9,9 @@ from docx import Document
 import PyPDF2
 from werkzeug.utils import secure_filename
 import db_manager
+from io import BytesIO
+import markdown
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -1283,6 +1286,76 @@ def api_search_argomenti():
     
     argomenti = db_manager.search_argomenti(query)
     return jsonify([dict(a) for a in argomenti])
+
+# === EXPORT ROUTES ===
+
+@app.route('/export_word/<int:argomento_id>', methods=['POST'])
+def export_word(argomento_id):
+    """Esporta un argomento in formato Word (.docx)"""
+    try:
+        # Ottieni i dati dell'argomento
+        argomento = db_manager.get_argomento_by_id(argomento_id)
+        if not argomento:
+            return jsonify({'error': 'Argomento non trovato'}), 404
+        
+        materia = db_manager.get_materia_by_id(argomento['id_materia'])
+        
+        # Crea un nuovo documento Word
+        doc = Document()
+        
+        # Aggiungi il titolo
+        title = doc.add_heading(argomento['titolo'], 0)
+        title.alignment = 1  # Centratura
+        
+        # Aggiungi informazioni sulla materia
+        doc.add_paragraph(f"Materia: {materia['nome']}")
+        doc.add_paragraph(f"Livello di preparazione: {argomento['etichetta_preparazione']}")
+        doc.add_paragraph("")  # Riga vuota
+        
+        # Converte il markdown in HTML e poi in testo formattato
+        if argomento['contenuto_md']:
+            # Converti markdown in HTML
+            html = markdown.markdown(argomento['contenuto_md'])
+            
+            # Parse HTML per estrarre il testo formattato
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Processa ogni elemento HTML
+            for element in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li']):
+                if element.name.startswith('h'):
+                    # Headers
+                    level = int(element.name[1])
+                    doc.add_heading(element.get_text(), level)
+                elif element.name == 'p':
+                    # Paragrafi
+                    doc.add_paragraph(element.get_text())
+                elif element.name in ['ul', 'ol']:
+                    # Liste - aggiungi gli elementi della lista
+                    for li in element.find_all('li'):
+                        doc.add_paragraph(li.get_text(), style='List Bullet')
+        else:
+            doc.add_paragraph("Nessun contenuto disponibile.")
+        
+        # Salva il documento in un buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        
+        # Crea un nome file sicuro
+        filename = f"{argomento['titolo'].replace(' ', '_').replace('/', '_')}.docx"
+        filename = re.sub(r'[^\w\-_.]', '', filename)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        
+    except Exception as e:
+        print(f"Errore nell'esportazione Word: {e}")
+        traceback.print_exc()
+        return jsonify({'error': 'Errore durante l\'esportazione'}), 500
 
 if __name__ == '__main__':
     # Run on all available network interfaces (LAN access)
